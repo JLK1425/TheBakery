@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carrito de Compras - The Bakery by Fresarte</title>
+  <link rel="stylesheet" href="TheBakery/assets/css/style.css">
+  <style>
+    .cart-page {
+      min-height: 100vh;
+      padding: 100px 1rem 2rem;
+      background: #f9fafb;
+    }
+    .cart-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    @media (min-width: 900px) {
+      .cart-container {
+        grid-template-columns: 2fr 1fr;
+      }
+    }
+    .cart-section {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    }
+    .cart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .cart-header h1 {
+      margin: 0;
+      font-size: 1.75rem;
+    }
+    .cart-item-card {
+      display: flex;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      border: 1px solid #e5e7eb;
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+      transition: .3s box-shadow;
+    }
+    .cart-item-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,.1);
+    }
+    .cart-item-image {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .cart-item-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .cart-item-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--fg);
+    }
+    .cart-item-options {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .cart-item-price {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .cart-item-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 0.5rem;
+    }
+    .quantity-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: #f9fafb;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: .3s background;
+    }
+    .quantity-btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    .quantity-value {
+      min-width: 40px;
+      text-align: center;
+      font-weight: 600;
+    }
+    .remove-item-btn {
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      transition: .3s color;
+    }
+    .remove-item-btn:hover {
+      color: #dc2626;
+    }
+    .cart-summary {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      position: sticky;
+      top: 100px;
+      height: fit-content;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .summary-row:last-of-type {
+      border-bottom: none;
+    }
+    .summary-total {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--fg);
+      margin-top: 1rem;
+    }
+    .checkout-btn {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      font-size: 1.1rem;
+    }
+    .empty-cart {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+    .empty-cart h2 {
+      margin-bottom: 1rem;
+    }
+    .empty-cart p {
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+    .continue-shopping {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 999px;
+      font-weight: 600;
+      transition: .3s background;
+    }
+    .continue-shopping:hover {
+      background: var(--accent-600);
+    }
+  </style>
+</head>
+
+<body id="bakery-landing" class="is-white">
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <div class="container wrap">
+      <div class="brand">
+        <a href="index-original.html" style="display:inline-block">
+          <img src="TheBakery/assets/imagenes/logo.png" alt="The Bakery by Fresarte" style="height:36px">
+        </a>
+      </div>
+      <div class="nav-center">
+        <div class="links" id="navLinks">
+          <a href="index-original.html#home" class="nav-link">Inicio</a>
+          <a href="pasteles-de-autor.html" class="nav-link">Pasteles de Autor</a>
+          <a href="index-original.html#reviews" class="nav-link">Reseñas</a>
+          <a href="index-original.html#about" class="nav-link">Nosotros</a>
+          <a href="index-original.html#contact" class="nav-link">Contacto</a>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <!-- Cart -->
+        <button class="nav-action-btn" id="cartBtn" onclick="window.location.href='cart.html'">
+          <svg class="icon-action" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          <span>Cart</span>
+          <span class="cart-badge" id="cartBadge">0</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Cart Page Content -->
+  <main class="cart-page">
+    <div class="cart-container">
+      <!-- Cart Items -->
+      <div class="cart-section">
+        <div class="cart-header">
+          <h1>Tu Carrito</h1>
+          <span id="itemCount">0 productos</span>
+        </div>
+        <div id="cartItemsContainer">
+          <!-- Items will be loaded here -->
+        </div>
+      </div>
+
+      <!-- Cart Summary -->
+      <div class="cart-summary">
+        <h2 style="margin-top:0; margin-bottom:1.5rem">Resumen del Pedido</h2>
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span id="subtotal">RD$0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>Impuestos (18%)</span>
+          <span id="taxes">RD$0.00</span>
+        </div>
+        <div class="summary-row summary-total">
+          <span>Total</span>
+          <span id="total">RD$0.00</span>
+        </div>
+        <button class="btn btn-primary checkout-btn" id="checkoutBtn">
+          Finalizar Pedido
+        </button>
+        <a href="index-original.html" class="continue-shopping" style="display:block; text-align:center; margin-top:1rem">
+          Continuar Comprando
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <script src="TheBakery/assets/js/auth.js"></script>
+  <script src="TheBakery/assets/js/script.js"></script>
+  <script src="TheBakery/assets/js/cart.js"></script>
+</body>
+
+</html>
+
+

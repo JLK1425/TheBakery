@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Pedido - The Bakery by Fresarte</title>
+  <link rel="stylesheet" href="TheBakery/assets/css/style.css">
+  <style>
+    .tracking-page {
+      min-height: 100vh;
+      padding-top: 100px;
+      background: linear-gradient(135deg, #f9fafb 0%, #fff 100%);
+    }
+    .tracking-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px 4rem;
+    }
+    .tracking-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .tracking-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      color: var(--fg);
+      margin-bottom: 0.5rem;
+    }
+    .tracking-subtitle {
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+    .order-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,.1);
+      margin-bottom: 2rem;
+    }
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #e5e7eb;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .order-id {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--fg);
+    }
+    .order-date {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .status-section {
+      margin-bottom: 2rem;
+    }
+    .status-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--fg);
+      margin-bottom: 1.5rem;
+    }
+    .status-content {
+      padding-left: 1rem;
+    }
+    .status-label {
+      font-weight: 700;
+      color: var(--fg);
+      margin-bottom: 0.25rem;
+      font-size: 1.1rem;
+    }
+    .status-description {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .status-time {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+    .order-details {
+      margin-bottom: 2rem;
+    }
+    .details-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--fg);
+      margin-bottom: 1rem;
+    }
+    .customer-info {
+      background: #f9fafb;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .info-row:last-child {
+      border-bottom: none;
+    }
+    .info-label {
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .info-value {
+      color: var(--fg);
+      font-weight: 600;
+    }
+    .order-items {
+      margin-bottom: 1.5rem;
+    }
+    .order-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem;
+      background: #f9fafb;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+    .order-item:last-child {
+      margin-bottom: 0;
+    }
+    .item-image {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    .item-details {
+      flex: 1;
+    }
+    .item-name {
+      font-weight: 700;
+      color: var(--fg);
+      margin-bottom: 0.5rem;
+    }
+    .item-options {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .item-quantity {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .item-price {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 1.1rem;
+      min-width: 100px;
+      text-align: right;
+    }
+    .order-total {
+      background: var(--accent);
+      color: #fff;
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .total-label {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      margin-bottom: 0.5rem;
+    }
+    .total-value {
+      font-size: 2rem;
+      font-weight: 800;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      flex: 1;
+      min-width: 150px;
+    }
+    .loading {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted);
+    }
+    .error-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    }
+    .error-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    .error-title {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--fg);
+    }
+    .error-message {
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .order-header {
+        flex-direction: column;
+      }
+      .order-item {
+        flex-direction: column;
+      }
+      .item-price {
+        text-align: left;
+        margin-top: 0.5rem;
+      }
+    }
+
+    /* ==== TIMELINE FIX ==== */
+
+    /* Línea vertical */
+    .status-timeline {
+      position: relative;
+      margin-left: 25px;
+      padding-left: 15px;
+    }
+
+    .status-step {
+      position: relative;
+      padding: 10px 0 20px 35px;
+    }
+
+    /* Punto circular */
+    .status-indicator {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid #d1d5db; /* gris */
+      background: #ffffff;
+      position: absolute;
+      left: -25px;
+      top: 12px;
+      z-index: 2;
+    }
+
+    /* Línea vertical base */
+    .status-step::before {
+      content: "";
+      position: absolute;
+      left: -19px;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background: #d1d5db; /* gris claro */
+      z-index: 1;
+    }
+
+    /* Estado activo (actual) */
+    .status-step.active .status-indicator {
+      border-color: #ff3ea5;
+      background: #ff3ea5;
+    }
+
+    .status-step.active::before {
+      background: #ff3ea5;
+    }
+
+    /* Estados completados */
+    .status-step.completed .status-indicator {
+      border-color: #16a34a;
+      background: #16a34a;
+    }
+
+    .status-step.completed::before {
+      background: #16a34a;
+    }
+
+    /* Pendientes */
+    .status-step.pending .status-indicator {
+      background: white;
+      border-color: #d1d5db;
+    }
+
+    .status-step.pending::before {
+      background: #d1d5db;
+    }
+  </style>
+</head>
+
+<body id="bakery-landing" class="is-white">
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <div class="container wrap">
+      <div class="brand">
+        <a href="index-original.html" style="display:inline-block">
+          <img src="TheBakery/assets/imagenes/logo.png" alt="The Bakery by Fresarte" style="height:36px">
+        </a>
+      </div>
+      <div class="nav-center">
+        <div class="links" id="navLinks">
+          <a href="index-original.html#home" class="nav-link">Inicio</a>
+          <a href="pasteles-de-autor.html" class="nav-link">Pasteles de Autor</a>
+          <a href="index-original.html#reviews" class="nav-link">Reseñas</a>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <a href="index-original.html" class="nav-action-btn">
+          <svg class="icon-action" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>Inicio</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Tracking Page -->
+  <main class="tracking-page">
+    <div class="tracking-container">
+      <div class="tracking-header">
+        <h1 class="tracking-title">Rastrear Mi Pedido</h1>
+        <p class="tracking-subtitle">Sigue el estado de tu pedido en tiempo real</p>
+      </div>
+
+      <div id="trackingContent">
+        <div class="loading">Cargando información del pedido...</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="brand">The Bakery <span class="pink">by Fresarte</span></div>
+      <div class="muted" style="margin-top:10px">© 2025 The Bakery by Fresarte. Todos los derechos reservados.</div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="TheBakery/assets/js/tracking.js"></script>
+</body>
+
+</html>
+

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pago Exitoso - The Bakery by Fresarte</title>
+  <link rel="stylesheet" href="TheBakery/assets/css/style.css">
+  <style>
+    .success-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, #f9fafb 0%, #fff 100%);
+    }
+    .success-container {
+      max-width: 600px;
+      width: 100%;
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 3rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,.1);
+      text-align: center;
+    }
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background: #10b981;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 2rem;
+      animation: scaleIn 0.5s ease;
+    }
+    .success-icon svg {
+      width: 50px;
+      height: 50px;
+      color: #fff;
+    }
+    @keyframes scaleIn {
+      from {
+        transform: scale(0);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    .success-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--fg);
+      margin-bottom: 1rem;
+    }
+    .success-message {
+      color: var(--muted);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    .order-details {
+      background: #f9fafb;
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin: 2rem 0;
+      text-align: left;
+    }
+    .order-details h3 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+    .order-info {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .order-info:last-child {
+      border-bottom: none;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-top: 0.5rem;
+      padding-top: 1rem;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      flex: 1;
+      min-width: 150px;
+    }
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+    .loading.active {
+      display: block;
+    }
+  </style>
+</head>
+
+<body id="bakery-landing" class="is-white">
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <div class="container wrap">
+      <div class="brand">
+        <a href="index-original.html" style="display:inline-block">
+          <img src="TheBakery/assets/imagenes/logo.png" alt="The Bakery by Fresarte" style="height:36px">
+        </a>
+      </div>
+      <div class="nav-center">
+        <div class="links" id="navLinks">
+          <a href="index-original.html#home" class="nav-link">Inicio</a>
+          <a href="pasteles-de-autor.html" class="nav-link">Pasteles de Autor</a>
+          <a href="index-original.html#reviews" class="nav-link">Reseñas</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Success Page Content -->
+  <main class="success-page">
+    <div class="success-container">
+      <div class="loading active" id="loading">
+        <p>Cargando información del pedido...</p>
+      </div>
+
+      <div id="successContent" style="display:none">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h1 class="success-title">¡Pago Exitoso!</h1>
+        <p class="success-message">
+          Gracias por tu compra. Tu pedido ha sido procesado correctamente y recibirás un correo de confirmación pronto.
+        </p>
+
+        <div class="order-details" id="orderDetails">
+          <h3>Detalles del Pedido</h3>
+          <div class="order-info">
+            <span>ID de Pedido:</span>
+            <span id="orderId">-</span>
+          </div>
+          <div class="order-info">
+            <span>Total Pagado:</span>
+            <span id="orderTotal">-</span>
+          </div>
+          <div class="order-info">
+            <span>Estado:</span>
+            <span style="color:#10b981; font-weight:600">Pagado</span>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <a href="index-original.html" class="btn btn-primary">Volver al Inicio</a>
+          <a href="#" id="trackOrderLink" class="btn" style="background:#f9fafb; color:var(--fg)">Rastrear Pedido</a>
+        </div>
+      </div>
+
+      <div id="errorContent" style="display:none">
+        <div class="success-icon" style="background:#ef4444">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </div>
+        <h1 class="success-title">Error al Procesar</h1>
+        <p class="success-message" id="errorMessage">
+          Hubo un problema al verificar tu pedido. Por favor, contacta con soporte si el pago fue procesado.
+        </p>
+        <div class="action-buttons">
+          <a href="index-original.html" class="btn btn-primary">Volver al Inicio</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="TheBakery/assets/js/success.js"></script>
+</body>
+
+</html>
+
+

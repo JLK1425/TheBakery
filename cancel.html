@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pago Cancelado - The Bakery by Fresarte</title>
+  <link rel="stylesheet" href="TheBakery/assets/css/style.css">
+  <style>
+    .cancel-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, #f9fafb 0%, #fff 100%);
+    }
+    .cancel-container {
+      max-width: 600px;
+      width: 100%;
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 3rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,.1);
+      text-align: center;
+    }
+    .cancel-icon {
+      width: 80px;
+      height: 80px;
+      background: #f59e0b;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 2rem;
+      animation: scaleIn 0.5s ease;
+    }
+    .cancel-icon svg {
+      width: 50px;
+      height: 50px;
+      color: #fff;
+    }
+    @keyframes scaleIn {
+      from {
+        transform: scale(0);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    .cancel-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--fg);
+      margin-bottom: 1rem;
+    }
+    .cancel-message {
+      color: var(--muted);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      flex: 1;
+      min-width: 150px;
+    }
+  </style>
+</head>
+
+<body id="bakery-landing" class="is-white">
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <div class="container wrap">
+      <div class="brand">
+        <a href="index-original.html" style="display:inline-block">
+          <img src="TheBakery/assets/imagenes/logo.png" alt="The Bakery by Fresarte" style="height:36px">
+        </a>
+      </div>
+      <div class="nav-center">
+        <div class="links" id="navLinks">
+          <a href="index-original.html#home" class="nav-link">Inicio</a>
+          <a href="pasteles-de-autor.html" class="nav-link">Pasteles de Autor</a>
+          <a href="index-original.html#reviews" class="nav-link">Reseñas</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Cancel Page Content -->
+  <main class="cancel-page">
+    <div class="cancel-container">
+      <div class="cancel-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+      <h1 class="cancel-title">Pago Cancelado</h1>
+      <p class="cancel-message">
+        Tu pago fue cancelado. No se realizó ningún cargo. Tu carrito se ha guardado para que puedas completar tu compra más tarde.
+      </p>
+      <div class="action-buttons">
+        <a href="cart.html" class="btn btn-primary">Volver al Carrito</a>
+        <a href="index-original.html" class="btn" style="background:#f9fafb; color:var(--fg)">Continuar Comprando</a>
+      </div>
+    </div>
+  </main>
+</body>
+
+</html>
+
+

@@ -1,0 +1,128 @@
+{
+  "2026-01-26": {
+    "1": {
+      "available": 2,
+      "reserved": 0
+    },
+    "cake_choco_8": {
+      "available": 3,
+      "reserved": 0
+    }
+  },
+  "2026-01-27": {
+    "1": {
+      "available": 5,
+      "reserved": 0
+    },
+    "cake_choco_8": {
+      "available": 2,
+      "reserved": 0
+    }
+  },
+  "2026-01-28": {
+    "cake_choco_8": {
+      "available": 4,
+      "reserved": 0
+    }
+  },
+  "2026-02-01": {
+    "cake_choco_8": {
+      "available": 5,
+      "reserved": 0
+    }
+  },
+  "2026-02-02": {
+    "cake_choco_8": {
+      "available": 5,
+      "reserved": 0
+    }
+  },
+  "2026-02-03": {
+    "cake_choco_8": {
+      "available": 5,
+      "reserved": 0
+    }
+  },
+  "2026-02-04": {
+    "cake_choco_8": {
+      "available": 5,
+      "reserved": 0
+    }
+  },
+  "2026-02-05": {
+    "cake_choco_8": {
+      "available": 5,
+      "reserved": 0
+    }
+  },
+  "2026-02-06": {
+    "cake_choco_8": {
+      "available": 5,
+      "reserved": 0
+    }
+  },
+  "2026-02-07": {
+    "1": {
+      "available": 0,
+      "reserved": 2
+    },
+    "2": {
+      "available": 0,
+      "reserved": 2
+    },
+    "3": {
+      "available": 0,
+      "reserved": 1
+    },
+    "5": {
+      "available": 0,
+      "reserved": 0
+    },
+    "cake_choco_8": {
+      "available": 5,
+      "reserved": 4
+    }
+  },
+  "2026-02-08": {
+    "cake_choco_8": {
+      "available": 5,
+      "reserved": 0
+    }
+  },
+  "2026-02-09": {
+    "cake_choco_8": {
+      "available": 5,
+      "reserved": 0
+    }
+  },
+  "2026-02-10": {
+    "cake_choco_8": {
+      "available": 5,
+      "reserved": 0
+    }
+  },
+  "2026-02-11": {
+    "cake_choco_8": {
+      "available": 5,
+      "reserved": 0
+    }
+  },
+  "2026-02-12": {
+    "cake_choco_8": {
+      "available": 5,
+      "reserved": 0
+    }
+  },
+  "2026-02-13": {
+    "cake_choco_8": {
+      "available": 5,
+      "reserved": 0
+    }
+  },
+  "2026-02-14": {
+    "cake_choco_8": {
+      "available": 5,
+      "reserved": 0
+    }
+  }
+}

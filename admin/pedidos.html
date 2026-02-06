@@ -6,34 +6,101 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestión de Pedidos - The Bakery by Fresarte</title>
   <link rel="stylesheet" href="../TheBakery/assets/css/style.css">
+  <link rel="stylesheet" href="../TheBakery/assets/css/admin-sidebar.css">
   <style>
     .admin-page {
       min-height: 100vh;
-      padding-top: 100px;
+      padding-top: 140px;
       background: #f9fafb;
+      width: 100%;
+      margin: 0;
+      padding-left: 0;
+      padding-right: 0;
+      box-sizing: border-box;
+    }
+    /* Admin Top Header */
+    .admin-top-header {
+      position: fixed;
+      top: 0;
+      left: 230px;
+      right: 0;
+      height: 60px;
+      background: #ffffff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      transition: left 0.3s ease;
+    }
+    .admin-top-header-logo {
+      display: flex;
+      align-items: center;
+    }
+    .admin-top-header-logo img {
+      width: 150px;
+      height: auto;
+    }
+    .admin-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .admin-header-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: transparent;
+      border: none;
+      color: #6b7280;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+    .admin-header-btn:hover {
+      background: #f9fafb;
+      color: #374151;
+    }
+    .admin-header-btn svg {
+      flex-shrink: 0;
+    }
+    .admin-header-btn-danger {
+      color: #d7263d;
+    }
+      .admin-header-btn-danger:hover {
+      background: #d91a6b;
+      color: #fff;
+    }
+    .admin-header-btn#deleteAllOrders:hover {
+      background: #d91a6b;
+      opacity: 0.9;
     }
     .admin-header {
       background: #fff;
       border-bottom: 2px solid #e5e7eb;
-      padding: 2rem 0;
+      padding: 2rem 24px;
       margin-bottom: 2rem;
+      width: 100%;
+      box-sizing: border-box;
     }
     .admin-header .container {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
       align-items: center;
       flex-wrap: wrap;
       gap: 1rem;
+      padding: 0;
+      max-width: none;
     }
-    .admin-title {
+    .admin-page-title {
       font-size: 2rem;
       font-weight: 800;
       color: var(--fg);
       margin: 0;
-    }
-    .admin-subtitle {
-      color: var(--muted);
-      margin: 0.5rem 0 0;
     }
     .refresh-btn {
       display: flex;
@@ -52,9 +119,9 @@
       background: var(--accent-600);
     }
     .orders-container {
-      max-width: 1400px;
-      margin: 0 auto;
+      width: 100%;
       padding: 0 24px;
+      max-width: none;
     }
     .orders-stats {
       display: grid;
@@ -96,17 +163,33 @@
       padding: 1.5rem;
       box-shadow: 0 2px 8px rgba(0,0,0,.1);
       transition: box-shadow 0.2s;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      overflow: visible;
+      min-height: 0;
+      border: 1px solid #e5e7eb;
+    }
+    @media (min-width: 900px) {
+      .order-card {
+        grid-template-columns: 1fr 1.5fr 1fr;
+        align-items: start;
+      }
     }
     .order-card:hover {
       box-shadow: 0 4px 16px rgba(0,0,0,.15);
     }
-    .order-header {
+    .order-col-info {
       display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .order-col-items { min-width: 0; }
+    .order-col-status {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-      gap: 1rem;
     }
     .order-id {
       font-size: 1.1rem;
@@ -118,13 +201,9 @@
       font-size: 0.9rem;
     }
     .order-customer {
-      margin-bottom: 1rem;
-    }
-    .customer-info {
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
+      flex-direction: column;
+      gap: 0.25rem;
     }
     .customer-name {
       font-weight: 600;
@@ -132,7 +211,13 @@
     }
     .customer-email {
       color: var(--muted);
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+    }
+    .order-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
     }
     .order-items {
       margin-bottom: 1rem;
@@ -167,9 +252,11 @@
       justify-content: space-between;
       align-items: center;
       padding-top: 1rem;
+      margin-top: 0.5rem;
       border-top: 2px solid #e5e7eb;
       flex-wrap: wrap;
       gap: 1rem;
+      clear: both;
     }
     .order-total {
       font-size: 1.5rem;
@@ -229,65 +316,289 @@
       padding: 4rem 2rem;
       color: var(--muted);
     }
+    /* Modal detalle de pedido */
+    .order-detail-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+    }
+    .order-detail-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+    .order-detail-modal {
+      background: #fff;
+      border-radius: var(--radius);
+      max-width: 520px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      transform: scale(0.95);
+      transition: transform 0.2s;
+    }
+    .order-detail-overlay.open .order-detail-modal {
+      transform: scale(1);
+    }
+    .order-detail-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 2px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .order-detail-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--fg);
+      margin: 0;
+    }
+    .order-detail-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #6b7280;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+    }
+    .order-detail-close:hover {
+      color: var(--fg);
+    }
+    .order-detail-body {
+      padding: 1.5rem;
+    }
+    .order-detail-section {
+      margin-bottom: 1.25rem;
+    }
+    .order-detail-section:last-child {
+      margin-bottom: 0;
+    }
+    .order-detail-section-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .order-detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 0.35rem 0;
+      font-size: 0.95rem;
+    }
+    .order-detail-row .label {
+      color: var(--muted);
+      margin-right: 0.5rem;
+    }
+    .order-detail-row .value {
+      font-weight: 600;
+      color: var(--fg);
+      text-align: right;
+    }
+    .order-detail-items {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .order-detail-items li {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .order-detail-items li:last-child {
+      border-bottom: none;
+    }
+    .order-detail-total {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--fg);
+      padding-top: 0.75rem;
+      margin-top: 0.75rem;
+      border-top: 2px solid #e5e7eb;
+    }
+    .btn-ver-detalle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.5rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-ver-detalle:hover {
+      background: var(--accent-600, #d8379a);
+    }
     @media (max-width: 768px) {
+      .admin-top-header {
+        left: 0;
+      }
+      .admin-page {
+        padding-top: 100px;
+      }
+      .admin-header {
+        padding: 2rem 1rem;
+      }
       .admin-header .container {
         flex-direction: column;
         align-items: flex-start;
+        padding: 0;
       }
-      .order-header {
-        flex-direction: column;
+      .orders-container {
+        width: 100%;
+        margin-left: 0 !important;
+        padding: 0 1rem;
       }
-      .order-footer {
-        flex-direction: column;
-        align-items: flex-start;
+      .order-col-status {
+        border-top: 1px solid #e5e7eb;
+        padding-top: 1rem;
+      }
+      .order-card {
+        padding: 1rem;
+      }
+      .orders-stats {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
   </style>
 </head>
 
 <body id="bakery-landing" class="is-white">
-  <!-- NAV -->
-  <nav class="nav" id="nav">
-    <div class="container wrap">
-      <div class="brand">
-        <a href="../index-original.html" style="display:inline-block">
-          <img src="../TheBakery/assets/imagenes/logo.png" alt="The Bakery by Fresarte" style="height:36px">
-        </a>
-      </div>
-      <div class="nav-center">
-        <div class="links" id="navLinks">
-          <a href="../index-original.html#home" class="nav-link">Inicio</a>
-          <a href="../pasteles-de-autor.html" class="nav-link">Pasteles de Autor</a>
-        </div>
-      </div>
-      <div class="nav-actions">
-        <a href="../index-original.html" class="nav-action-btn">
-          <svg class="icon-action" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-          </svg>
-          <span>Volver al Sitio</span>
-        </a>
-      </div>
+  <!-- Sidebar Toggle (Mobile) -->
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
+
+  <!-- Sidebar Overlay (Mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-header">
+      <img src="../TheBakery/assets/imagenes/logo.png" alt="The Bakery" class="sidebar-logo">
     </div>
-  </nav>
+    
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>Inicio</span>
+      </a>
+      
+      <a href="pedidos.html" class="sidebar-nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+        </svg>
+        <span>Pedidos</span>
+      </a>
+      
+      <a href="stock-pasteles.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 7h-4M4 7h4m0 0v13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7m0 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3M10 7V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v3m8 0h4"></path>
+        </svg>
+        <span>Stock de Pasteles</span>
+      </a>
+      
+      <a href="#" class="sidebar-nav-item disabled">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="20" x2="12" y2="10"></line>
+          <line x1="18" y1="20" x2="18" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="16"></line>
+        </svg>
+        <span>Reportes</span>
+      </a>
+      
+      <a href="#" class="sidebar-nav-item disabled">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <span>Usuarios</span>
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" class="sidebar-footer-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
+        </svg>
+        <span>Configuración</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Admin Header -->
+  <header class="admin-top-header">
+    <div class="admin-top-header-logo">
+      <img src="../TheBakery/assets/imagenes/logo.png" alt="The Bakery">
+    </div>
+    <div class="admin-header-actions">
+      <button class="admin-header-btn" id="refreshBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <polyline points="1 20 1 14 7 14"></polyline>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+        <span>Actualizar</span>
+      </button>
+      <button class="admin-header-btn" id="helpBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <span>Ayuda</span>
+      </button>
+      <button class="admin-header-btn admin-header-btn-danger" id="deleteAllOrders" style="background: #ef2a82; color: #fff;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+        <span>Eliminar Todos los Pedidos</span>
+      </button>
+      <button class="admin-header-btn admin-header-btn-danger" id="logoutBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Cerrar Sesión</span>
+      </button>
+    </div>
+  </header>
 
   <!-- Admin Page -->
+  <div class="admin-content-wrapper">
   <main class="admin-page">
     <div class="admin-header">
       <div class="container">
-        <div>
-          <h1 class="admin-title">Gestión de Pedidos</h1>
-          <p class="admin-subtitle">Panel de control para colaboradores</p>
-        </div>
-        <button class="refresh-btn" id="refreshBtn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="23 4 23 10 17 10"></polyline>
-            <polyline points="1 20 1 14 7 14"></polyline>
-            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-          </svg>
-          Actualizar
-        </button>
+        <div id="adminPageTitle" class="admin-page-title"></div>
       </div>
     </div>
 
@@ -297,12 +608,44 @@
         <!-- Stats will be generated by JS -->
       </div>
 
+      <!-- Search Bar -->
+      <div style="margin-bottom: 1.5rem;">
+        <input 
+          type="text" 
+          id="searchOrders" 
+          placeholder="Buscar pedido por ID, nombre o email..." 
+          style="
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+          "
+          onfocus="this.style.borderColor='#ef42a8'"
+          onblur="this.style.borderColor='#e5e7eb'"
+        />
+      </div>
+
       <!-- Orders List -->
       <div class="orders-list" id="ordersList">
         <div class="loading">Cargando pedidos...</div>
       </div>
     </div>
   </main>
+
+  <!-- Modal Detalle de Pedido -->
+  <div class="order-detail-overlay" id="orderDetailOverlay" aria-hidden="true">
+    <div class="order-detail-modal" id="orderDetailModal" role="dialog" aria-labelledby="orderDetailTitle">
+      <div class="order-detail-header">
+        <h2 class="order-detail-title" id="orderDetailTitle">Detalle del pedido</h2>
+        <button type="button" class="order-detail-close" id="orderDetailClose" aria-label="Cerrar">&times;</button>
+      </div>
+      <div class="order-detail-body" id="orderDetailBody">
+        <!-- Se rellena por JS -->
+      </div>
+    </div>
+  </div>
 
   <!-- FOOTER -->
   <footer class="footer">
@@ -311,9 +654,61 @@
       <div class="muted" style="margin-top:10px">© 2025 The Bakery by Fresarte. Todos los derechos reservados.</div>
     </div>
   </footer>
+  </main>
+  </div>
 
   <!-- Scripts -->
+  <script src="../TheBakery/assets/js/auth-guard.js"></script>
+  <script src="../TheBakery/assets/js/admin-common.js"></script>
+  <script src="../TheBakery/assets/js/admin-alerts.js"></script>
   <script src="../TheBakery/assets/js/admin-pedidos.js"></script>
+  
+  <!-- Sidebar Toggle Script -->
+  <script>
+    (function() {
+      const sidebar = document.getElementById('adminSidebar');
+      const toggleBtn = document.getElementById('sidebarToggle');
+      const overlay = document.getElementById('sidebarOverlay');
+      
+      function toggleSidebar() {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+      }
+      
+      function closeSidebar() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+      }
+      
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', toggleSidebar);
+      }
+      
+      if (overlay) {
+        overlay.addEventListener('click', closeSidebar);
+      }
+      
+      // Cerrar sidebar al hacer clic en un enlace (móvil)
+      const sidebarLinks = document.querySelectorAll('.sidebar-nav-item, .sidebar-footer-item');
+      sidebarLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          if (window.innerWidth <= 768) {
+            closeSidebar();
+          }
+        });
+      });
+    })();
+
+    // Botón de Ayuda
+    (function() {
+      const helpBtn = document.getElementById('helpBtn');
+      if (helpBtn) {
+        helpBtn.addEventListener('click', () => {
+          alert('Centro de Ayuda\n\nPara más información, contacta al administrador del sistema.');
+        });
+      }
+    })();
+  </script>
 </body>
 
 </html>

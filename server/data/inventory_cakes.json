@@ -1,0 +1,58 @@
+[
+  {
+    "id": "1",
+    "name": "Pastel Chocolate Deluxe",
+    "sizes": {
+      "10": 85,
+      "12": 100
+    }
+  },
+  {
+    "id": "2",
+    "name": "Pastel de Fresa Fresca",
+    "sizes": {
+      "10": 85,
+      "12": 100
+    }
+  },
+  {
+    "id": "3",
+    "name": "Dubai Chocolate Cake",
+    "sizes": {
+      "10": 88,
+      "12": 100
+    }
+  },
+  {
+    "id": "4",
+    "name": "Fresas con Crema Cake",
+    "sizes": {
+      "10": 94,
+      "12": 100
+    }
+  },
+  {
+    "id": "5",
+    "name": "Blueberry Lemon Cake",
+    "sizes": {
+      "10": 94,
+      "12": 100
+    }
+  },
+  {
+    "id": "6",
+    "name": "Lemon Pie Cake",
+    "sizes": {
+      "10": 95,
+      "12": 100
+    }
+  },
+  {
+    "id": "7",
+    "name": "Tropical Passionfruit Cake",
+    "sizes": {
+      "10": 95,
+      "12": 100
+    }
+  }
+]

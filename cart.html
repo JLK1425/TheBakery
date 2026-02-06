@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Carrito de Compras - The Bakery by Fresarte</title>
   <link rel="stylesheet" href="TheBakery/assets/css/style.css">
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .cart-page {
       min-height: 100vh;
@@ -94,6 +95,35 @@
       border: 1px solid #e5e7eb;
       border-radius: 8px;
       padding: 0.5rem;
+    }
+    .checkout-buttons-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .reservation-confirmed-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .reservation-confirmed-label {
+      font-size: 0.9rem;
+      color: var(--fg);
+      margin: 0;
+      font-weight: 500;
+    }
+    .btn-secondary {
+      background: #f3f4f6;
+      color: var(--fg);
+      border: 1px solid #e5e7eb;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      align-self: flex-start;
+    }
+    .btn-secondary:hover {
+      background: #e5e7eb;
     }
     .quantity-btn {
       width: 32px;
@@ -248,9 +278,19 @@
           <span>Total</span>
           <span id="total">RD$0.00</span>
         </div>
-        <button class="btn btn-primary checkout-btn" id="checkoutBtn">
-          Finalizar Pedido
-        </button>
+        <div class="checkout-buttons-wrapper">
+          <button type="button" class="btn btn-primary checkout-btn" id="openReservationModalBtn">
+            Reservar fecha y hora
+          </button>
+          <div class="reservation-confirmed-block" id="reservationConfirmedBlock" style="display:none">
+            <p class="reservation-confirmed-label" id="reservationConfirmedLabel"></p>
+            <button type="button" class="btn btn-secondary" id="cambiarReservaBtn">Cambiar reserva</button>
+          </div>
+          <button type="button" class="btn btn-primary checkout-btn" id="checkoutBtn" title="Debes reservar fecha y hora antes de continuar al pago">
+            Continuar a pago
+          </button>
+          <p class="reservation-hint" id="reservationHint" style="display:none">Debes reservar fecha y hora antes de continuar al pago.</p>
+        </div>
         <a href="index-original.html" class="continue-shopping" style="display:block; text-align:center; margin-top:1rem">
           Continuar Comprando
         </a>
@@ -258,9 +298,85 @@
     </div>
   </main>
 
+  <!-- Modal: Reserva tu fecha y hora -->
+  <div id="reservationModal" class="fixed inset-0 z-[1000] hidden overflow-y-auto flex items-center justify-center p-4" aria-modal="true">
+    <div class="fixed inset-0 bg-black/40" id="reservationModalBackdrop"></div>
+    <div class="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl mx-auto">
+        <div class="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
+          <h2 class="text-xl font-semibold text-gray-900">Reserva tu fecha y hora</h2>
+          <button type="button" id="closeReservationModal" class="rounded-lg p-2 text-xl leading-none text-gray-500 hover:bg-gray-100 hover:text-gray-700" aria-label="Cerrar">×</button>
+        </div>
+        <div class="p-6 space-y-6">
+          <!-- Tabs -->
+          <div class="flex rounded-xl bg-gray-100 p-1">
+            <button type="button" id="tabInvitado" class="tab-reservation flex-1 rounded-lg py-2.5 text-sm font-medium transition px-4 bg-white shadow text-gray-900" data-tab="invitado">Invitado</button>
+            <button type="button" id="tabRegistrarme" class="tab-reservation flex-1 rounded-lg py-2.5 text-sm font-medium transition px-4 text-gray-600" data-tab="registrarme">Registrarme</button>
+          </div>
+
+          <!-- Panel Invitado -->
+          <div id="panelInvitado" class="panel-reservation space-y-4">
+            <div class="grid gap-4 sm:grid-cols-1">
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Nombre</label>
+                <input type="text" id="invitadoName" placeholder="Tu nombre" class="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" id="invitadoEmail" placeholder="email@ejemplo.com" class="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Teléfono</label>
+                <input type="tel" id="invitadoPhone" placeholder="8095551234" class="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel Registrarme -->
+          <div id="panelRegistrarme" class="panel-reservation hidden space-y-4">
+            <div id="registrarmeForm" class="grid gap-4 sm:grid-cols-1">
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Nombre</label>
+                <input type="text" id="registerName" placeholder="Tu nombre" class="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Email</label>
+                <input type="email" id="registerEmail" placeholder="email@ejemplo.com" class="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Teléfono</label>
+                <input type="tel" id="registerPhone" placeholder="8095551234" class="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
+              </div>
+              <div>
+                <label class="mb-1 block text-sm font-medium text-gray-700">Últimos 4 dígitos de cédula</label>
+                <input type="text" id="registerCedula" placeholder="1234" maxlength="4" pattern="[0-9]{4}" class="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
+              </div>
+              <button type="button" id="btnCrearPerfil" class="btn btn-primary w-full sm:w-auto">Crear perfil</button>
+            </div>
+            <div id="registradoBadge" class="hidden rounded-xl bg-green-50 px-4 py-3 text-green-800 text-sm font-medium">Registrado como <span id="registradoName"></span></div>
+          </div>
+
+          <!-- Calendario grid -->
+          <div>
+            <h3 class="mb-3 text-base font-semibold text-gray-900">Disponibilidad</h3>
+            <div id="availabilityError" class="hidden mb-3 rounded-xl bg-red-50 px-4 py-3 text-red-700 text-sm"></div>
+            <div id="availabilityLoading" class="rounded-xl bg-gray-50 px-4 py-8 text-center text-gray-500">Cargando disponibilidad…</div>
+            <div id="availabilityGrid" class="hidden space-y-4"></div>
+          </div>
+
+          <!-- Reservar horario -->
+          <div class="flex flex-wrap items-center gap-4 border-t border-gray-200 pt-4">
+            <div id="holdSuccess" class="hidden flex-1 rounded-xl bg-green-50 px-4 py-3 text-green-800 text-sm"></div>
+            <div id="holdError" class="hidden flex-1 rounded-xl bg-red-50 px-4 py-3 text-red-800 text-sm"></div>
+            <button type="button" id="btnReservarHorario" class="btn btn-primary" disabled>Reservar horario</button>
+          </div>
+        </div>
+    </div>
+  </div>
+
   <script src="TheBakery/assets/js/auth.js"></script>
   <script src="TheBakery/assets/js/script.js"></script>
   <script src="TheBakery/assets/js/cart.js"></script>
+  <script src="TheBakery/assets/js/reservations-ui.js"></script>
 </body>
 
 </html>

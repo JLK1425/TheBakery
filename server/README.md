@@ -94,8 +94,39 @@ Crea una sesión de checkout de Stripe.
 ### `GET /checkout-session/:sessionId`
 Verifica el estado de una sesión de checkout.
 
-### `POST /save-order`
-Guarda un pedido después del pago exitoso.
+### `POST /api/orders`
+Crea un nuevo pedido después del pago exitoso.
+
+**Body:**
+```json
+{
+  "id": "ORD-1763590462748",
+  "sessionId": "cs_test_...",
+  "customerEmail": "cliente@ejemplo.com",
+  "customerName": "Nombre Cliente",
+  "items": [...],
+  "total": 2950,
+  "status": "Pendiente"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "orderId": "ORD-1763590462748",
+  "order": {...}
+}
+```
+
+### `GET /api/orders`
+Obtiene todos los pedidos.
+
+### `PUT /api/orders/:id/status`
+Actualiza el estado de un pedido.
+
+### `DELETE /api/orders/:id`
+Elimina un pedido.
 
 ### `GET /health`
 Verifica el estado del servidor y la configuración de Stripe.
@@ -124,6 +155,105 @@ Verifica el estado del servidor y la configuración de Stripe.
 - [Documentación de Stripe](https://stripe.com/docs)
 - [Stripe Testing](https://stripe.com/docs/testing)
 - [Stripe Dashboard](https://dashboard.stripe.com)
+
+## 📅 Calendario de reservas y stock diario
+
+Slots 1h (10:00–20:00), lead time 24h, festivos y stock por día/producto. Respuestas en formato grid para UI.
+
+### `POST /api/users/register`
+
+Registro (o actualización por email). Hash de `cedulaLast4` con SHA-256 + salt (`CEDULA_SALT` en `.env`).
+
+**Body:** `{ "name", "email", "phone", "cedulaLast4" }` (cedulaLast4 = 4 dígitos)
+
+**Response:** `{ "userId" }`
+
+```bash
+curl -s -X POST http://localhost:3000/api/users/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Maria Lopez","email":"maria@ejemplo.com","phone":"8095551234","cedulaLast4":"1234"}'
+```
+
+### `POST /api/users/lookup`
+
+Busca por email y valida `cedulaLast4` (hash). 404 si no coincide.
+
+**Body:** `{ "email", "cedulaLast4" }`
+
+**Response:** `200 { "userId", "name", "email", "phone" }` | `404`
+
+```bash
+curl -s -X POST http://localhost:3000/api/users/lookup \
+  -H "Content-Type: application/json" \
+  -d '{"email":"maria@ejemplo.com","cedulaLast4":"1234"}'
+```
+
+### `POST /api/availability`
+
+Grid de días con slots (formato UI). Incluye días cerrados (`isClosed`, `reason`).
+
+**Body:** `{ "days": 14, "items": [{ "productId", "qty" }] }`
+
+**Response:**
+```json
+{
+  "timezone": "America/Santo_Domingo",
+  "days": [
+    { "dateKey": "2026-01-26", "isClosed": false, "reason": null, "slots": [
+      { "startAt": "…", "endAt": "…", "isAvailable": true }
+    ]},
+    { "dateKey": "2026-01-27", "isClosed": true, "reason": "HOLIDAY_CLOSED", "slots": [] }
+  ]
+}
+```
+
+```bash
+curl -s -X POST http://localhost:3000/api/availability \
+  -H "Content-Type: application/json" \
+  -d '{"days":14,"items":[{"productId":"cake_choco_8","qty":1}]}'
+# O con archivo: curl ... -d @test-availability.json
+```
+
+### `POST /api/reservations/hold`
+
+Aparta slot y reserva stock (hold 10 min). `userId` **o** `customer` (name, email, phone) obligatorios.
+
+**Body:** `{ "slotStartAt": ISO, "items": [{ "productId", "qty" }], "userId"?, "customer"? }`
+
+**Response:** `{ "reservationId", "holdExpiresAt" }`
+
+```bash
+# Con customer:
+curl -s -X POST http://localhost:3000/api/reservations/hold \
+  -H "Content-Type: application/json" \
+  -d '{"slotStartAt":"2026-01-26T15:00:00.000Z","items":[{"productId":"cake_choco_8","qty":1}],"customer":{"name":"Maria","phone":"8095551234","email":"maria@ejemplo.com"}}'
+
+# Con userId (tras register/lookup):
+curl -s -X POST http://localhost:3000/api/reservations/hold \
+  -H "Content-Type: application/json" \
+  -d '{"slotStartAt":"2026-01-26T15:00:00.000Z","items":[{"productId":"cake_choco_8","qty":1}],"userId":1}'
+```
+
+### `POST /api/reservations/expire`
+
+Marca HELD vencidas como EXPIRED y libera stock.
+
+**Response:** `{ "expiredCount" }`
+
+```bash
+curl -s -X POST http://localhost:3000/api/reservations/expire \
+  -H "Content-Type: application/json" -d "{}"
+```
+
+### Archivos de datos
+
+- `server/data/business_hours.json`: `timezone`, `default.open` / `default.close`
+- `server/data/holidays.json`: `closed` (YYYY-MM-DD), `specialHours` (fecha → `{ open, close }`)
+- `server/data/reservations.json`: array de reservas
+- `server/data/users_reservations.json`: usuarios para reservas (register/lookup). `users.json` sigue para auth admin.
+- `server/data/inventory_cakes_daily.json`: stock diario `{ "YYYY-MM-DD": { "productId": { "available", "reserved" } } }`
+
+---
 
 ## ❓ Solución de Problemas
 

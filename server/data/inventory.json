@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "name": "Carrot Cake",
+    "slug": "carrot-cake",
+    "inventory_8": 5,
+    "inventory_12": 3,
+    "price_8": 1250,
+    "price_12": 2150
+  },
+  {
+    "id": 2,
+    "name": "Nutella Cake",
+    "slug": "nutella-cake",
+    "inventory_8": 4,
+    "inventory_12": 2,
+    "price_8": 1350,
+    "price_12": 2300
+  }
+]

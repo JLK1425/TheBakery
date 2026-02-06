@@ -1,0 +1,15 @@
+﻿# OS / Editor
+.vscode/
+.DS_Store
+
+# Env (NO subir secretos)
+server/.env
+.env
+
+# Data runtime (no subir datos reales)
+server/data/orders.json
+server/data/*.log
+
+# Tests temporales
+server/test-*.json
+server/debug-pack.md

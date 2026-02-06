@@ -1,0 +1,78 @@
+[
+  {
+    "id": "resv_1769308294241_o0ce7isy",
+    "status": "EXPIRED",
+    "slotStartAt": "2026-01-26T15:00:00.000Z",
+    "dateKey": "2026-01-26",
+    "items": [
+      {
+        "productId": "cake_choco_8",
+        "qty": 1
+      }
+    ],
+    "customer": {
+      "name": "Maria",
+      "phone": "8095551234",
+      "email": "maria@ejemplo.com"
+    },
+    "holdExpiresAt": "2026-01-25T02:41:34.241Z",
+    "createdAt": "2026-01-25T02:31:34.241Z"
+  },
+  {
+    "id": "resv_1769312551410_32ojjzpu",
+    "status": "EXPIRED",
+    "slotStartAt": "2026-01-26T14:00:00.000Z",
+    "dateKey": "2026-01-26",
+    "items": [
+      {
+        "productId": "cake_choco_8",
+        "qty": 1
+      }
+    ],
+    "customer": {
+      "name": "Pedro",
+      "phone": "8090000000",
+      "email": "pedro@test.com"
+    },
+    "holdExpiresAt": "2026-01-25T03:52:31.410Z",
+    "createdAt": "2026-01-25T03:42:31.410Z"
+  },
+  {
+    "id": "resv_1769313257939_wyyawbdf",
+    "status": "EXPIRED",
+    "slotStartAt": "2026-01-26T14:00:00.000Z",
+    "dateKey": "2026-01-26",
+    "items": [
+      {
+        "productId": "cake_choco_8",
+        "qty": 1
+      }
+    ],
+    "customer": {
+      "name": "Pedro",
+      "phone": "8090000000",
+      "email": "pedro@test.com"
+    },
+    "holdExpiresAt": "2026-01-25T04:04:17.939Z",
+    "createdAt": "2026-01-25T03:54:17.939Z"
+  },
+  {
+    "id": "resv_1769318217108_deknlwpr",
+    "status": "EXPIRED",
+    "slotStartAt": "2026-01-27T14:00:00.000Z",
+    "dateKey": "2026-01-27",
+    "items": [
+      {
+        "productId": "cake_choco_8",
+        "qty": 1
+      }
+    ],
+    "customer": {
+      "name": "Pedro",
+      "phone": "8090000000",
+      "email": "pedro@test.com"
+    },
+    "holdExpiresAt": "2026-01-25T05:14:57.112Z",
+    "createdAt": "2026-01-25T05:16:57.108Z"
+  }
+]

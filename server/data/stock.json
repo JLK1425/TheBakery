@@ -1,0 +1,33 @@
+{
+  "updatedAt": "2026-02-06T17:44:44.930Z",
+  "items": {
+    "1": {
+      "name": "Pastel Chocolate Deluxe",
+      "available": 5
+    },
+    "2": {
+      "name": "Pastel de Fresa Fresca",
+      "available": 5
+    },
+    "3": {
+      "name": "Dubai Chocolate Cake",
+      "available": 5
+    },
+    "4": {
+      "name": "Fresas con Crema Cake",
+      "available": 5
+    },
+    "5": {
+      "name": "Blueberry Lemon Cake",
+      "available": 5
+    },
+    "6": {
+      "name": "Lemon Pie Cake",
+      "available": 5
+    },
+    "7": {
+      "name": "Tropical Passionfruit Cake",
+      "available": 5
+    }
+  }
+}

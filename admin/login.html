@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión - The Bakery Admin</title>
+  <link rel="stylesheet" href="../TheBakery/assets/css/style.css">
+  
+  <style>
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: linear-gradient(135deg, #ffe1f1, #ffd3eb);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-card {
+      background: #ffffff;
+      width: 100%;
+      max-width: 420px;
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-logo img {
+      width: 140px;
+      margin-bottom: 1rem;
+    }
+
+    .login-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--fg);
+      margin-bottom: 1rem;
+    }
+
+    .login-subtitle {
+      margin-bottom: 2rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: 2px solid #e5e7eb;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    .login-input:focus {
+      border-color: #ef42a8;
+      outline: none;
+    }
+
+    .login-btn {
+      width: 100%;
+      background: #ef42a8;
+      border: none;
+      padding: 14px;
+      color: white;
+      font-size: 1.1rem;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .login-btn:hover {
+      background: #d8379a;
+    }
+
+    .error-message {
+      background: #ffe4e6;
+      color: #b91c1c;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="../TheBakery/assets/imagenes/logo.png" alt="The Bakery Logo">
+    </div>
+
+    <h1 class="login-title">Acceso Administrativo</h1>
+    <p class="login-subtitle">Panel exclusivo para colaboradores autorizados</p>
+
+    <div id="errorBox" class="error-message"></div>
+
+    <input type="email" id="email" class="login-input" placeholder="Correo electrónico" autocomplete="off">
+    <input type="password" id="password" class="login-input" placeholder="Contraseña">
+
+    <button class="login-btn" id="loginBtn">Iniciar Sesión</button>
+  </div>
+
+  <script src="../TheBakery/assets/js/login.js"></script>
+
+</body>
+</html>

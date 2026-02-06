@@ -1,0 +1,9 @@
+[
+  {
+    "id": 1,
+    "name": "Joel SuperAdmin",
+    "email": "j.abreu@grupopeguero.com",
+    "passwordHash": "$2b$10$IFYfLzF79w2S95CDjsN5puCBlGxPznKvEnNGuYn77pTvgpDlZY3gu",
+    "role": "superadmin"
+  }
+]

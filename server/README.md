@@ -34,7 +34,7 @@ cp .env.example .env
 STRIPE_SECRET_KEY=sk_test_tu_clave_secreta_aqui
 STRIPE_PUBLISHABLE_KEY=pk_test_tu_clave_publica_aqui
 PORT=3000
-FRONTEND_URL=http://localhost:5500
+FRONTEND_URL=http://localhost:5503
 ```
 
 **⚠️ IMPORTANTE:** 
@@ -56,11 +56,22 @@ npm start
 
 El servidor estará corriendo en `http://localhost:3000`
 
-## 🔧 Configuración del Frontend
+## 🔧 Cómo correr todo (Frontend + Backend)
 
-Asegúrate de que tu servidor frontend (Live Server, etc.) esté corriendo en el puerto configurado en `FRONTEND_URL` (por defecto `http://localhost:5500`).
+1. **Backend:** En una terminal:
+   ```bash
+   cd server
+   npm run dev
+   ```
+   Backend en `http://localhost:3000`.
 
-Si usas un puerto diferente, actualiza `FRONTEND_URL` en el archivo `.env`.
+2. **Frontend:** Abre el proyecto con **Live Server** (VS Code / Cursor) en el puerto **5503**.
+   - Abre el HTML raíz o usa "Open with Live Server" en `index.html` / `admin/login.html`.
+   - La URL debe ser exactamente `http://localhost:5503` (no `127.0.0.1`).
+
+3. **Sesión admin:** Las cookies de sesión requieren mismo esquema de host. Usa `http://localhost:5503` para el frontend; si usas `http://127.0.0.1:5503`, CORS rechazará el origen y la sesión se perderá.
+
+4. En `.env`: `FRONTEND_URL=http://localhost:5503` (recomendado para Live Server).
 
 ## 📝 Endpoints Disponibles
 
@@ -245,12 +256,46 @@ curl -s -X POST http://localhost:3000/api/reservations/expire \
   -H "Content-Type: application/json" -d "{}"
 ```
 
+### Admin – Login con sesión
+
+- `POST /api/auth/login` – body: `{ email, password }` → `{ ok, user }` o 401
+- `GET /api/auth/me` – devuelve usuario si hay sesión activa
+- `POST /api/auth/logout` – destruye sesión
+
+### Crear admin (DEV)
+
+Para poder probar el login de admin, crea o actualiza un usuario con:
+
+```bash
+cd server
+npm run create-admin
+```
+
+O con credenciales de ejemplo (admin@thebakery.com / Admin12345!):
+
+```bash
+npm run create-admin:dev
+```
+
+O con email y contraseña propios:
+
+```bash
+node tools/create-admin.js <email> "<password>"
+```
+
+- Crea o actualiza el usuario por email (case-insensitive).
+- Solo se guarda el hash bcrypt, nunca la contraseña en texto plano.
+- Persistencia: `server/data/admin-users.json`.
+
+**Probar login:** abre `admin/login.html` con Live Server y usa las credenciales creadas.
+
 ### Archivos de datos
 
+- `server/data/admin-users.json`: usuarios admin para login (email, passwordHash, role). Usado por `tools/create-admin.js` y `POST /api/auth/login`.
 - `server/data/business_hours.json`: `timezone`, `default.open` / `default.close`
 - `server/data/holidays.json`: `closed` (YYYY-MM-DD), `specialHours` (fecha → `{ open, close }`)
 - `server/data/reservations.json`: array de reservas
-- `server/data/users_reservations.json`: usuarios para reservas (register/lookup). `users.json` sigue para auth admin.
+- `server/data/users_reservations.json`: usuarios para reservas (register/lookup)
 - `server/data/inventory_cakes_daily.json`: stock diario `{ "YYYY-MM-DD": { "productId": { "available", "reserved" } } }`
 
 ---

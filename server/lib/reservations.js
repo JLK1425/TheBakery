@@ -347,6 +347,11 @@ function hasStockForItems(inv, dateKey, items) {
  * @returns {{ ok: boolean, error?: string, details?: Array, failedItems?: Array }}
  */
 function checkStockForItems(inv, dateKey, items) {
+  // BYPASS: stock infinito para pruebas (set STOCK_BYPASS=true en .env)
+  if (process.env.STOCK_BYPASS === 'true') {
+    return { ok: true, details: [], failedItems: [] };
+  }
+
   const byRaw = {};
   for (const it of items) {
     const raw = String(it.productId || it.backendProductId || '').trim();

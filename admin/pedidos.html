@@ -5,6 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestión de Pedidos - The Bakery by Fresarte</title>
+  <script src="../TheBakery/assets/js/auth-guard.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../TheBakery/assets/css/style.css">
   <link rel="stylesheet" href="../TheBakery/assets/css/admin-sidebar.css">
   <style>
@@ -559,6 +561,15 @@
       <img src="../TheBakery/assets/imagenes/logo.png" alt="The Bakery">
     </div>
     <div class="admin-header-actions">
+      <button type="button" class="admin-header-btn relative" id="stockAlertBtn" title="Stock bajo" style="display:none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <span>Stock bajo</span>
+        <span id="stockAlertBadge" class="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[20px] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">0</span>
+      </button>
       <button class="admin-header-btn" id="refreshBtn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="23 4 23 10 17 10"></polyline>
@@ -634,6 +645,37 @@
     </div>
   </main>
 
+  <!-- Modal Stock Bajo -->
+  <div id="stockAlertModal" class="fixed inset-0 z-[1100] hidden" aria-hidden="true">
+    <div class="fixed inset-0 bg-black/50" id="stockAlertModalBackdrop"></div>
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+      <div class="relative bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+        <div class="flex items-center justify-between p-4 border-b border-gray-200">
+          <h2 class="text-xl font-bold text-gray-900">Productos con stock bajo</h2>
+          <button type="button" id="stockAlertModalClose" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div class="p-4 overflow-auto max-h-[60vh]">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b border-gray-200">
+                <th class="py-2 px-3 font-semibold text-gray-700">Producto</th>
+                <th class="py-2 px-3 font-semibold text-gray-700">Tamaño</th>
+                <th class="py-2 px-3 font-semibold text-gray-700">Stock actual</th>
+                <th class="py-2 px-3 font-semibold text-gray-700">Umbral</th>
+              </tr>
+            </thead>
+            <tbody id="stockAlertTableBody">
+              <!-- Se llena por JS -->
+            </tbody>
+          </table>
+          <p id="stockAlertEmpty" class="text-gray-500 text-center py-8 hidden">No hay productos con stock bajo.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal Detalle de Pedido -->
   <div class="order-detail-overlay" id="orderDetailOverlay" aria-hidden="true">
     <div class="order-detail-modal" id="orderDetailModal" role="dialog" aria-labelledby="orderDetailTitle">
@@ -658,7 +700,6 @@
   </div>
 
   <!-- Scripts -->
-  <script src="../TheBakery/assets/js/auth-guard.js"></script>
   <script src="../TheBakery/assets/js/admin-common.js"></script>
   <script src="../TheBakery/assets/js/admin-alerts.js"></script>
   <script src="../TheBakery/assets/js/admin-pedidos.js"></script>

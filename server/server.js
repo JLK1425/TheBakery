@@ -13,38 +13,63 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const session = require('express-session');
 const reservationsLib = require('./lib/reservations');
 const usersReservations = require('./lib/users-reservations');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5500';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://127.0.0.1:5503';
 const TEST_MODE = process.env.TEST_MODE === 'true';
+const IS_PROD = process.env.NODE_ENV === 'production';
 
-// ---------------- CORS (con credentials: true no usar "*"; origin debe ser explícito) ----------------
-const CORS_ORIGINS = [
-  FRONTEND_URL,
-  'http://127.0.0.1:5503',
+// CORS: orígenes permitidos (Live Server / herramientas de desarrollo)
+const allowedOrigins = [
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
   'http://localhost:5503',
-  'http://127.0.0.1:5502',
-  'http://localhost:5502',
-  'http://127.0.0.1:5501',
-  'http://localhost:5501'
+  'http://127.0.0.1:5503'
 ];
 app.use(cors({
-  origin: function (origin, cb) {
-    if (!origin || CORS_ORIGINS.includes(origin)) {
-      cb(null, origin || CORS_ORIGINS[0]);
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
     } else {
-      cb(null, false);
+      callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
-// -------------------------------------
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Middleware de debugging: log de requests + responder OPTIONS con 200 (evita fallo de preflight)
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  console.log('Origin:', req.get('origin'));
+  console.log('Headers:', req.headers);
+
+  if (req.method === 'OPTIONS') {
+    console.log('✅ OPTIONS request detected - sending 200');
+    return res.status(200).end();
+  }
+
+  next();
+});
+
+// [REQ] log para OPTIONS/POST checkout y api/pay/session (ruta neutral evita cancel por blockers)
+app.use(function(req, res, next) {
+  var isLogged = (req.method === 'OPTIONS' || req.method === 'POST') &&
+    (req.path === '/create-checkout-session' || req.path === '/api/pay/session' || req.path === '/debug/ping');
+  if (!isLogged) return next();
+  var origin = req.get('origin') || '(none)';
+  console.log('[REQ]', req.method, req.path, 'origin=', origin);
+  res.on('finish', function() {
+    console.log('[REQ]', req.method, req.path, 'status=', res.statusCode);
+  });
+  next();
+});
 
 // Inventario
 const INVENTORY_FILE = path.join(__dirname, 'data', 'inventory.json');
@@ -113,8 +138,48 @@ function writeUsers(data) {
   }
 }
 
+// Admin users (sesión con express-session)
+const ADMIN_USERS_FILE = path.join(__dirname, 'data', 'admin-users.json');
+
+function ensureAdminUsersFile() {
+  try {
+    if (!fs.existsSync(ADMIN_USERS_FILE)) {
+      fs.writeFileSync(ADMIN_USERS_FILE, '[]', 'utf8');
+    }
+  } catch (e) {
+    console.warn('No se pudo crear admin-users.json:', e.message);
+  }
+}
+ensureAdminUsersFile();
+
+function readAdminUsers() {
+  try {
+    const raw = fs.readFileSync(ADMIN_USERS_FILE, 'utf8');
+    return JSON.parse(raw);
+  } catch (e) {
+    return [];
+  }
+}
+
+function findUserByEmail(email) {
+  const users = readAdminUsers();
+  const e = (email || '').trim().toLowerCase();
+  return users.find(u => String(u.email || '').toLowerCase() === e);
+}
+
+function requireAdmin(req, res, next) {
+  if (!req.session || !req.session.user) {
+    return res.status(401).json({ ok: false, error: 'UNAUTHORIZED' });
+  }
+  if (req.session.user.role !== 'admin' && req.session.user.role !== 'superadmin') {
+    return res.status(401).json({ ok: false, error: 'UNAUTHORIZED' });
+  }
+  req.user = req.session.user;
+  next();
+}
+
 // =========================
-//     AUTH MIDDLEWARE
+//     AUTH MIDDLEWARE (legacy JWT)
 // =========================
 
 function requireAuth(req, res, next) {
@@ -147,9 +212,17 @@ function requireSuperAdmin(req, res, next) {
   next();
 }
 
-// Middleware (CORS ya aplicado arriba con credentials)
-app.use(express.json());
 app.use(cookieParser());
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'dev-session-secret-change-in-prod', // Solo para desarrollo local
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: false
+  }
+}));
 app.use(express.static(path.join(__dirname, '..'))); // Servir archivos estáticos del proyecto
 
 // Rutas de datos (para compatibilidad con el frontend)
@@ -288,9 +361,21 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Crear sesión de checkout de Stripe
-app.post('/create-checkout-session', async (req, res) => {
+// Debug: ping POST (probar CORS con credentials)
+app.post('/debug/ping', (req, res) => res.status(200).json({ ok: true }));
+
+// Debug: echo POST con JSON (para probar que un POST con body no se cancela)
+app.post('/debug/echo', (req, res) => {
+  res.json({ ok: true, body: req.body });
+});
+
+// Handler compartido: misma lógica para /api/pay/session y /create-checkout-session (wrapper compatibilidad).
+// Ruta neutral /api/pay/session evita que blockers/heurísticas cancelen requests con "checkout-session" en la URL.
+async function createCheckoutSessionHandler(req, res) {
+  console.log('🚀 [DEBUG] Solicitud recibida en /create-checkout-session');
   try {
+    console.log('[CHECKOUT] Request body:', JSON.stringify({ line_items_count: req.body?.line_items?.length, items_count: req.body?.items?.length, total: req.body?.total }, null, 2));
+    console.log('[CHECKOUT] User session:', req.session ? (req.session.user ? 'logged' : 'anonymous') : 'none');
     console.log('=== INICIO CHECKOUT SESSION ===');
     const { line_items, items, total, customerEmail, customerName } = req.body;
 
@@ -317,6 +402,43 @@ app.post('/create-checkout-session', async (req, res) => {
 
     console.log('Stripe configurado correctamente');
 
+    // Normalizar URLs de imágenes en line_items (antes de reserva)
+    let normalizedItems = line_items;
+    if (line_items && Array.isArray(line_items)) {
+      normalizedItems = line_items.map((item, index) => {
+        const clone = JSON.parse(JSON.stringify(item));
+        if (clone.price_data?.product_data?.images && Array.isArray(clone.price_data.product_data.images)) {
+          clone.price_data.product_data.images = clone.price_data.product_data.images.map(imgUrl => {
+            if (typeof imgUrl === 'string') {
+              return imgUrl.replace(/cake (\d+)\.png/g, 'cake_$1.png')
+                .replace(/cake autor (\d+)\.png/g, 'cake_autor_$1.png')
+                .replace(/([^\/]+) ([\w\d]+\.png)/g, '$1_$2');
+            }
+            return imgUrl;
+          });
+        }
+        return clone;
+      });
+    }
+
+    // Extraer items para reserva (productId, size, quantity) - el carrito envía items con estos campos
+    const itemsForReservation = items && Array.isArray(items) && items.length > 0
+      ? items.map(it => ({ productId: String(it.productId || it.id || ''), size: String(it.size || '10'), quantity: Number(it.quantity) || 1 }))
+      : normalizedItems.map((li, i) => ({
+          productId: String(i + 1),
+          size: '10',
+          quantity: Number(li.quantity) || 1
+        }));
+
+    const tempSessionId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    const reservationData = { items: itemsForReservation, tempSessionId };
+    console.log('[STOCK-RESERVATION] Creating reservation:', JSON.stringify(reservationData));
+    const reserveResult = createStockReservation(itemsForReservation, tempSessionId);
+    if (!reserveResult.ok) {
+      console.log('[STOCK-RESERVATION] Reserva fallida:', reserveResult.error);
+      return res.status(400).json({ error: reserveResult.error || 'Stock insuficiente' });
+    }
+
     // Calcular total si no se proporcionó
     let orderTotal = total;
     if (!orderTotal && items && items.length > 0) {
@@ -329,37 +451,6 @@ app.post('/create-checkout-session', async (req, res) => {
       orderTotal = orderTotal * 1.18; // Agregar ITBIS
     }
 
-    // Normalizar URLs de imágenes en line_items (reemplazar espacios por guiones bajos)
-    let normalizedItems = line_items;
-    if (line_items && Array.isArray(line_items)) {
-      normalizedItems = line_items.map((item, index) => {
-        if (item.price_data?.product_data?.images && Array.isArray(item.price_data.product_data.images)) {
-          item.price_data.product_data.images = item.price_data.product_data.images.map(imgUrl => {
-            if (typeof imgUrl === 'string') {
-              const originalUrl = imgUrl;
-              // Normalizar: reemplazar espacios por guiones bajos en nombres de archivo
-              imgUrl = imgUrl.replace(/cake (\d+)\.png/g, 'cake_$1.png')
-                          .replace(/cake autor (\d+)\.png/g, 'cake_autor_$1.png')
-                          .replace(/([^\/]+) ([\w\d]+\.png)/g, '$1_$2');
-              
-              if (originalUrl !== imgUrl) {
-                console.log(`Imagen normalizada [item ${index}]: "${originalUrl}" -> "${imgUrl}"`);
-              }
-              
-              // Validar que no tenga espacios
-              if (imgUrl.includes(' ')) {
-                console.warn(`⚠️ Advertencia: URL aún contiene espacios [item ${index}]: "${imgUrl}"`);
-              }
-              
-              return imgUrl;
-            }
-            return imgUrl;
-          });
-        }
-        return item;
-      });
-    }
-    
     console.log('Line items normalizados:', normalizedItems.length);
 
     // Preparar items para metadata (usar items del body o construir desde line_items)
@@ -393,9 +484,10 @@ app.post('/create-checkout-session', async (req, res) => {
     console.log('Primer line_item ejemplo:', JSON.stringify(normalizedItems[0], null, 2));
     console.log('Metadata reducido:', { itemsCount, productIds: productIds.substring(0, 50) + '...', total: metadataTotal });
     
+    // 1. Crear sesión de Stripe
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: normalizedItems, // Usar normalizedItems con URLs normalizadas
+      line_items: normalizedItems,
       mode: 'payment',
       success_url: `${FRONTEND_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${FRONTEND_URL}/cancel.html`,
@@ -404,39 +496,141 @@ app.post('/create-checkout-session', async (req, res) => {
         customerName: customerName || 'Cliente',
         customerEmail: customerEmail || '',
         itemsCount: itemsCount.toString(),
-        productIds: productIds.substring(0, 200), // Limitar a 200 caracteres para estar seguro
+        productIds: productIds.substring(0, 200),
         orderTotal: metadataTotal
       },
       locale: 'es'
     });
 
-    console.log('✅ Sesión creada exitosamente:', session.id);
-    console.log('URL de checkout:', session.url);
+    console.log('✅ Stripe Session:', session.url);
 
-    res.json({ 
-      sessionId: session.id,
-      url: session.url 
-    });
+    // 2. Responder al frontend de inmediato (no esperar a la DB)
+    res.json({ url: session.url });
 
-  } catch (error) {
-    console.error('Error al crear sesión de checkout:', error);
-    console.error('Error details:', {
-      message: error.message,
-      type: error.type,
-      code: error.code,
-      statusCode: error.statusCode,
-      raw: error.raw
-    });
-    res.status(500).json({ 
-      error: 'Error al procesar el pago',
-      message: error.message,
-      details: process.env.NODE_ENV === 'development' ? {
-        type: error.type,
-        code: error.code
-      } : undefined
-    });
+    // 3. Tareas de fondo: actualizar reserva con sessionId de Stripe (no bloquea la respuesta)
+    Promise.resolve()
+      .then(() => updateReservationWithStripeSessionId(tempSessionId, session.id))
+      .then(() => console.log('💾 DB Actualizada en segundo plano'))
+      .catch(err => console.error('⚠️ Error DB Background:', err));
+    return;
+
+  } catch (err) {
+    console.error('Error al crear sesión de checkout:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ ok: false, error: String(err && (err.message || err)) });
+    }
+  }
+}
+
+// Ruta neutral: evita cancel por blockers/heurísticas que detectan "checkout-session" en la URL.
+app.post('/api/pay/session', createCheckoutSessionHandler);
+// Wrapper compatibilidad: misma lógica, no eliminar por si otras páginas lo usan.
+app.post('/create-checkout-session', createCheckoutSessionHandler);
+
+// Form POST: crea sesión y responde con HTML que redirige a Stripe (evita que 302 no se siga en algunos navegadores).
+app.post('/api/pay/redirect', async function (req, res) {
+  try {
+    var body = req.body && req.body.payload ? JSON.parse(req.body.payload) : req.body;
+    if (!body || !body.line_items) {
+      return res.status(400).send('Payload inválido. Usa el campo "payload" con el JSON del carrito.');
+    }
+    var result = await createCheckoutSessionFromBody(body);
+    var stripeUrl = result.url;
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.status(200).send(
+      '<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=' +
+      stripeUrl.replace(/&/g, '&amp;') +
+      '"><script>location.replace(' + JSON.stringify(stripeUrl) + ');</script></head><body>Redirigiendo a la pasarela de pago… <a href="' +
+      stripeUrl.replace(/"/g, '&quot;').replace(/</g, '&lt;') +
+      '">Ir ahora</a>.</body></html>'
+    );
+  } catch (err) {
+    console.error('[api/pay/redirect] Error:', err);
+    if (err.statusCode) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    if (!res.headersSent) {
+      return res.status(500).json({ ok: false, error: String(err && (err.message || err)) });
+    }
   }
 });
+
+// Lógica compartida: recibe body, crea sesión Stripe, devuelve { url, sessionId, reservationId, expiresAt } o lanza.
+async function createCheckoutSessionFromBody(body) {
+  var line_items = body.line_items, items = body.items, total = body.total, customerEmail = body.customerEmail, customerName = body.customerName;
+  if (!line_items || !Array.isArray(line_items) || line_items.length === 0) {
+    throw Object.assign(new Error('El carrito está vacío o el formato de items es incorrecto'), { statusCode: 400 });
+  }
+  if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('XXXX')) {
+    throw Object.assign(new Error('Stripe no está configurado'), { statusCode: 500 });
+  }
+  var normalizedItems = line_items;
+  if (Array.isArray(line_items)) {
+    normalizedItems = line_items.map(function (item) {
+      var clone = JSON.parse(JSON.stringify(item));
+      if (clone.price_data && clone.price_data.product_data && Array.isArray(clone.price_data.product_data.images)) {
+        clone.price_data.product_data.images = clone.price_data.product_data.images.map(function (imgUrl) {
+          if (typeof imgUrl === 'string') {
+            return imgUrl.replace(/cake (\d+)\.png/g, 'cake_$1.png')
+              .replace(/cake autor (\d+)\.png/g, 'cake_autor_$1.png')
+              .replace(/([^\/]+) ([\w\d]+\.png)/g, '$1_$2');
+          }
+          return imgUrl;
+        });
+      }
+      return clone;
+    });
+  }
+  var itemsForReservation = items && Array.isArray(items) && items.length > 0
+    ? items.map(function (it) { return { productId: String(it.productId || it.id || ''), size: String(it.size || '10'), quantity: Number(it.quantity) || 1 }; })
+    : normalizedItems.map(function (li, i) { return { productId: String(i + 1), size: '10', quantity: Number(li.quantity) || 1 }; });
+  var tempSessionId = 'temp-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9);
+  var reserveResult = createStockReservation(itemsForReservation, tempSessionId);
+  if (!reserveResult.ok) {
+    throw Object.assign(new Error(reserveResult.error || 'Stock insuficiente'), { statusCode: 400 });
+  }
+  var orderTotal = total;
+  if (!orderTotal && items && items.length > 0) {
+    orderTotal = items.reduce(function (sum, item) {
+      var price = typeof item.basePrice === 'number' ? item.basePrice : parseFloat((item.price || item.basePrice || '0').replace(/[^0-9.]/g, ''));
+      return sum + (price * (item.quantity || 1));
+    }, 0);
+    orderTotal = orderTotal * 1.18;
+  }
+  var itemsForMetadata = items || [];
+  if (itemsForMetadata.length === 0 && normalizedItems) {
+    itemsForMetadata = normalizedItems.map(function (lineItem, index) {
+      return {
+        id: 'item-' + index,
+        productId: 'item-' + index,
+        name: (lineItem.price_data && lineItem.price_data.product_data && lineItem.price_data.product_data.name) || 'Producto',
+        price: 'RD$' + ((lineItem.price_data && lineItem.price_data.unit_amount) ? (lineItem.price_data.unit_amount / 100).toFixed(2) : '0'),
+        basePrice: (lineItem.price_data && lineItem.price_data.unit_amount) ? lineItem.price_data.unit_amount / 100 : 0,
+        quantity: lineItem.quantity || 1,
+        image: (lineItem.price_data && lineItem.price_data.product_data && lineItem.price_data.product_data.images && lineItem.price_data.product_data.images[0]) || '',
+        size: '', message: '', giftCard: false, addon: '', addonPrice: 0
+      };
+    });
+  }
+  var itemsCount = itemsForMetadata.length;
+  var productIds = itemsForMetadata.map(function (item) { return item.productId || item.id || ''; }).filter(Boolean).join(',');
+  var metadataTotal = orderTotal ? String(orderTotal) : '0';
+  var session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: normalizedItems,
+    mode: 'payment',
+    success_url: FRONTEND_URL + '/success.html?session_id={CHECKOUT_SESSION_ID}',
+    cancel_url: FRONTEND_URL + '/cancel.html',
+    customer_email: customerEmail || undefined,
+    metadata: { customerName: customerName || 'Cliente', customerEmail: customerEmail || '', itemsCount: String(itemsCount), productIds: productIds.substring(0, 200), orderTotal: metadataTotal },
+    locale: 'es'
+  });
+  console.log('Sesión creada exitosamente:', session.id);
+  console.log('URL de checkout:', session.url);
+  updateReservationWithStripeSessionId(tempSessionId, session.id);
+  var expiresAt = Date.now() + RESERVATION_TTL_MS;
+  return { url: session.url, sessionId: session.id, reservationId: reserveResult.reservationId, expiresAt: expiresAt };
+}
 
 // Verificar estado de la sesión (para success.html)
 app.get('/checkout-session/:sessionId', async (req, res) => {
@@ -508,13 +702,9 @@ app.get('/checkout-session/:sessionId', async (req, res) => {
 });
 
 
-// Health check
+// Health check (para validar conectividad desde el frontend)
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    message: 'The Bakery Server is running',
-    stripe_configured: !!(process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.includes('XXXX'))
-  });
+  res.json({ ok: true, status: 'ok', message: 'The Bakery Server is running' });
 });
 
 // =========================
@@ -582,8 +772,8 @@ app.post('/api/inventory', (req, res) => {
 //      PEDIDOS (ORDERS)
 // =========================
 
-// Obtener todos los pedidos
-app.get('/api/orders', (req, res) => {
+// Obtener todos los pedidos (admin)
+app.get('/api/orders', requireAdmin, (req, res) => {
   const orders = readOrders();
   res.json(orders);
 });
@@ -707,8 +897,8 @@ app.post('/api/orders', (req, res) => {
   }
 });
 
-// Actualizar estado de un pedido
-app.put('/api/orders/:id/status', (req, res) => {
+// Actualizar estado de un pedido (admin)
+app.put('/api/orders/:id/status', requireAdmin, (req, res) => {
   const id = req.params.id;
   const { status } = req.body;
 
@@ -729,7 +919,7 @@ app.put('/api/orders/:id/status', (req, res) => {
 
 // Eliminar pedido
 // DELETE /api/orders/all - Eliminar todos los pedidos
-app.delete('/api/orders/all', requireAuth, (req, res) => {
+app.delete('/api/orders/all', requireAdmin, (req, res) => {
   try {
     writeOrders([]);
     res.json({ success: true, message: 'Todos los pedidos fueron eliminados' });
@@ -739,7 +929,7 @@ app.delete('/api/orders/all', requireAuth, (req, res) => {
   }
 });
 
-app.delete('/api/orders/:id', (req, res) => {
+app.delete('/api/orders/:id', requireAdmin, (req, res) => {
   console.log("ID RECIBIDO PARA ELIMINAR:", req.params.id);
   try {
     let id = String(req.params.id || '').trim();
@@ -822,82 +1012,57 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-// Login de usuario
+// Login admin (sesión con express-session, admin-users.json)
 app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
+    return res.status(400).json({ ok: false, error: 'Email y contraseña son obligatorios' });
   }
 
-  const users = readUsers();
-  const user = users.find(u => u.email === email);
-  if (!user) {
-    return res.status(401).json({ error: 'Credenciales incorrectas' });
+  const emailNorm = String(email).trim().toLowerCase();
+  const user = findUserByEmail(emailNorm);
+
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[auth/login] admin-users file:', ADMIN_USERS_FILE);
+    console.log('[auth/login] user found by email:', !!user);
+  }
+
+  if (!user || !user.passwordHash) {
+    return res.status(401).json({ ok: false, error: 'INVALID_CREDENTIALS' });
   }
 
   try {
     const isValid = await bcrypt.compare(password, user.passwordHash);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[auth/login] bcrypt.compare result:', isValid);
+    }
     if (!isValid) {
-      return res.status(401).json({ error: 'Credenciales incorrectas' });
+      return res.status(401).json({ ok: false, error: 'INVALID_CREDENTIALS' });
     }
 
-    const secret = process.env.JWT_SECRET || 'dev_secret_change_me';
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      secret,
-      { expiresIn: '8h' }
-    );
-
-    // Cookie HTTPOnly para que el navegador la envíe automáticamente
-    res.cookie("token", token, {
-      httpOnly: true,
-      sameSite: "strict",
-      secure: false, // en local debe ser false
-    });
-    
-
-    const { passwordHash, ...safeUser } = user;
-    res.json({ user: safeUser });
+    req.session.user = { id: user.id, email: user.email, role: user.role || 'admin' };
+    res.json({ ok: true, user: req.session.user });
   } catch (err) {
     console.error('Error en login:', err);
-    res.status(500).json({ error: 'Error interno en login' });
+    res.status(500).json({ ok: false, error: 'Error interno' });
   }
 });
 
-// Ruta para verificar sesión actual (útil para proteger ADM desde el frontend)
+// Verificar sesión admin
 app.get('/api/auth/me', (req, res) => {
-  const token = req.cookies?.token;
-  if (!token) {
-    return res.status(401).json({ error: 'No autenticado' });
+  if (req.session && req.session.user) {
+    return res.json({ ok: true, user: req.session.user });
   }
-
-  try {
-    const secret = process.env.JWT_SECRET || 'dev_secret_change_me';
-    const payload = jwt.verify(token, secret);
-    const users = readUsers();
-    const user = users.find(u => u.id === payload.id);
-
-    if (!user) {
-      return res.status(401).json({ error: 'Usuario no encontrado' });
-    }
-
-    const { passwordHash, ...safeUser } = user;
-    res.json({ user: safeUser });
-  } catch (err) {
-    console.error('Error verificando token:', err);
-    return res.status(401).json({ error: 'Token inválido o expirado' });
-  }
+  res.status(401).json({ ok: false });
 });
 
-// Logout
+// Logout admin (destruir sesión)
 app.post('/api/auth/logout', (req, res) => {
-  res.clearCookie('token', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax"
+  req.session.destroy((err) => {
+    res.clearCookie('connect.sid', { path: '/' });
+    res.json({ ok: true });
   });
-  res.json({ message: 'Sesión cerrada correctamente' });
 });
 
 // =========================
@@ -905,14 +1070,14 @@ app.post('/api/auth/logout', (req, res) => {
 // =========================
 
 // Obtener lista de usuarios (solo SuperAdmin)
-app.get('/api/users', requireAuth, requireSuperAdmin, (req, res) => {
+app.get('/api/users', requireAdmin, requireSuperAdmin, (req, res) => {
   const users = readUsers();
   const safeUsers = users.map(({ passwordHash, ...rest }) => rest);
   res.json(safeUsers);
 });
 
 // Crear usuario (solo SuperAdmin)
-app.post('/api/users', requireAuth, requireSuperAdmin, async (req, res) => {
+app.post('/api/users', requireAdmin, requireSuperAdmin, async (req, res) => {
   const { name, email, password, role } = req.body;
 
   if (!name || !email || !password) {
@@ -984,13 +1149,13 @@ function writeIngredients(data) {
 }
 
 // GET /inventory/ingredients
-app.get('/inventory/ingredients', requireAuth, (req, res) => {
+app.get('/inventory/ingredients', requireAdmin, (req, res) => {
   const ingredients = readIngredients();
   res.json(ingredients);
 });
 
 // POST /inventory/ingredients/update
-app.post('/inventory/ingredients/update', requireAuth, (req, res) => {
+app.post('/inventory/ingredients/update', requireAdmin, (req, res) => {
   const updatedIngredient = req.body;
   const ingredients = readIngredients();
   
@@ -1005,7 +1170,7 @@ app.post('/inventory/ingredients/update', requireAuth, (req, res) => {
 });
 
 // POST /inventory/ingredients/add
-app.post('/inventory/ingredients/add', requireAuth, (req, res) => {
+app.post('/inventory/ingredients/add', requireAdmin, (req, res) => {
   const newIngredient = req.body;
   const ingredients = readIngredients();
   
@@ -1106,8 +1271,156 @@ function initializeCakesInventory() {
   return [];
 }
 
+// ============================================
+// RESERVAS TEMPORALES DE STOCK
+// ============================================
+const STOCK_RESERVATIONS_FILE = path.join(__dirname, 'data', 'stock-reservations.json');
+const RESERVATION_TTL_MS = 10 * 60 * 1000; // 10 minutos
+
+function readStockReservations() {
+  try {
+    if (!fs.existsSync(STOCK_RESERVATIONS_FILE)) {
+      fs.writeFileSync(STOCK_RESERVATIONS_FILE, JSON.stringify({ reservations: [] }, null, 2), 'utf8');
+      return { reservations: [] };
+    }
+    const raw = fs.readFileSync(STOCK_RESERVATIONS_FILE, 'utf8');
+    return JSON.parse(raw);
+  } catch (e) {
+    console.error('[STOCK-RESERVATION] Error leyendo reservas:', e.message);
+    return { reservations: [] };
+  }
+}
+
+function writeStockReservations(data) {
+  try {
+    fs.writeFileSync(STOCK_RESERVATIONS_FILE, JSON.stringify(data, null, 2), 'utf8');
+  } catch (e) {
+    console.error('[STOCK-RESERVATION] Error escribiendo reservas:', e.message);
+  }
+}
+
+function createStockReservation(items, tempSessionId) {
+  const cakes = readCakes();
+  const reservationsData = readStockReservations();
+
+  // BYPASS: stock infinito para pruebas (set STOCK_BYPASS=true en .env para activar)
+  const stockBypass = process.env.STOCK_BYPASS === 'true';
+  if (stockBypass) {
+    console.log('[STOCK-RESERVATION] BYPASS activo - no se valida ni descuenta stock');
+    const id = `RES-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    const expiresAt = new Date(Date.now() + RESERVATION_TTL_MS).toISOString();
+    const reservationItems = items.map(it => ({
+      productId: String(it.productId || it.id || ''),
+      size: String(it.size || '10'),
+      quantity: Number(it.quantity) || 1
+    }));
+    reservationsData.reservations.push({
+      id,
+      sessionId: tempSessionId,
+      items: reservationItems,
+      expiresAt,
+      status: 'pending'
+    });
+    writeStockReservations(reservationsData);
+    console.log('[STOCK-RESERVATION] Creada (bypass):', id, 'items:', reservationItems.length);
+    return { ok: true, reservationId: id, tempSessionId };
+  }
+
+  for (const it of items) {
+    const productId = String(it.productId || it.id || '');
+    const size = String(it.size || '10');
+    const quantity = Number(it.quantity) || 1;
+    const cake = cakes.find(c => String(c.id) === productId);
+    if (!cake || !cake.sizes) {
+      console.log('[STOCK-RESERVATION] Pastel no encontrado:', productId);
+      return { ok: false, error: 'Pastel no encontrado en inventario', productId };
+    }
+    const current = cake.sizes[size] || 0;
+    if (current < quantity) {
+      console.log('[STOCK-RESERVATION] Stock insuficiente:', cake.name, size, 'disponible:', current, 'solicitado:', quantity);
+      return { ok: false, error: 'Stock insuficiente', available: current, requested: quantity, productId, size };
+    }
+  }
+
+  for (const it of items) {
+    const productId = String(it.productId || it.id || '');
+    const size = String(it.size || '10');
+    const quantity = Number(it.quantity) || 1;
+    const cake = cakes.find(c => String(c.id) === productId);
+    cake.sizes[size] = Math.max(0, (cake.sizes[size] || 0) - quantity);
+    console.log('[STOCK-RESERVATION] Reservado:', cake.name, size, 'nuevo:', cake.sizes[size]);
+  }
+  writeCakes(cakes);
+
+  const id = `RES-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+  const expiresAt = new Date(Date.now() + RESERVATION_TTL_MS).toISOString();
+  const reservationItems = items.map(it => ({
+    productId: String(it.productId || it.id || ''),
+    size: String(it.size || '10'),
+    quantity: Number(it.quantity) || 1
+  }));
+  const reservation = {
+    id,
+    sessionId: tempSessionId,
+    items: reservationItems,
+    expiresAt,
+    status: 'pending'
+  };
+  reservationsData.reservations.push(reservation);
+  writeStockReservations(reservationsData);
+  console.log('[STOCK-RESERVATION] Creada:', id, 'items:', reservationItems.length);
+  return { ok: true, reservationId: id, tempSessionId };
+}
+
+function updateReservationWithStripeSessionId(tempSessionId, stripeSessionId) {
+  const data = readStockReservations();
+  const r = data.reservations.find(x => x.sessionId === tempSessionId);
+  if (!r) {
+    console.log('[STOCK-RESERVATION] No se encontró reserva para temp:', tempSessionId);
+    return false;
+  }
+  r.sessionId = stripeSessionId;
+  writeStockReservations(data);
+  console.log('[STOCK-RESERVATION] Actualizada sessionId:', r.id, '->', stripeSessionId);
+  return true;
+}
+
+function findReservationBySessionId(sessionId) {
+  const data = readStockReservations();
+  return data.reservations.find(r => r.sessionId === sessionId && r.status === 'pending');
+}
+
+function expireReservations() {
+  const now = Date.now();
+  const data = readStockReservations();
+  let expired = 0;
+  const cakes = readCakes();
+  for (const r of data.reservations) {
+    if (r.status !== 'pending') continue;
+    const expiresAt = new Date(r.expiresAt).getTime();
+    if (expiresAt < now) {
+      for (const it of r.items) {
+        const cake = cakes.find(c => String(c.id) === it.productId);
+        if (cake && cake.sizes) {
+          const size = String(it.size || '10');
+          const qty = Number(it.quantity) || 1;
+          cake.sizes[size] = (cake.sizes[size] || 0) + qty;
+          console.log('[STOCK-RESERVATION] Expiró, liberado:', cake.name, size, '+', qty);
+        }
+      }
+      r.status = 'expired';
+      expired++;
+    }
+  }
+  if (expired > 0) {
+    writeCakes(cakes);
+    writeStockReservations(data);
+    console.log('[STOCK-RESERVATION] Expiraron', expired, 'reservas');
+  }
+}
+
 // GET /inventory/cakes (requiere autenticación para admin)
-app.get('/inventory/cakes', requireAuth, (req, res) => {
+app.get('/inventory/cakes', requireAdmin, (req, res) => {
   const cakes = readCakes();
   res.json(cakes);
 });
@@ -1131,7 +1444,7 @@ app.get('/server/data/cake_map.json', (req, res) => {
 });
 
 // POST /inventory/cakes/update
-app.post('/inventory/cakes/update', requireAuth, (req, res) => {
+app.post('/inventory/cakes/update', requireAdmin, (req, res) => {
   const updatedCake = req.body;
   const cakes = readCakes();
   
@@ -1145,47 +1458,70 @@ app.post('/inventory/cakes/update', requireAuth, (req, res) => {
   res.json(updatedCake);
 });
 
-// POST /api/inventory/decrease - Descontar inventario al agregar al carrito
+// POST /api/inventory/decrease - Validar contra reservas o descontar (legacy sin sessionId)
 app.post('/api/inventory/decrease', (req, res) => {
   try {
-    const { productId, size, quantity = 1 } = req.body;
+    const { productId, size, quantity = 1, sessionId } = req.body;
     
     if (!productId || !size) {
       return res.status(400).json({ error: 'productId y size son requeridos' });
     }
     
+    const prodId = String(productId);
+    const sz = String(size);
+    const qty = Number(quantity) || 1;
+    
+    if (sessionId) {
+      const reservation = findReservationBySessionId(sessionId);
+      if (!reservation) {
+        console.log('[STOCK-RESERVATION] decrease: no hay reserva válida para sessionId:', sessionId);
+        return res.status(400).json({ error: 'No hay reserva válida para esta sesión' });
+      }
+      const item = reservation.items.find(it => String(it.productId) === prodId && String(it.size) === sz);
+      if (!item || (item.quantity || 0) < qty) {
+        console.log('[STOCK-RESERVATION] decrease: item no encontrado en reserva o cantidad insuficiente');
+        return res.status(400).json({ error: 'Item no encontrado en reserva' });
+      }
+      const cake = readCakes().find(c => String(c.id) === prodId);
+      const currentStock = cake && cake.sizes ? (cake.sizes[sz] || 0) : 0;
+      console.log('[STOCK-RESERVATION] decrease: validado contra reserva, stock actual:', currentStock);
+      return res.json({
+        success: true,
+        productId: prodId,
+        size: sz,
+        previousQuantity: currentStock,
+        newQuantity: currentStock,
+        cakeName: (cake && cake.name) || 'Producto'
+      });
+    }
+    
+    // Sin sessionId: solo validar stock disponible (NO descontar - el descuento real ocurre al reservar en checkout)
     const cakes = readCakes();
-    const cake = cakes.find(c => String(c.id) === String(productId));
+    const cake = cakes.find(c => String(c.id) === prodId);
     
     if (!cake || !cake.sizes) {
       console.warn('[INVENTORY UPDATE] Pastel no encontrado:', productId);
       return res.status(404).json({ error: 'Pastel no encontrado en inventario' });
     }
     
-    const currentStock = cake.sizes[size] || 0;
+    const currentStock = cake.sizes[sz] || 0;
     
-    if (currentStock < quantity) {
-      console.log('[INVENTORY UPDATE] Stock insuficiente:', cake.name, size, 'Disponible:', currentStock, 'Solicitado:', quantity);
+    if (currentStock < qty) {
+      console.log('[INVENTORY UPDATE] Stock insuficiente:', cake.name, sz, 'Disponible:', currentStock, 'Solicitado:', qty);
       return res.status(400).json({ 
         error: 'Stock insuficiente',
         available: currentStock,
-        requested: quantity
+        requested: qty
       });
     }
     
-    const newQuantity = currentStock - quantity;
-    cake.sizes[size] = Math.max(0, newQuantity);
-    
-    writeCakes(cakes);
-    
-    console.log('[INVENTORY UPDATE]', cake.name, size, newQuantity);
-    
+    console.log('[STOCK-RESERVATION] decrease sin sessionId: solo validado, stock:', currentStock);
     res.json({
       success: true,
-      productId: String(productId),
-      size: size,
+      productId: prodId,
+      size: sz,
       previousQuantity: currentStock,
-      newQuantity: cake.sizes[size],
+      newQuantity: currentStock,
       cakeName: cake.name
     });
     
@@ -1195,7 +1531,7 @@ app.post('/api/inventory/decrease', (req, res) => {
   }
 });
 
-// POST /api/inventory/increase - Recuperar inventario al eliminar del carrito
+// POST /api/inventory/increase - No-op en flujo reservas (stock se libera solo al expirar reserva)
 app.post('/api/inventory/increase', (req, res) => {
   try {
     const { productId, size, quantity = 1 } = req.body;
@@ -1213,25 +1549,55 @@ app.post('/api/inventory/increase', (req, res) => {
     }
     
     const currentStock = cake.sizes[size] || 0;
-    const newQuantity = currentStock + quantity;
-    cake.sizes[size] = newQuantity;
-    
-    writeCakes(cakes);
-    
-    console.log('[INVENTORY UPDATE]', cake.name, size, newQuantity);
+    console.log('[STOCK-RESERVATION] increase: no-op (stock no se descontó en add-to-cart), actual:', currentStock);
     
     res.json({
       success: true,
       productId: String(productId),
       size: size,
       previousQuantity: currentStock,
-      newQuantity: cake.sizes[size],
+      newQuantity: currentStock,
       cakeName: cake.name
     });
     
   } catch (error) {
     console.error('Error al recuperar inventario:', error);
     res.status(500).json({ error: 'Error al recuperar inventario', message: error.message });
+  }
+});
+
+// POST /api/inventory/confirm-payment - Marcar reserva como confirmada tras pago exitoso
+app.post('/api/inventory/confirm-payment', (req, res) => {
+  try {
+    const { sessionId } = req.body;
+    
+    if (!sessionId) {
+      return res.status(400).json({ error: 'sessionId es requerido' });
+    }
+    
+    const reservation = findReservationBySessionId(sessionId);
+    if (!reservation) {
+      console.log('[STOCK-RESERVATION] confirm-payment: reserva no encontrada o ya expirada/confirmada:', sessionId);
+      return res.status(404).json({ error: 'Reserva no encontrada o expirada' });
+    }
+    
+    reservation.status = 'confirmed';
+    const data = readStockReservations();
+    const idx = data.reservations.findIndex(r => r.id === reservation.id);
+    if (idx >= 0) data.reservations[idx] = reservation;
+    writeStockReservations(data);
+    
+    console.log('[STOCK-RESERVATION] Pago confirmado:', reservation.id, 'sessionId:', sessionId);
+    
+    res.json({
+      success: true,
+      reservationId: reservation.id,
+      message: 'Reserva confirmada'
+    });
+    
+  } catch (error) {
+    console.error('[STOCK-RESERVATION] Error confirm-payment:', error);
+    res.status(500).json({ error: 'Error al confirmar pago', message: error.message });
   }
 });
 
@@ -1338,8 +1704,91 @@ app.get('/api/stock', async (req, res) => {
   }
 });
 
+// GET /api/stock/low - productos con stock bajo (inventory_cakes)
+const STOCK_ALERTS_FILE = path.join(__dirname, 'data', 'stock-alerts.json');
+const LOW_STOCK_THRESHOLD = 3;
+
+function readStockAlerts() {
+  try {
+    if (!fs.existsSync(STOCK_ALERTS_FILE)) {
+      fs.writeFileSync(STOCK_ALERTS_FILE, JSON.stringify({ threshold: 3, lastAlert: {}, alerts: [] }, null, 2), 'utf8');
+      return { threshold: 3, lastAlert: {}, alerts: [] };
+    }
+    const raw = fs.readFileSync(STOCK_ALERTS_FILE, 'utf8');
+    return JSON.parse(raw);
+  } catch (e) {
+    console.error('[STOCK-ALERT] Error leyendo alertas:', e.message);
+    return { threshold: 3, lastAlert: {}, alerts: [] };
+  }
+}
+
+function writeStockAlerts(data) {
+  try {
+    fs.writeFileSync(STOCK_ALERTS_FILE, JSON.stringify(data, null, 2), 'utf8');
+  } catch (e) {
+    console.error('[STOCK-ALERT] Error escribiendo alertas:', e.message);
+  }
+}
+
+function getLowStockAlerts(threshold = LOW_STOCK_THRESHOLD) {
+  const cakes = readCakes();
+  const alerts = [];
+  for (const cake of cakes) {
+    if (!cake.sizes || typeof cake.sizes !== 'object') continue;
+    for (const [size, qty] of Object.entries(cake.sizes)) {
+      const current = Number(qty) || 0;
+      if (current < threshold) {
+        alerts.push({
+          productId: String(cake.id),
+          name: cake.name || 'Producto',
+          size: String(size),
+          current: current,
+          threshold: threshold
+        });
+      }
+    }
+  }
+  return alerts;
+}
+
+app.get('/api/stock/low', (req, res) => {
+  try {
+    const threshold = Number(req.query.threshold) || LOW_STOCK_THRESHOLD;
+    const alerts = getLowStockAlerts(threshold);
+    res.json(alerts);
+  } catch (e) {
+    console.error('[STOCK-ALERT] Error GET /api/stock/low:', e.message);
+    res.status(500).json({ error: 'Error al cargar alertas de stock' });
+  }
+});
+
+function checkLowStockAndAlert() {
+  const alerts = getLowStockAlerts();
+  if (alerts.length === 0) return;
+  const data = readStockAlerts();
+  const now = Date.now();
+  const cooldownMs = 2 * 60 * 60 * 1000; // 2 horas
+  const keysToAlert = [];
+  for (const a of alerts) {
+    const key = `${a.productId}-${a.size}`;
+    const last = data.lastAlert[key] ? new Date(data.lastAlert[key]).getTime() : 0;
+    if (now - last >= cooldownMs) keysToAlert.push(key);
+  }
+  if (keysToAlert.length === 0) return;
+  const newAlerts = alerts.filter(a => keysToAlert.includes(`${a.productId}-${a.size}`));
+  data.alerts = data.alerts || [];
+  const entry = { timestamp: new Date().toISOString(), items: newAlerts };
+  data.alerts.push(entry);
+  if (data.alerts.length > 100) data.alerts = data.alerts.slice(-100);
+  for (const a of newAlerts) {
+    data.lastAlert[`${a.productId}-${a.size}`] = new Date().toISOString();
+  }
+  writeStockAlerts(data);
+  console.log('[STOCK-ALERT] Alertas guardadas:', newAlerts.length, newAlerts.map(a => a.name + ' ' + a.size).join(', '));
+}
+
 // PUT /api/stock - actualiza stock (require auth admin)
-app.put('/api/stock', requireAuth, (req, res) => {
+app.put('/api/stock', requireAdmin, (req, res) => {
   try {
     const updates = normalizeStockPayload(req.body);
     if (!updates) return res.status(400).json({ error: 'Stock inválido: valores deben ser números >= 0' });
@@ -1461,9 +1910,9 @@ app.post('/api/reservations/expire', async (req, res) => {
   }
 });
 
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`\n🍰 The Bakery Server running on http://localhost:${PORT}`);
+// Iniciar servidor (0.0.0.0 = todas las interfaces)
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`\n🍰 The Bakery Server running on http://127.0.0.1:${PORT} (listening on 0.0.0.0:${PORT})`);
   console.log(`📦 Frontend URL: ${FRONTEND_URL}`);
   console.log(`💳 Stripe configured: ${!!(process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.includes('XXXX'))}\n`);
   
@@ -1471,6 +1920,26 @@ app.listen(PORT, () => {
     console.log('⚠️  ADVERTENCIA: Stripe no está configurado.');
     console.log('   Por favor, configura tus claves en server/.env\n');
   }
+
+  // Cron: expirar reservas temporales cada 2 minutos
+  setInterval(() => {
+    try {
+      expireReservations();
+    } catch (e) {
+      console.error('[STOCK-RESERVATION] Error en cron expire:', e.message);
+    }
+  }, 2 * 60 * 1000);
+  console.log('[STOCK-RESERVATION] Cron expiración reservas: cada 2 min');
+
+  // Cron: verificar stock bajo cada 5 minutos
+  setInterval(() => {
+    try {
+      checkLowStockAndAlert();
+    } catch (e) {
+      console.error('[STOCK-ALERT] Error en cron stock bajo:', e.message);
+    }
+  }, 5 * 60 * 1000);
+  console.log('[STOCK-ALERT] Cron stock bajo: cada 5 min');
 });
 
 

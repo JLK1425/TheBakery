@@ -1,4 +1,10 @@
 {
-    "kiroAgent.configureMCP": "Disabled",
-    "liveServer.settings.port": 5502
+  "kiroAgent.configureMCP": "Disabled",
+  "liveServer.settings.port": 5503,
+  "liveServer.settings.ignoreFiles": [
+    "server/**",
+    "server/data/**",
+    ".env",
+    "**/*.json.tmp.*"
+  ]
 }

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Test Simple</title>
+</head>
+<body>
+  <h1>Test Mínimo</h1>
+  <button onclick="test()">Click Aquí</button>
+  <pre id="log"></pre>
+
+  <script>
+    function log(msg) {
+      document.getElementById('log').textContent += msg + '\n';
+      console.log(msg);
+    }
+
+    async function test() {
+      log('1. Click detectado');
+      
+      try {
+        log('2. Haciendo fetch...');
+        const res = await fetch('http://127.0.0.1:3000/health');
+        log('3. Status: ' + res.status);
+        const text = await res.text();
+        log('4. Response: ' + text);
+      } catch (e) {
+        log('ERROR: ' + e.message);
+      }
+    }
+    
+    log('Script cargado correctamente');
+  </script>
+</body>
+</html>

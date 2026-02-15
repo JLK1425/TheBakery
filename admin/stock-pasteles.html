@@ -5,6 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stock de Pasteles - The Bakery by Fresarte</title>
+  <script src="../TheBakery/assets/js/auth-guard.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../TheBakery/assets/css/style.css">
   <link rel="stylesheet" href="../TheBakery/assets/css/admin-sidebar.css">
   <style>
@@ -65,22 +67,33 @@
     </div>
   </header>
 
+  <div class="admin-content-wrapper">
   <main class="admin-page">
     <div class="admin-header" style="padding: 2rem 24px; background:#fff; border-bottom: 2px solid #e5e7eb; margin-bottom: 2rem;">
       <h1 class="admin-page-title">Stock de Pasteles</h1>
     </div>
     <div class="stock-container">
       <p style="color:var(--muted); margin-bottom:1rem;">Actualiza la cantidad disponible por producto. Este stock se valida al reservar fecha y hora.</p>
+      <div class="flex flex-wrap gap-2 mb-4">
+        <button type="button" class="filter-btn active px-4 py-2 rounded-lg font-medium text-sm bg-gray-200 text-gray-800" data-filter="all">Todos</button>
+        <button type="button" class="filter-btn px-4 py-2 rounded-lg font-medium text-sm bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="low">Stock Bajo</button>
+        <button type="button" class="filter-btn px-4 py-2 rounded-lg font-medium text-sm bg-gray-100 text-gray-600 hover:bg-gray-200" data-filter="zero">Sin Stock</button>
+      </div>
+      <div id="bulkActions" class="hidden mb-4 p-4 bg-gray-50 rounded-lg flex flex-wrap items-center gap-3">
+        <span class="text-sm font-medium text-gray-700">Seleccionados: <span id="selectedCount">0</span></span>
+        <input type="number" id="bulkStockInput" min="0" placeholder="Stock para aplicar" class="w-32 px-3 py-2 border-2 border-gray-200 rounded-lg font-semibold text-center" />
+        <button type="button" id="bulkUpdateBtn" class="px-4 py-2 bg-rose-500 text-white rounded-lg font-semibold hover:bg-rose-600">Actualizar seleccionados</button>
+      </div>
       <div id="stockTableContainer">
         <div class="loading">Cargando...</div>
       </div>
       <button type="button" class="btn-save-all" id="saveAllBtn" style="display:none">Actualizar todo</button>
     </div>
   </main>
+  </div>
 
   <footer class="footer"><div class="container"><div class="brand">The Bakery <span class="pink">by Fresarte</span></div><div class="muted" style="margin-top:10px">© 2025 The Bakery by Fresarte.</div></div></footer>
 
-  <script src="../TheBakery/assets/js/auth-guard.js"></script>
   <script src="../TheBakery/assets/js/admin-stock-pasteles.js"></script>
   <script>
     (function(){
@@ -90,7 +103,7 @@
       if(o)o.onclick=function(){ s.classList.remove('open'); o.classList.remove('active'); };
     })();
     document.getElementById('logoutBtn').addEventListener('click',async function(){
-      try{ await fetch('http://localhost:3000/api/auth/logout',{method:'POST',credentials:'include'}); window.location.href='login.html'; }catch(e){ console.error(e); }
+      try{ await fetch('http://127.0.0.1:3000/api/auth/logout',{method:'POST',credentials:'include'}); window.location.href='login.html'; }catch(e){ console.error(e); }
     });
   </script>
 </body>

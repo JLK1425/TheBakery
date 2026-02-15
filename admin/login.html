@@ -103,12 +103,12 @@
     <h1 class="login-title">Acceso Administrativo</h1>
     <p class="login-subtitle">Panel exclusivo para colaboradores autorizados</p>
 
-    <div id="errorBox" class="error-message"></div>
-
-    <input type="email" id="email" class="login-input" placeholder="Correo electrónico" autocomplete="off">
-    <input type="password" id="password" class="login-input" placeholder="Contraseña">
-
-    <button class="login-btn" id="loginBtn">Iniciar Sesión</button>
+    <form id="loginForm">
+      <div id="loginError" class="error-message"></div>
+      <input type="email" id="email" class="login-input" placeholder="Correo electrónico" autocomplete="email" required>
+      <input type="password" id="password" class="login-input" placeholder="Contraseña" autocomplete="current-password" required>
+      <button type="submit" class="login-btn" id="loginBtn">Iniciar Sesión</button>
+    </form>
   </div>
 
   <script src="../TheBakery/assets/js/login.js"></script>

@@ -1,0 +1,72 @@
+{
+  "threshold": 3,
+  "lastAlert": {
+    "1-10": "2026-02-13T18:15:57.538Z",
+    "2-10": "2026-02-13T18:15:57.538Z",
+    "4-10": "2026-02-15T13:49:01.344Z"
+  },
+  "alerts": [
+    {
+      "timestamp": "2026-02-13T18:15:57.538Z",
+      "items": [
+        {
+          "productId": "1",
+          "name": "Pastel de Coco",
+          "size": "10",
+          "current": 1,
+          "threshold": 3
+        },
+        {
+          "productId": "2",
+          "name": "Matcha Strawberry",
+          "size": "10",
+          "current": 1,
+          "threshold": 3
+        },
+        {
+          "productId": "4",
+          "name": "Pastel de Fresas",
+          "size": "10",
+          "current": 1,
+          "threshold": 3
+        }
+      ]
+    },
+    {
+      "timestamp": "2026-02-13T20:19:36.578Z",
+      "items": [
+        {
+          "productId": "4",
+          "name": "Pastel de Fresas",
+          "size": "10",
+          "current": 1,
+          "threshold": 3
+        }
+      ]
+    },
+    {
+      "timestamp": "2026-02-14T18:10:42.581Z",
+      "items": [
+        {
+          "productId": "4",
+          "name": "Pastel de Fresas",
+          "size": "10",
+          "current": 1,
+          "threshold": 3
+        }
+      ]
+    },
+    {
+      "timestamp": "2026-02-15T13:49:01.344Z",
+      "items": [
+        {
+          "productId": "4",
+          "name": "Pastel de Fresas",
+          "size": "10",
+          "current": 1,
+          "threshold": 3
+        }
+      ]
+    }
+  ]
+}

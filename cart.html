@@ -1,243 +1,141 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carrito de Compras - The Bakery by Fresarte</title>
+  <title>Carrito - The Bakery</title>
   <link rel="stylesheet" href="TheBakery/assets/css/style.css">
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .cart-page {
       min-height: 100vh;
-      padding: 100px 1rem 2rem;
+      padding: 120px 20px 40px;
       background: #f9fafb;
     }
     .cart-container {
       max-width: 1200px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 2rem;
-    }
-    @media (min-width: 900px) {
-      .cart-container {
-        grid-template-columns: 2fr 1fr;
-      }
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
     }
     .cart-section {
-      background: #fff;
-      border-radius: var(--radius);
-      padding: 2rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    .cart-header {
+    .cart-item {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 2px solid #e5e7eb;
-    }
-    .cart-header h1 {
-      margin: 0;
-      font-size: 1.75rem;
-    }
-    .cart-item-card {
-      display: flex;
-      gap: 1.5rem;
-      padding: 1.5rem;
+      gap: 20px;
+      padding: 20px;
       border: 1px solid #e5e7eb;
-      border-radius: var(--radius);
-      margin-bottom: 1rem;
-      transition: .3s box-shadow;
+      border-radius: 8px;
+      margin-bottom: 15px;
     }
-    .cart-item-card:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,.1);
-    }
-    .cart-item-image {
-      width: 120px;
-      height: 120px;
+    .cart-item img {
+      width: 100px;
+      height: 100px;
       object-fit: cover;
-      border-radius: var(--radius);
-      flex-shrink: 0;
+      border-radius: 8px;
     }
     .cart-item-details {
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
     }
     .cart-item-name {
       font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--fg);
-    }
-    .cart-item-options {
-      font-size: 0.9rem;
-      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 5px;
     }
     .cart-item-price {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--accent);
+      color: #ec4899;
+      font-size: 1.2rem;
+      font-weight: 700;
     }
-    .cart-item-controls {
+    .quantity-controls {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-    .quantity-control {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 0.5rem;
-    }
-    .checkout-buttons-wrapper {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .reservation-confirmed-block {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .reservation-confirmed-label {
-      font-size: 0.9rem;
-      color: var(--fg);
-      margin: 0;
-      font-weight: 500;
-    }
-    .btn-secondary {
-      background: #f3f4f6;
-      color: var(--fg);
-      border: 1px solid #e5e7eb;
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      align-self: flex-start;
-    }
-    .btn-secondary:hover {
-      background: #e5e7eb;
+      gap: 10px;
+      margin-top: 10px;
     }
     .quantity-btn {
       width: 32px;
       height: 32px;
-      border: none;
-      background: #f9fafb;
+      border: 1px solid #ddd;
+      background: white;
       border-radius: 4px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      transition: .3s background;
+      font-size: 18px;
     }
     .quantity-btn:hover {
-      background: var(--accent);
-      color: #fff;
+      background: #f3f4f6;
     }
-    .quantity-value {
-      min-width: 40px;
-      text-align: center;
-      font-weight: 600;
-    }
-    .remove-item-btn {
-      background: transparent;
-      border: none;
-      color: #ef4444;
-      cursor: pointer;
-      padding: 0.5rem;
-      font-size: 0.9rem;
-      transition: .3s color;
-    }
-    .remove-item-btn:hover {
+    .remove-btn {
+      background: #fee2e2;
       color: #dc2626;
-    }
-    .cart-summary {
-      background: #fff;
-      border-radius: var(--radius);
-      padding: 2rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,.1);
-      position: sticky;
-      top: 100px;
-      height: fit-content;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: auto;
     }
     .summary-row {
       display: flex;
       justify-content: space-between;
-      padding: 0.75rem 0;
+      padding: 12px 0;
       border-bottom: 1px solid #e5e7eb;
-    }
-    .summary-row:last-of-type {
-      border-bottom: none;
     }
     .summary-total {
       font-size: 1.5rem;
       font-weight: 800;
-      color: var(--fg);
-      margin-top: 1rem;
+      color: #1f2937;
+      margin-top: 15px;
     }
     .checkout-btn {
       width: 100%;
-      margin-top: 1.5rem;
-      padding: 1rem;
+      background: #ec4899;
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 8px;
       font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    .checkout-btn:hover {
+      background: #db2777;
+    }
+    .checkout-btn:disabled {
+      background: #d1d5db;
+      cursor: not-allowed;
     }
     .empty-cart {
       text-align: center;
-      padding: 4rem 2rem;
-    }
-    .empty-cart h2 {
-      margin-bottom: 1rem;
-    }
-    .empty-cart p {
-      color: var(--muted);
-      margin-bottom: 2rem;
-    }
-    .continue-shopping {
-      display: inline-block;
-      padding: 0.75rem 2rem;
-      background: var(--accent);
-      color: #fff;
-      text-decoration: none;
-      border-radius: 999px;
-      font-weight: 600;
-      transition: .3s background;
-    }
-    .continue-shopping:hover {
-      background: var(--accent-600);
+      padding: 60px 20px;
     }
   </style>
 </head>
-
-<body id="bakery-landing" class="is-white">
+<body>
   <!-- NAV -->
   <nav class="nav" id="nav">
     <div class="container wrap">
       <div class="brand">
-        <a href="index-original.html" style="display:inline-block">
-          <img src="TheBakery/assets/imagenes/logo.png" alt="The Bakery by Fresarte" style="height:36px">
+        <a href="index-original.html">
+          <img src="TheBakery/assets/imagenes/logo.png" alt="The Bakery" style="height:36px">
         </a>
       </div>
       <div class="nav-center">
-        <div class="links" id="navLinks">
-          <a href="index-original.html#home" class="nav-link">Inicio</a>
-          <a href="pasteles-de-autor.html" class="nav-link">Pasteles de Autor</a>
-          <a href="index-original.html#reviews" class="nav-link">Reseñas</a>
-          <a href="index-original.html#about" class="nav-link">Nosotros</a>
-          <a href="index-original.html#contact" class="nav-link">Contacto</a>
+        <div class="links">
+          <a href="index-original.html#home">Inicio</a>
+          <a href="pasteles-de-autor.html">Pasteles de Autor</a>
+          <a href="index-original.html#reviews">Reseñas</a>
+          <a href="index-original.html#about">Nosotros</a>
+          <a href="index-original.html#contact">Contacto</a>
         </div>
       </div>
       <div class="nav-actions">
-        <!-- Cart -->
-        <button class="nav-action-btn" id="cartBtn" onclick="window.location.href='cart.html'">
-          <svg class="icon-action" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="nav-action-btn" onclick="window.location.href='cart.html'">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="9" cy="21" r="1"></circle>
             <circle cx="20" cy="21" r="1"></circle>
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
@@ -249,136 +147,43 @@
     </div>
   </nav>
 
-  <!-- Cart Page Content -->
+  <!-- CART PAGE -->
   <main class="cart-page">
     <div class="cart-container">
-      <!-- Cart Items -->
+      <!-- Items del carrito -->
       <div class="cart-section">
-        <div class="cart-header">
-          <h1>Tu Carrito</h1>
-          <span id="itemCount">0 productos</span>
-        </div>
-        <div id="cartItemsContainer">
-          <!-- Items will be loaded here -->
+        <h1 style="margin-top:0">Tu Carrito</h1>
+        <div id="cartItems">
+          <!-- Se llenará con JavaScript -->
         </div>
       </div>
 
-      <!-- Cart Summary -->
-      <div class="cart-summary">
-        <h2 style="margin-top:0; margin-bottom:1.5rem">Resumen del Pedido</h2>
+      <!-- Resumen -->
+      <div class="cart-section">
+        <h2 style="margin-top:0">Resumen del Pedido</h2>
+
         <div class="summary-row">
           <span>Subtotal</span>
           <span id="subtotal">RD$0.00</span>
         </div>
+
         <div class="summary-row">
           <span>Impuestos (18%)</span>
           <span id="taxes">RD$0.00</span>
         </div>
+
         <div class="summary-row summary-total">
           <span>Total</span>
           <span id="total">RD$0.00</span>
         </div>
-        <div class="checkout-buttons-wrapper">
-          <button type="button" class="btn btn-primary checkout-btn" id="openReservationModalBtn">
-            Reservar fecha y hora
-          </button>
-          <div class="reservation-confirmed-block" id="reservationConfirmedBlock" style="display:none">
-            <p class="reservation-confirmed-label" id="reservationConfirmedLabel"></p>
-            <button type="button" class="btn btn-secondary" id="cambiarReservaBtn">Cambiar reserva</button>
-          </div>
-          <button type="button" class="btn btn-primary checkout-btn" id="checkoutBtn" title="Debes reservar fecha y hora antes de continuar al pago">
-            Continuar a pago
-          </button>
-          <p class="reservation-hint" id="reservationHint" style="display:none">Debes reservar fecha y hora antes de continuar al pago.</p>
-        </div>
-        <a href="index-original.html" class="continue-shopping" style="display:block; text-align:center; margin-top:1rem">
-          Continuar Comprando
-        </a>
+
+        <button id="checkoutBtn" class="checkout-btn" type="button">
+          Continuar a pago
+        </button>
       </div>
     </div>
   </main>
 
-  <!-- Modal: Reserva tu fecha y hora -->
-  <div id="reservationModal" class="fixed inset-0 z-[1000] hidden overflow-y-auto flex items-center justify-center p-4" aria-modal="true">
-    <div class="fixed inset-0 bg-black/40" id="reservationModalBackdrop"></div>
-    <div class="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl mx-auto">
-        <div class="sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
-          <h2 class="text-xl font-semibold text-gray-900">Reserva tu fecha y hora</h2>
-          <button type="button" id="closeReservationModal" class="rounded-lg p-2 text-xl leading-none text-gray-500 hover:bg-gray-100 hover:text-gray-700" aria-label="Cerrar">×</button>
-        </div>
-        <div class="p-6 space-y-6">
-          <!-- Tabs -->
-          <div class="flex rounded-xl bg-gray-100 p-1">
-            <button type="button" id="tabInvitado" class="tab-reservation flex-1 rounded-lg py-2.5 text-sm font-medium transition px-4 bg-white shadow text-gray-900" data-tab="invitado">Invitado</button>
-            <button type="button" id="tabRegistrarme" class="tab-reservation flex-1 rounded-lg py-2.5 text-sm font-medium transition px-4 text-gray-600" data-tab="registrarme">Registrarme</button>
-          </div>
-
-          <!-- Panel Invitado -->
-          <div id="panelInvitado" class="panel-reservation space-y-4">
-            <div class="grid gap-4 sm:grid-cols-1">
-              <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Nombre</label>
-                <input type="text" id="invitadoName" placeholder="Tu nombre" class="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
-              </div>
-              <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Email</label>
-                <input type="email" id="invitadoEmail" placeholder="email@ejemplo.com" class="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
-              </div>
-              <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Teléfono</label>
-                <input type="tel" id="invitadoPhone" placeholder="8095551234" class="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
-              </div>
-            </div>
-          </div>
-
-          <!-- Panel Registrarme -->
-          <div id="panelRegistrarme" class="panel-reservation hidden space-y-4">
-            <div id="registrarmeForm" class="grid gap-4 sm:grid-cols-1">
-              <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Nombre</label>
-                <input type="text" id="registerName" placeholder="Tu nombre" class="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
-              </div>
-              <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Email</label>
-                <input type="email" id="registerEmail" placeholder="email@ejemplo.com" class="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
-              </div>
-              <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Teléfono</label>
-                <input type="tel" id="registerPhone" placeholder="8095551234" class="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
-              </div>
-              <div>
-                <label class="mb-1 block text-sm font-medium text-gray-700">Últimos 4 dígitos de cédula</label>
-                <input type="text" id="registerCedula" placeholder="1234" maxlength="4" pattern="[0-9]{4}" class="w-full rounded-xl border border-gray-300 px-4 py-2.5 focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
-              </div>
-              <button type="button" id="btnCrearPerfil" class="btn btn-primary w-full sm:w-auto">Crear perfil</button>
-            </div>
-            <div id="registradoBadge" class="hidden rounded-xl bg-green-50 px-4 py-3 text-green-800 text-sm font-medium">Registrado como <span id="registradoName"></span></div>
-          </div>
-
-          <!-- Calendario grid -->
-          <div>
-            <h3 class="mb-3 text-base font-semibold text-gray-900">Disponibilidad</h3>
-            <div id="availabilityError" class="hidden mb-3 rounded-xl bg-red-50 px-4 py-3 text-red-700 text-sm"></div>
-            <div id="availabilityLoading" class="rounded-xl bg-gray-50 px-4 py-8 text-center text-gray-500">Cargando disponibilidad…</div>
-            <div id="availabilityGrid" class="hidden space-y-4"></div>
-          </div>
-
-          <!-- Reservar horario -->
-          <div class="flex flex-wrap items-center gap-4 border-t border-gray-200 pt-4">
-            <div id="holdSuccess" class="hidden flex-1 rounded-xl bg-green-50 px-4 py-3 text-green-800 text-sm"></div>
-            <div id="holdError" class="hidden flex-1 rounded-xl bg-red-50 px-4 py-3 text-red-800 text-sm"></div>
-            <button type="button" id="btnReservarHorario" class="btn btn-primary" disabled>Reservar horario</button>
-          </div>
-        </div>
-    </div>
-  </div>
-
-  <script src="TheBakery/assets/js/auth.js"></script>
-  <script src="TheBakery/assets/js/script.js"></script>
   <script src="TheBakery/assets/js/cart.js"></script>
-  <script src="TheBakery/assets/js/reservations-ui.js"></script>
 </body>
-
 </html>
-
-

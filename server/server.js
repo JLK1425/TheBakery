@@ -9,7 +9,9 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const fsPromises = require('fs').promises;
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+// === STRIPE DESACTIVADO (usando CardNet) ===
+// const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const cardnet = require('./lib/cardnet');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -23,21 +25,9 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://127.0.0.1:5503';
 const TEST_MODE = process.env.TEST_MODE === 'true';
 const IS_PROD = process.env.NODE_ENV === 'production';
 
-// CORS: orígenes permitidos (Live Server / herramientas de desarrollo)
-const allowedOrigins = [
-  'http://localhost:5500',
-  'http://127.0.0.1:5500',
-  'http://localhost:5503',
-  'http://127.0.0.1:5503'
-];
+// CORS: aplicado a todas las rutas (incluye /api y /public/inventory/cakes)
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: ['http://127.0.0.1:5503', 'http://localhost:5503', 'http://localhost:5500', 'http://127.0.0.1:5500'],
   credentials: true
 }));
 
@@ -69,6 +59,16 @@ app.use(function(req, res, next) {
     console.log('[REQ]', req.method, req.path, 'status=', res.statusCode);
   });
   next();
+});
+
+// CardNet: recibe POST de CardNet y redirige a frontend (Live Server no acepta POST)
+app.post('/cardnet/return', function (req, res) {
+  console.log('[CARDNET] POST /cardnet/return -> redirect a success.html');
+  res.redirect(FRONTEND_URL + '/success.html?source=cardnet');
+});
+app.post('/cardnet/cancel', function (req, res) {
+  console.log('[CARDNET] POST /cardnet/cancel -> redirect a cancel.html');
+  res.redirect(FRONTEND_URL + '/cancel.html?source=cardnet');
 });
 
 // Inventario
@@ -369,335 +369,123 @@ app.post('/debug/echo', (req, res) => {
   res.json({ ok: true, body: req.body });
 });
 
+// === STRIPE DESACTIVADO (usando CardNet) ===
+/*
 // Handler compartido: misma lógica para /api/pay/session y /create-checkout-session (wrapper compatibilidad).
-// Ruta neutral /api/pay/session evita que blockers/heurísticas cancelen requests con "checkout-session" en la URL.
 async function createCheckoutSessionHandler(req, res) {
-  console.log('🚀 [DEBUG] Solicitud recibida en /create-checkout-session');
-  try {
-    console.log('[CHECKOUT] Request body:', JSON.stringify({ line_items_count: req.body?.line_items?.length, items_count: req.body?.items?.length, total: req.body?.total }, null, 2));
-    console.log('[CHECKOUT] User session:', req.session ? (req.session.user ? 'logged' : 'anonymous') : 'none');
-    console.log('=== INICIO CHECKOUT SESSION ===');
-    const { line_items, items, total, customerEmail, customerName } = req.body;
-
-    console.log('Datos recibidos:', {
-      line_items_count: line_items?.length || 0,
-      items_count: items?.length || 0,
-      total: total,
-      customerEmail: customerEmail
-    });
-
-    // Validar que tenemos line_items
-    if (!line_items || !Array.isArray(line_items) || line_items.length === 0) {
-      console.error('Error: line_items vacío o inválido');
-      return res.status(400).json({ error: 'El carrito está vacío o el formato de items es incorrecto' });
-    }
-
-    // Validar que tenemos la clave de Stripe
-    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('XXXX')) {
-      console.error('Error: Stripe no configurado');
-      return res.status(500).json({ 
-        error: 'Stripe no está configurado. Por favor, configura tus claves en el archivo .env' 
-      });
-    }
-
-    console.log('Stripe configurado correctamente');
-
-    // Normalizar URLs de imágenes en line_items (antes de reserva)
-    let normalizedItems = line_items;
-    if (line_items && Array.isArray(line_items)) {
-      normalizedItems = line_items.map((item, index) => {
-        const clone = JSON.parse(JSON.stringify(item));
-        if (clone.price_data?.product_data?.images && Array.isArray(clone.price_data.product_data.images)) {
-          clone.price_data.product_data.images = clone.price_data.product_data.images.map(imgUrl => {
-            if (typeof imgUrl === 'string') {
-              return imgUrl.replace(/cake (\d+)\.png/g, 'cake_$1.png')
-                .replace(/cake autor (\d+)\.png/g, 'cake_autor_$1.png')
-                .replace(/([^\/]+) ([\w\d]+\.png)/g, '$1_$2');
-            }
-            return imgUrl;
-          });
-        }
-        return clone;
-      });
-    }
-
-    // Extraer items para reserva (productId, size, quantity) - el carrito envía items con estos campos
-    const itemsForReservation = items && Array.isArray(items) && items.length > 0
-      ? items.map(it => ({ productId: String(it.productId || it.id || ''), size: String(it.size || '10'), quantity: Number(it.quantity) || 1 }))
-      : normalizedItems.map((li, i) => ({
-          productId: String(i + 1),
-          size: '10',
-          quantity: Number(li.quantity) || 1
-        }));
-
-    const tempSessionId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-    const reservationData = { items: itemsForReservation, tempSessionId };
-    console.log('[STOCK-RESERVATION] Creating reservation:', JSON.stringify(reservationData));
-    const reserveResult = createStockReservation(itemsForReservation, tempSessionId);
-    if (!reserveResult.ok) {
-      console.log('[STOCK-RESERVATION] Reserva fallida:', reserveResult.error);
-      return res.status(400).json({ error: reserveResult.error || 'Stock insuficiente' });
-    }
-
-    // Calcular total si no se proporcionó
-    let orderTotal = total;
-    if (!orderTotal && items && items.length > 0) {
-      orderTotal = items.reduce((sum, item) => {
-        const price = typeof item.basePrice === 'number' 
-          ? item.basePrice 
-          : parseFloat((item.price || item.basePrice || '0').replace(/[^0-9.]/g, ''));
-        return sum + (price * (item.quantity || 1));
-      }, 0);
-      orderTotal = orderTotal * 1.18; // Agregar ITBIS
-    }
-
-    console.log('Line items normalizados:', normalizedItems.length);
-
-    // Preparar items para metadata (usar items del body o construir desde line_items)
-    let itemsForMetadata = items || [];
-    if (itemsForMetadata.length === 0 && normalizedItems) {
-      // Construir items desde line_items como fallback
-      itemsForMetadata = normalizedItems.map((lineItem, index) => ({
-        id: `item-${index}`,
-        productId: `item-${index}`,
-        name: lineItem.price_data?.product_data?.name || 'Producto',
-        price: `RD$${(lineItem.price_data.unit_amount / 100).toFixed(2)}`,
-        basePrice: lineItem.price_data.unit_amount / 100,
-        quantity: lineItem.quantity || 1,
-        image: lineItem.price_data?.product_data?.images?.[0] || '',
-        size: '',
-        message: '',
-        giftCard: false,
-        addon: '',
-        addonPrice: 0
-      }));
-    }
-
-    // Preparar metadata reducido para Stripe (máximo 500 caracteres por campo)
-    // Solo enviar resumen corto, no el JSON completo
-    const itemsCount = itemsForMetadata.length;
-    const productIds = itemsForMetadata.map(item => item.productId || item.id || '').filter(id => id).join(',');
-    const metadataTotal = orderTotal ? orderTotal.toString() : '0';
-
-    // Crear sesión de checkout con line_items directamente de Stripe
-    console.log('Creando sesión de Stripe...');
-    console.log('Primer line_item ejemplo:', JSON.stringify(normalizedItems[0], null, 2));
-    console.log('Metadata reducido:', { itemsCount, productIds: productIds.substring(0, 50) + '...', total: metadataTotal });
-    
-    // 1. Crear sesión de Stripe
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: normalizedItems,
-      mode: 'payment',
-      success_url: `${FRONTEND_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${FRONTEND_URL}/cancel.html`,
-      customer_email: customerEmail || undefined,
-      metadata: {
-        customerName: customerName || 'Cliente',
-        customerEmail: customerEmail || '',
-        itemsCount: itemsCount.toString(),
-        productIds: productIds.substring(0, 200),
-        orderTotal: metadataTotal
-      },
-      locale: 'es'
-    });
-
-    console.log('✅ Stripe Session:', session.url);
-
-    // 2. Responder al frontend de inmediato (no esperar a la DB)
-    res.json({ url: session.url });
-
-    // 3. Tareas de fondo: actualizar reserva con sessionId de Stripe (no bloquea la respuesta)
-    Promise.resolve()
-      .then(() => updateReservationWithStripeSessionId(tempSessionId, session.id))
-      .then(() => console.log('💾 DB Actualizada en segundo plano'))
-      .catch(err => console.error('⚠️ Error DB Background:', err));
-    return;
-
-  } catch (err) {
-    console.error('Error al crear sesión de checkout:', err);
-    if (!res.headersSent) {
-      res.status(500).json({ ok: false, error: String(err && (err.message || err)) });
-    }
-  }
+  ...
+  const session = await stripe.checkout.sessions.create({ ... });
+  res.json({ url: session.url });
+  ...
 }
-
-// Ruta neutral: evita cancel por blockers/heurísticas que detectan "checkout-session" en la URL.
 app.post('/api/pay/session', createCheckoutSessionHandler);
-// Wrapper compatibilidad: misma lógica, no eliminar por si otras páginas lo usan.
 app.post('/create-checkout-session', createCheckoutSessionHandler);
+app.post('/api/pay/redirect', async function (req, res) { ... });
+*/
 
-// Form POST: crea sesión y responde con HTML que redirige a Stripe (evita que 302 no se siga en algunos navegadores).
-app.post('/api/pay/redirect', async function (req, res) {
+// === CARDNET: Crear sesión de pago ===
+app.post('/api/pay/session', async (req, res) => {
   try {
-    var body = req.body && req.body.payload ? JSON.parse(req.body.payload) : req.body;
-    if (!body || !body.line_items) {
-      return res.status(400).send('Payload inválido. Usa el campo "payload" con el JSON del carrito.');
+    const { line_items, items, total } = req.body;
+
+    console.log('[CARDNET] Recibido request de pago');
+
+    // Calcular subtotal desde line_items
+    let subtotal = 0;
+    if (line_items && line_items.length > 0) {
+      subtotal = line_items.reduce((sum, item) => {
+        const unitAmount = item.price_data?.unit_amount || 0;
+        const qty = item.quantity || 1;
+        return sum + (unitAmount * qty);
+      }, 0) / 100; // convertir de centavos a pesos
+    } else if (total) {
+      subtotal = parseFloat(String(total).replace(/[^0-9.]/g, ''));
     }
-    var result = await createCheckoutSessionFromBody(body);
-    var stripeUrl = result.url;
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    return res.status(200).send(
-      '<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=' +
-      stripeUrl.replace(/&/g, '&amp;') +
-      '"><script>location.replace(' + JSON.stringify(stripeUrl) + ');</script></head><body>Redirigiendo a la pasarela de pago… <a href="' +
-      stripeUrl.replace(/"/g, '&quot;').replace(/</g, '&lt;') +
-      '">Ir ahora</a>.</body></html>'
-    );
-  } catch (err) {
-    console.error('[api/pay/redirect] Error:', err);
-    if (err.statusCode) {
-      return res.status(err.statusCode).json({ error: err.message });
+
+    if (subtotal <= 0) {
+      return res.status(400).json({ error: 'El monto debe ser mayor a 0' });
     }
-    if (!res.headersSent) {
-      return res.status(500).json({ ok: false, error: String(err && (err.message || err)) });
-    }
+
+    // Calcular ITBIS (18%)
+    const tax = Math.round(subtotal * 0.18 * 100) / 100;
+    const totalAmount = Math.round((subtotal + tax) * 100) / 100;
+
+    // Obtener IP del cliente
+    let clientIp = req.ip || req.connection.remoteAddress || '127.0.0.1';
+    clientIp = clientIp.replace('::ffff:', '').replace('::1', '127.0.0.1');
+
+    const result = await cardnet.createSession({
+      subtotal,
+      tax,
+      total: totalAmount,
+      clientIp,
+      items: line_items || items
+    });
+
+    // Responder al frontend con SESSION y URL del gateway
+    res.json({
+      SESSION: result.SESSION,
+      authorizeUrl: result.authorizeUrl,
+      ordenId: result.ordenId
+    });
+
+  } catch (error) {
+    console.error('[CARDNET] Error en /api/pay/session:', error.message);
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Lógica compartida: recibe body, crea sesión Stripe, devuelve { url, sessionId, reservationId, expiresAt } o lanza.
-async function createCheckoutSessionFromBody(body) {
-  var line_items = body.line_items, items = body.items, total = body.total, customerEmail = body.customerEmail, customerName = body.customerName;
-  if (!line_items || !Array.isArray(line_items) || line_items.length === 0) {
-    throw Object.assign(new Error('El carrito está vacío o el formato de items es incorrecto'), { statusCode: 400 });
-  }
-  if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('XXXX')) {
-    throw Object.assign(new Error('Stripe no está configurado'), { statusCode: 500 });
-  }
-  var normalizedItems = line_items;
-  if (Array.isArray(line_items)) {
-    normalizedItems = line_items.map(function (item) {
-      var clone = JSON.parse(JSON.stringify(item));
-      if (clone.price_data && clone.price_data.product_data && Array.isArray(clone.price_data.product_data.images)) {
-        clone.price_data.product_data.images = clone.price_data.product_data.images.map(function (imgUrl) {
-          if (typeof imgUrl === 'string') {
-            return imgUrl.replace(/cake (\d+)\.png/g, 'cake_$1.png')
-              .replace(/cake autor (\d+)\.png/g, 'cake_autor_$1.png')
-              .replace(/([^\/]+) ([\w\d]+\.png)/g, '$1_$2');
-          }
-          return imgUrl;
-        });
-      }
-      return clone;
-    });
-  }
-  var itemsForReservation = items && Array.isArray(items) && items.length > 0
-    ? items.map(function (it) { return { productId: String(it.productId || it.id || ''), size: String(it.size || '10'), quantity: Number(it.quantity) || 1 }; })
-    : normalizedItems.map(function (li, i) { return { productId: String(i + 1), size: '10', quantity: Number(li.quantity) || 1 }; });
-  var tempSessionId = 'temp-' + Date.now() + '-' + Math.random().toString(36).slice(2, 9);
-  var reserveResult = createStockReservation(itemsForReservation, tempSessionId);
-  if (!reserveResult.ok) {
-    throw Object.assign(new Error(reserveResult.error || 'Stock insuficiente'), { statusCode: 400 });
-  }
-  var orderTotal = total;
-  if (!orderTotal && items && items.length > 0) {
-    orderTotal = items.reduce(function (sum, item) {
-      var price = typeof item.basePrice === 'number' ? item.basePrice : parseFloat((item.price || item.basePrice || '0').replace(/[^0-9.]/g, ''));
-      return sum + (price * (item.quantity || 1));
-    }, 0);
-    orderTotal = orderTotal * 1.18;
-  }
-  var itemsForMetadata = items || [];
-  if (itemsForMetadata.length === 0 && normalizedItems) {
-    itemsForMetadata = normalizedItems.map(function (lineItem, index) {
-      return {
-        id: 'item-' + index,
-        productId: 'item-' + index,
-        name: (lineItem.price_data && lineItem.price_data.product_data && lineItem.price_data.product_data.name) || 'Producto',
-        price: 'RD$' + ((lineItem.price_data && lineItem.price_data.unit_amount) ? (lineItem.price_data.unit_amount / 100).toFixed(2) : '0'),
-        basePrice: (lineItem.price_data && lineItem.price_data.unit_amount) ? lineItem.price_data.unit_amount / 100 : 0,
-        quantity: lineItem.quantity || 1,
-        image: (lineItem.price_data && lineItem.price_data.product_data && lineItem.price_data.product_data.images && lineItem.price_data.product_data.images[0]) || '',
-        size: '', message: '', giftCard: false, addon: '', addonPrice: 0
-      };
-    });
-  }
-  var itemsCount = itemsForMetadata.length;
-  var productIds = itemsForMetadata.map(function (item) { return item.productId || item.id || ''; }).filter(Boolean).join(',');
-  var metadataTotal = orderTotal ? String(orderTotal) : '0';
-  var session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    line_items: normalizedItems,
-    mode: 'payment',
-    success_url: FRONTEND_URL + '/success.html?session_id={CHECKOUT_SESSION_ID}',
-    cancel_url: FRONTEND_URL + '/cancel.html',
-    customer_email: customerEmail || undefined,
-    metadata: { customerName: customerName || 'Cliente', customerEmail: customerEmail || '', itemsCount: String(itemsCount), productIds: productIds.substring(0, 200), orderTotal: metadataTotal },
-    locale: 'es'
-  });
-  console.log('Sesión creada exitosamente:', session.id);
-  console.log('URL de checkout:', session.url);
-  updateReservationWithStripeSessionId(tempSessionId, session.id);
-  var expiresAt = Date.now() + RESERVATION_TTL_MS;
-  return { url: session.url, sessionId: session.id, reservationId: reserveResult.reservationId, expiresAt: expiresAt };
-}
+// === STRIPE DESACTIVADO: createCheckoutSessionFromBody y GET checkout-session ===
+/*
+async function createCheckoutSessionFromBody(body) { ... stripe.checkout.sessions.create ... }
+app.get('/checkout-session/:sessionId', async (req, res) => { ... stripe.checkout.sessions.retrieve ... });
+*/
 
-// Verificar estado de la sesión (para success.html)
-app.get('/checkout-session/:sessionId', async (req, res) => {
+// === CARDNET: Verificar resultado de pago ===
+app.get('/api/pay/verify', async (req, res) => {
   try {
-    const { sessionId } = req.params;
-    console.log('Verificando sesión de checkout:', sessionId);
-    
-    // Si TEST_MODE está activo, devolver datos falsos
-    if (TEST_MODE) {
-      console.warn('⚠️ TEST MODE: checkout-session está devolviendo datos falsos');
-      
-      return res.json({
-        id: sessionId,
-        payment_status: 'paid',
-        amount_total: 12345,
-        currency: 'dop',
-        customer_email: 'test@example.com',
-        metadata: {
-          customerName: 'Cliente de Prueba'
-        },
-        line_items: {
-          data: [
-            {
-              price: {
-                id: 'price_test_1',
-                product: 'prod_test_2'
-              },
-              description: 'Pastel de Prueba',
-              quantity: 1,
-              amount_total: 12345
-            }
-          ]
-        }
-      });
+    const sessionId = req.query.session;
+    if (!sessionId) {
+      return res.status(400).json({ error: 'Parámetro session requerido' });
     }
-    
-    // Modo normal: usar Stripe real
-    if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('XXXX')) {
-      return res.status(500).json({ 
-        error: 'Stripe no está configurado',
-        message: 'Por favor, configura tus claves en el archivo .env'
+
+    const result = await cardnet.verifyTransaction(sessionId);
+
+    // Si fue aprobada, guardar la orden en orders.json
+    if (result.approved) {
+      const ordersPath = path.join(__dirname, 'data', 'orders.json');
+      let orders = [];
+      try {
+        orders = JSON.parse(fs.readFileSync(ordersPath, 'utf8'));
+      } catch (e) {
+        orders = [];
+      }
+
+      orders.push({
+        id: result.ordenId,
+        paymentMethod: 'cardnet',
+        responseCode: result.responseCode,
+        authorizationCode: result.authorizationCode,
+        cardNumber: result.creditCardNumber,
+        referenceNumber: result.referenceNumber,
+        txToken: result.txToken,
+        subtotal: result.originalData.subtotal,
+        tax: result.originalData.tax,
+        total: result.originalData.total,
+        items: result.originalData.items,
+        status: 'paid',
+        createdAt: new Date().toISOString()
       });
+
+      fs.writeFileSync(ordersPath, JSON.stringify(orders, null, 2));
+      console.log('[CARDNET] Orden guardada:', result.ordenId);
     }
-    
-    const session = await stripe.checkout.sessions.retrieve(sessionId, { expand: ['line_items'] });
-    
-    console.log('Sesión recuperada:', {
-      id: session.id,
-      payment_status: session.payment_status,
-      customer_email: session.customer_email
-    });
-    
-    res.json({
-      id: session.id,
-      payment_status: session.payment_status,
-      amount_total: session.amount_total,
-      currency: session.currency,
-      customer_email: session.customer_email,
-      metadata: session.metadata,
-      line_items: session.line_items
-    });
+
+    res.json(result);
+
   } catch (error) {
-    console.error('Error al verificar sesión:', error);
-    res.status(500).json({ 
-      error: 'Error al verificar la sesión',
-      message: error.message 
-    });
+    console.error('[CARDNET] Error en /api/pay/verify:', error.message);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -1907,6 +1695,185 @@ app.post('/api/reservations/expire', async (req, res) => {
   } catch (err) {
     console.error('Error en /api/reservations/expire:', err);
     res.status(500).json({ error: 'Error al expirar reservas', message: err.message });
+  }
+});
+
+// ============================================
+// CUSTOMER DATA & BAKERY CONFIG ENDPOINTS
+// ============================================
+
+// Leer configuración del bakery
+const bakeryConfigPath = path.join(__dirname, 'data', 'bakery-config.json');
+const customersPath = path.join(__dirname, 'data', 'customers.json');
+const dailyOrdersPath = path.join(__dirname, 'data', 'daily-orders.json');
+
+function readJSON(filePath, fallback) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (e) {
+    return fallback;
+  }
+}
+
+function writeJSON(filePath, data) {
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+}
+
+// GET /api/bakery/config — Devuelve configuración pública (timer, min horas, etc)
+app.get('/api/bakery/config', (req, res) => {
+  try {
+    const config = readJSON(bakeryConfigPath, {
+      maxOrdersPerDay: 8,
+      minHoursInAdvance: 48,
+      cartTimerMinutes: 15,
+      blockedDays: []
+    });
+    // Solo enviar lo que el frontend necesita (no notas internas)
+    res.json({
+      cartTimerMinutes: config.cartTimerMinutes,
+      minHoursInAdvance: config.minHoursInAdvance,
+      blockedDays: config.blockedDays || []
+    });
+  } catch (error) {
+    console.error('[CONFIG] Error:', error.message);
+    res.status(500).json({ error: 'Error leyendo configuración' });
+  }
+});
+
+// GET /api/bakery/availability?date=YYYY-MM-DD — Verifica disponibilidad de una fecha
+app.get('/api/bakery/availability', (req, res) => {
+  try {
+    const { date } = req.query;
+    if (!date) {
+      return res.status(400).json({ error: 'Parámetro date requerido (YYYY-MM-DD)' });
+    }
+
+    const config = readJSON(bakeryConfigPath, { maxOrdersPerDay: 8, minHoursInAdvance: 48, blockedDays: [] });
+    const dailyOrders = readJSON(dailyOrdersPath, {});
+
+    // Verificar si la fecha está bloqueada
+    if (config.blockedDays && config.blockedDays.includes(date)) {
+      return res.json({ available: false, reason: 'Fecha no disponible', slotsLeft: 0 });
+    }
+
+    // Verificar mínimo de horas de anticipación
+    const deliveryDate = new Date(date + 'T00:00:00');
+    const now = new Date();
+    const hoursUntilDelivery = (deliveryDate - now) / (1000 * 60 * 60);
+
+    if (hoursUntilDelivery < config.minHoursInAdvance) {
+      return res.json({
+        available: false,
+        reason: 'Se requieren al menos ' + config.minHoursInAdvance + ' horas de anticipación',
+        slotsLeft: 0
+      });
+    }
+
+    // Verificar cuántos pedidos hay para esa fecha
+    const ordersForDate = dailyOrders[date] || 0;
+    const slotsLeft = Math.max(0, config.maxOrdersPerDay - ordersForDate);
+
+    res.json({
+      available: slotsLeft > 0,
+      slotsLeft: slotsLeft,
+      maxOrders: config.maxOrdersPerDay,
+      reason: slotsLeft > 0 ? 'Disponible' : 'Agenda completa para esta fecha'
+    });
+
+  } catch (error) {
+    console.error('[AVAILABILITY] Error:', error.message);
+    res.status(500).json({ error: 'Error verificando disponibilidad' });
+  }
+});
+
+// POST /api/customers — Guardar datos del cliente
+app.post('/api/customers', (req, res) => {
+  try {
+    const { firstName, lastName, phone, email, cedulaLast4, deliveryDate, pickupTime } = req.body;
+
+    // Validaciones básicas
+    if (!firstName || !lastName || !phone) {
+      return res.status(400).json({ error: 'Nombre, apellido y teléfono son requeridos' });
+    }
+
+    if (!email && !cedulaLast4) {
+      return res.status(400).json({ error: 'Email o últimos 4 dígitos de cédula son requeridos' });
+    }
+
+    if (!deliveryDate) {
+      return res.status(400).json({ error: 'Fecha de entrega es requerida' });
+    }
+
+    // Crear registro del cliente
+    const customer = {
+      id: 'CUST-' + Date.now(),
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      phone: phone.trim(),
+      email: email ? email.trim().toLowerCase() : null,
+      cedulaLast4: cedulaLast4 ? cedulaLast4.trim() : null,
+      deliveryDate,
+      pickupTime: pickupTime || null,
+      createdAt: new Date().toISOString(),
+      marketingConsent: true // por defecto acepta, se puede cambiar
+    };
+
+    // Guardar en customers.json
+    const customers = readJSON(customersPath, []);
+    customers.push(customer);
+    writeJSON(customersPath, customers);
+
+    // Incrementar contador de pedidos para la fecha
+    const dailyOrders = readJSON(dailyOrdersPath, {});
+    dailyOrders[deliveryDate] = (dailyOrders[deliveryDate] || 0) + 1;
+    writeJSON(dailyOrdersPath, dailyOrders);
+
+    console.log('[CUSTOMER] Nuevo cliente guardado:', customer.id, '-', customer.firstName, customer.lastName);
+    console.log('[CUSTOMER] Pedidos para', deliveryDate + ':', dailyOrders[deliveryDate]);
+
+    res.json({
+      success: true,
+      customerId: customer.id,
+      message: 'Datos guardados correctamente'
+    });
+
+  } catch (error) {
+    console.error('[CUSTOMER] Error:', error.message);
+    res.status(500).json({ error: 'Error guardando datos del cliente' });
+  }
+});
+
+// GET /api/customers — Listar todos los clientes
+app.get('/api/customers', (req, res) => {
+  try {
+    const customers = readJSON(customersPath, []);
+    // Ordenar por fecha de creación (más reciente primero)
+    customers.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    res.json(customers);
+  } catch (error) {
+    console.error('[CUSTOMERS] Error:', error.message);
+    res.status(500).json({ error: 'Error leyendo clientes' });
+  }
+});
+
+// DELETE /api/customers/:id — Eliminar un cliente
+app.delete('/api/customers/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    let customers = readJSON(customersPath, []);
+    const before = customers.length;
+    customers = customers.filter(c => c.id !== id);
+
+    if (customers.length === before) {
+      return res.status(404).json({ error: 'Cliente no encontrado' });
+    }
+
+    writeJSON(customersPath, customers);
+    console.log('[CUSTOMERS] Cliente eliminado:', id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[CUSTOMERS] Error eliminando:', error.message);
+    res.status(500).json({ error: 'Error eliminando cliente' });
   }
 });
 

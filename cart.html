@@ -115,7 +115,7 @@
     }
   </style>
 </head>
-<body>
+<body id="bakery-landing" class="is-white">
   <!-- NAV -->
   <nav class="nav" id="nav">
     <div class="container wrap">
@@ -149,12 +149,131 @@
 
   <!-- CART PAGE -->
   <main class="cart-page">
+    <!-- Timer de reserva -->
+    <div id="cart-timer-banner" style="display:none; background: #fff3cd; border-bottom: 2px solid #ffc107; padding: 12px 20px; text-align: center; margin-bottom: 16px;">
+      <span style="font-size: 16px; color: #856404;">
+        ⏱️ Tu carrito se reserva por <strong id="timer-display">15:00</strong> minutos.
+        <span id="timer-urgent" style="display:none; color: #dc3545; font-weight: bold;">¡Date prisa!</span>
+      </span>
+    </div>
+
     <div class="cart-container">
       <!-- Items del carrito -->
       <div class="cart-section">
         <h1 style="margin-top:0">Tu Carrito</h1>
         <div id="cartItems">
           <!-- Se llenará con JavaScript -->
+        </div>
+
+        <!-- Formulario de datos del cliente -->
+        <div id="customer-form-section" style="background: #fff; border-radius: 12px; padding: 24px; margin-top: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+          
+          <h3 style="margin-bottom: 16px; font-size: 1.3rem; color: #333;">Datos de Entrega</h3>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            
+            <!-- Nombre -->
+            <div>
+              <label for="customer-firstName" style="display: block; font-size: 14px; color: #555; margin-bottom: 4px; font-weight: 500;">Nombre *</label>
+              <input type="text" id="customer-firstName" placeholder="Tu nombre" required
+                style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: border-color 0.2s;"
+                onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#ddd'">
+            </div>
+
+            <!-- Apellido -->
+            <div>
+              <label for="customer-lastName" style="display: block; font-size: 14px; color: #555; margin-bottom: 4px; font-weight: 500;">Apellido *</label>
+              <input type="text" id="customer-lastName" placeholder="Tu apellido" required
+                style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: border-color 0.2s;"
+                onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#ddd'">
+            </div>
+
+            <!-- Teléfono -->
+            <div>
+              <label for="customer-phone" style="display: block; font-size: 14px; color: #555; margin-bottom: 4px; font-weight: 500;">Teléfono *</label>
+              <input type="tel" id="customer-phone" placeholder="809-000-0000" required
+                style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: border-color 0.2s;"
+                onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#ddd'">
+            </div>
+
+            <!-- Fecha de entrega -->
+            <div>
+              <label for="customer-deliveryDate" style="display: block; font-size: 14px; color: #555; margin-bottom: 4px; font-weight: 500;">Fecha de Entrega *</label>
+              <input type="date" id="customer-deliveryDate" required
+                style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: border-color 0.2s;"
+                onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#ddd'">
+              <span id="delivery-date-msg" style="font-size: 12px; color: #888; margin-top: 2px; display: block;">Mínimo 48 horas de anticipación</span>
+            </div>
+
+            <div>
+              <label for="customer-pickupTime" style="display: block; font-size: 14px; color: #555; margin-bottom: 4px; font-weight: 500;">Hora de Recogida *</label>
+              <select id="customer-pickupTime" required
+                style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; background: white; transition: border-color 0.2s; cursor: pointer;"
+                onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#ddd'">
+                <option value="">Selecciona una hora</option>
+                <option value="10:00">10:00 AM</option>
+                <option value="10:30">10:30 AM</option>
+                <option value="11:00">11:00 AM</option>
+                <option value="11:30">11:30 AM</option>
+                <option value="12:00">12:00 PM</option>
+                <option value="12:30">12:30 PM</option>
+                <option value="13:00">1:00 PM</option>
+                <option value="13:30">1:30 PM</option>
+                <option value="14:00">2:00 PM</option>
+                <option value="14:30">2:30 PM</option>
+                <option value="15:00">3:00 PM</option>
+                <option value="15:30">3:30 PM</option>
+                <option value="16:00">4:00 PM</option>
+                <option value="16:30">4:30 PM</option>
+                <option value="17:00">5:00 PM</option>
+                <option value="17:30">5:30 PM</option>
+                <option value="18:00">6:00 PM</option>
+                <option value="18:30">6:30 PM</option>
+                <option value="19:00">7:00 PM</option>
+                <option value="19:30">7:30 PM</option>
+                <option value="20:00">8:00 PM</option>
+                <option value="20:30">8:30 PM</option>
+                <option value="21:00">9:00 PM</option>
+                <option value="21:30">9:30 PM</option>
+                <option value="22:00">10:00 PM</option>
+              </select>
+              <span style="font-size: 12px; color: #888; margin-top: 2px; display: block;">Horario: 10:00 AM - 10:00 PM</span>
+            </div>
+            <div></div>
+          </div>
+
+          <!-- Email o Cédula -->
+          <div style="margin-top: 14px;">
+            <label style="display: block; font-size: 14px; color: #555; margin-bottom: 4px; font-weight: 500;">Contacto adicional *</label>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+              <label style="font-size: 13px; cursor: pointer;">
+                <input type="radio" name="contact-type" value="email" checked id="contact-type-email"
+                  style="margin-right: 4px;"> Email
+              </label>
+              <label style="font-size: 13px; cursor: pointer;">
+                <input type="radio" name="contact-type" value="cedula" id="contact-type-cedula"
+                  style="margin-right: 4px;"> Últimos 4 dígitos de cédula
+              </label>
+            </div>
+            
+            <div id="email-field">
+              <input type="email" id="customer-email" placeholder="tu@email.com"
+                style="width: 100%; max-width: 400px; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; transition: border-color 0.2s;"
+                onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#ddd'">
+            </div>
+            
+            <div id="cedula-field" style="display: none;">
+              <input type="text" id="customer-cedula4" placeholder="Ej: 5678" maxlength="4" pattern="[0-9]{4}"
+                style="width: 120px; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; text-align: center; letter-spacing: 4px; transition: border-color 0.2s;"
+                onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#ddd'">
+              <span style="font-size: 12px; color: #888; margin-left: 8px;">Solo los últimos 4 dígitos</span>
+            </div>
+          </div>
+
+          <!-- Mensaje de error del formulario -->
+          <div id="form-error-msg" style="display: none; margin-top: 12px; padding: 10px 14px; background: #fee; border: 1px solid #fcc; border-radius: 8px; color: #c00; font-size: 13px;">
+          </div>
+
         </div>
       </div>
 
@@ -185,5 +304,23 @@
   </main>
 
   <script src="TheBakery/assets/js/cart.js"></script>
+  <script>
+    // Toggle entre email y cédula
+    document.querySelectorAll('input[name="contact-type"]').forEach(function(radio) {
+      radio.addEventListener('change', function() {
+        var emailField = document.getElementById('email-field');
+        var cedulaField = document.getElementById('cedula-field');
+        if (this.value === 'email') {
+          emailField.style.display = 'block';
+          cedulaField.style.display = 'none';
+          document.getElementById('customer-email').value = '';
+        } else {
+          emailField.style.display = 'none';
+          cedulaField.style.display = 'block';
+          document.getElementById('customer-cedula4').value = '';
+        }
+      });
+    });
+  </script>
 </body>
 </html>

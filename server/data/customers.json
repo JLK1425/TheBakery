@@ -1,0 +1,109 @@
+[
+  {
+    "id": "CUST-1771448436273",
+    "firstName": "Joel",
+    "lastName": "Abreu De La Rosa",
+    "phone": "8097926278",
+    "email": "jlab.abreu@gmail.com",
+    "cedulaLast4": null,
+    "deliveryDate": "2026-02-23",
+    "createdAt": "2026-02-18T21:00:36.273Z",
+    "marketingConsent": true
+  },
+  {
+    "id": "CUST-1771449271506",
+    "firstName": "Joel",
+    "lastName": "Abreu De La Rosa",
+    "phone": "8097926278",
+    "email": "jlab.abreu@gmail.com",
+    "cedulaLast4": null,
+    "deliveryDate": "2026-02-24",
+    "pickupTime": "21:30",
+    "createdAt": "2026-02-18T21:14:31.506Z",
+    "marketingConsent": true
+  },
+  {
+    "id": "CUST-1771449491496",
+    "firstName": "Joel",
+    "lastName": "Abreu De La Rosa",
+    "phone": "8097926278",
+    "email": "jlab.abreu@gmail.com",
+    "cedulaLast4": null,
+    "deliveryDate": "2026-02-24",
+    "pickupTime": "20:00",
+    "createdAt": "2026-02-18T21:18:11.496Z",
+    "marketingConsent": true
+  },
+  {
+    "id": "CUST-1771449689572",
+    "firstName": "Karla",
+    "lastName": "De Leon",
+    "phone": "8097926278",
+    "email": "marcusloungeandgrill@gmail.com",
+    "cedulaLast4": null,
+    "deliveryDate": "2026-02-25",
+    "pickupTime": "21:00",
+    "createdAt": "2026-02-18T21:21:29.572Z",
+    "marketingConsent": true
+  },
+  {
+    "id": "CUST-1771526127750",
+    "firstName": "Joel",
+    "lastName": "Abreu De La Rosa",
+    "phone": "8097926278",
+    "email": "jlab.abreu@gmail.com",
+    "cedulaLast4": null,
+    "deliveryDate": "2026-02-24",
+    "pickupTime": "17:00",
+    "createdAt": "2026-02-19T18:35:27.750Z",
+    "marketingConsent": true
+  },
+  {
+    "id": "CUST-1771526288320",
+    "firstName": "Joel",
+    "lastName": "Abreu De La Rosa",
+    "phone": "8097926278",
+    "email": "jlab.abreu@gmail.com",
+    "cedulaLast4": null,
+    "deliveryDate": "2026-02-25",
+    "pickupTime": "16:30",
+    "createdAt": "2026-02-19T18:38:08.320Z",
+    "marketingConsent": true
+  },
+  {
+    "id": "CUST-1771526558167",
+    "firstName": "Karla",
+    "lastName": "De Leon",
+    "phone": "8097926278",
+    "email": "marcusloungeandgrill@gmail.com",
+    "cedulaLast4": null,
+    "deliveryDate": "2026-02-24",
+    "pickupTime": "16:00",
+    "createdAt": "2026-02-19T18:42:38.167Z",
+    "marketingConsent": true
+  },
+  {
+    "id": "CUST-1771530819837",
+    "firstName": "Joel",
+    "lastName": "Abreu De La Rosa",
+    "phone": "8097926278",
+    "email": "jlab.abreu@gmail.com",
+    "cedulaLast4": null,
+    "deliveryDate": "2026-02-25",
+    "pickupTime": "17:30",
+    "createdAt": "2026-02-19T19:53:39.837Z",
+    "marketingConsent": true
+  },
+  {
+    "id": "CUST-1771533479169",
+    "firstName": "Joel",
+    "lastName": "Abreu De La Rosa",
+    "phone": "8097926278",
+    "email": "jlab.abreu@gmail.com",
+    "cedulaLast4": null,
+    "deliveryDate": "2026-02-24",
+    "pickupTime": "13:00",
+    "createdAt": "2026-02-19T20:37:59.169Z",
+    "marketingConsent": true
+  }
+]

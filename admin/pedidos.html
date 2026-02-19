@@ -77,9 +77,26 @@
       background: #d91a6b;
       color: #fff;
     }
-    .admin-header-btn#deleteAllOrders:hover {
-      background: #d91a6b;
-      opacity: 0.9;
+    .archive-btn {
+      background: #8b5cf6;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s;
+    }
+    .archive-btn:hover {
+      background: #7c3aed;
+    }
+    .archive-btn:disabled {
+      background: #c4b5fd;
+      cursor: not-allowed;
     }
     .admin-header {
       background: #fff;
@@ -596,12 +613,8 @@
         </svg>
         <span>Ayuda</span>
       </button>
-      <button class="admin-header-btn admin-header-btn-danger" id="deleteAllOrders" style="background: #ef2a82; color: #fff;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="3 6 5 6 21 6"></polyline>
-          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-        </svg>
-        <span>Eliminar Todos los Pedidos</span>
+      <button class="admin-header-btn archive-btn" id="archiveDeliveredBtn" title="Archivar pedidos entregados">
+        📦 Archivar Entregados
       </button>
       <button class="admin-header-btn admin-header-btn-danger" id="logoutBtn">
         <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">

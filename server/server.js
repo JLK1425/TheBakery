@@ -117,6 +117,145 @@ function writeOrders(data) {
   }
 }
 
+// =====================
+//   ARCHIVED ORDERS
+// =====================
+const ARCHIVED_ORDERS_FILE = path.join(__dirname, 'data', 'archived-orders.json');
+
+function readArchivedOrders() {
+  try {
+    if (!fs.existsSync(ARCHIVED_ORDERS_FILE)) {
+      fs.writeFileSync(ARCHIVED_ORDERS_FILE, '{}');
+      return {};
+    }
+    return JSON.parse(fs.readFileSync(ARCHIVED_ORDERS_FILE, 'utf-8'));
+  } catch (e) {
+    console.error('Error reading archived orders:', e);
+    return {};
+  }
+}
+
+function writeArchivedOrders(data) {
+  fs.writeFileSync(ARCHIVED_ORDERS_FILE, JSON.stringify(data, null, 2));
+}
+
+// Generar resumen de un grupo de pedidos
+function generateDaySummary(orders) {
+  const cakeMap = {};
+  let totalRevenue = 0;
+  let totalTax = 0;
+
+  orders.forEach(order => {
+    totalRevenue += order.subtotal || 0;
+    totalTax += order.tax || 0;
+
+    (order.items || []).forEach(item => {
+      let name = 'Producto desconocido';
+      let price = 0;
+      let qty = item.quantity || 1;
+
+      if (item.name) {
+        name = item.name;
+        price = item.price || 0;
+      } else if (item.price_data && item.price_data.product_data) {
+        name = item.price_data.product_data.name || 'Producto';
+        price = (item.price_data.unit_amount || 0) / 100;
+      }
+
+      if (!cakeMap[name]) {
+        cakeMap[name] = { name, quantity: 0, revenue: 0 };
+      }
+      cakeMap[name].quantity += qty;
+      cakeMap[name].revenue += price * qty;
+    });
+  });
+
+  // Ordenar por cantidad vendida (mayor primero)
+  const topCakes = Object.values(cakeMap).sort((a, b) => b.quantity - a.quantity);
+
+  return {
+    totalOrders: orders.length,
+    totalRevenue,
+    totalTax,
+    totalWithTax: totalRevenue + totalTax,
+    topCakes
+  };
+}
+
+// Archivar pedidos entregados de una fecha específica
+function archiveDeliveredOrders() {
+  const orders = readOrders();
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0]; // "2026-02-19"
+
+  // Filtrar solo pedidos con status "Entregado"
+  const delivered = orders.filter(o => {
+    const status = String(o.status || '').trim();
+    return status === 'Entregado';
+  });
+
+  if (delivered.length === 0) {
+    console.log('[Archive] No hay pedidos entregados para archivar.');
+    return { archived: 0 };
+  }
+
+  // Leer archivo existente
+  const archived = readArchivedOrders();
+
+  // Agrupar entregados por fecha de creación
+  const byDate = {};
+  delivered.forEach(order => {
+    const dateStr = order.createdAt ? order.createdAt.split('T')[0] : todayStr;
+    if (!byDate[dateStr]) byDate[dateStr] = [];
+    byDate[dateStr].push(order);
+  });
+
+  // Agregar a archivo (merge si ya existe esa fecha)
+  let totalArchived = 0;
+  Object.entries(byDate).forEach(([dateStr, dateOrders]) => {
+    if (!archived[dateStr]) {
+      archived[dateStr] = {
+        date: dateStr,
+        archivedAt: now.toISOString(),
+        summary: generateDaySummary(dateOrders),
+        orders: dateOrders
+      };
+    } else {
+      // Merge: agregar pedidos que no estén ya (por ID)
+      const existingIds = new Set(archived[dateStr].orders.map(o => o.id));
+      const newOrders = dateOrders.filter(o => !existingIds.has(o.id));
+      archived[dateStr].orders.push(...newOrders);
+      // Recalcular resumen
+      archived[dateStr].summary = generateDaySummary(archived[dateStr].orders);
+      archived[dateStr].archivedAt = now.toISOString();
+    }
+    totalArchived += dateOrders.length;
+  });
+
+  // Limpiar archivos con más de 14 días
+  const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+  Object.keys(archived).forEach(dateStr => {
+    const archiveDate = new Date(dateStr + 'T00:00:00');
+    if (archiveDate < twoWeeksAgo) {
+      console.log(`[Archive] Eliminando archivo caducado: ${dateStr}`);
+      delete archived[dateStr];
+    }
+  });
+
+  // Guardar archivo
+  writeArchivedOrders(archived);
+
+  // Remover los pedidos entregados de orders.json (dejar los que NO son Entregado)
+  const remaining = orders.filter(o => {
+    const status = String(o.status || '').trim();
+    return status !== 'Entregado';
+  });
+  writeOrders(remaining);
+
+  console.log(`[Archive] ${totalArchived} pedidos archivados. ${remaining.length} pedidos restantes.`);
+  return { archived: totalArchived, remaining: remaining.length };
+}
+
 // Usuarios
 const USERS_FILE = path.join(__dirname, 'data', 'users.json');
 
@@ -1876,6 +2015,105 @@ app.delete('/api/customers/:id', (req, res) => {
     res.status(500).json({ error: 'Error eliminando cliente' });
   }
 });
+
+// =========================
+//   ARCHIVO Y REPORTES
+// =========================
+
+// Archivar manualmente pedidos entregados (botón admin)
+app.post('/api/orders/archive', requireAdmin, (req, res) => {
+  try {
+    const result = archiveDeliveredOrders();
+    res.json({ ok: true, ...result });
+  } catch (error) {
+    console.error('Error archivando pedidos:', error);
+    res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+// Obtener lista de reportes disponibles (fechas archivadas)
+app.get('/api/reports', requireAdmin, (req, res) => {
+  try {
+    const archived = readArchivedOrders();
+    const reports = Object.values(archived).map(entry => ({
+      date: entry.date,
+      archivedAt: entry.archivedAt,
+      summary: entry.summary
+    })).sort((a, b) => b.date.localeCompare(a.date)); // Más reciente primero
+
+    res.json(reports);
+  } catch (error) {
+    console.error('Error obteniendo reportes:', error);
+    res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+// Obtener reporte detallado de un día específico
+app.get('/api/reports/:date', requireAdmin, (req, res) => {
+  try {
+    const archived = readArchivedOrders();
+    const report = archived[req.params.date];
+
+    if (!report) {
+      return res.status(404).json({ ok: false, error: 'Reporte no encontrado para esa fecha' });
+    }
+
+    res.json(report);
+  } catch (error) {
+    console.error('Error obteniendo reporte:', error);
+    res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+// =========================
+//   AUTO-ARCHIVE TIMER
+// =========================
+
+function scheduleNightlyArchive() {
+  const now = new Date();
+  const next1159 = new Date(now);
+  next1159.setHours(23, 59, 0, 0);
+
+  // Si ya pasó las 11:59 de hoy, programar para mañana
+  if (now >= next1159) {
+    next1159.setDate(next1159.getDate() + 1);
+  }
+
+  const msUntilArchive = next1159.getTime() - now.getTime();
+  const hoursUntil = (msUntilArchive / (1000 * 60 * 60)).toFixed(1);
+  console.log(`[Archive] Próximo archivo automático en ${hoursUntil} horas (${next1159.toLocaleString()})`);
+
+  setTimeout(() => {
+    console.log('[Archive] Ejecutando archivo automático nocturno...');
+    archiveDeliveredOrders();
+    // Reprogramar para mañana
+    scheduleNightlyArchive();
+  }, msUntilArchive);
+}
+
+// Iniciar timer al arrancar el servidor
+scheduleNightlyArchive();
+
+// También limpiar archivos caducados al iniciar
+(function cleanupOnStart() {
+  const archived = readArchivedOrders();
+  const now = new Date();
+  const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+  let cleaned = 0;
+
+  Object.keys(archived).forEach(dateStr => {
+    const archiveDate = new Date(dateStr + 'T00:00:00');
+    if (archiveDate < twoWeeksAgo) {
+      delete archived[dateStr];
+      cleaned++;
+    }
+  });
+
+  if (cleaned > 0) {
+    writeArchivedOrders(archived);
+    console.log(`[Archive] Limpieza inicial: ${cleaned} reportes caducados eliminados.`);
+  }
+})();
 
 // Iniciar servidor (0.0.0.0 = todas las interfaces)
 app.listen(PORT, '0.0.0.0', () => {

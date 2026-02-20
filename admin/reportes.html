@@ -173,14 +173,24 @@
       background: #7c3aed;
     }
     .btn-export {
-      background: #e5e7eb;
-      color: #6b7280;
+      background: #f3f4f6;
+      color: #374151;
       border: none;
       padding: 0.5rem 1rem;
       border-radius: 8px;
-      cursor: not-allowed;
+      cursor: pointer;
       font-weight: 600;
       font-size: 0.813rem;
+      transition: background 0.2s;
+    }
+    .btn-export:hover {
+      background: #e5e7eb;
+    }
+    .btn-export-excel {
+      color: #047857;
+    }
+    .btn-export-pdf {
+      color: #dc2626;
     }
     .report-detail {
       display: none;
@@ -223,6 +233,10 @@
       .reports-container { padding: 1rem; }
     }
   </style>
+  <!-- Export Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body id="bakery-landing" class="is-white">

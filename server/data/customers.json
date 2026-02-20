@@ -105,5 +105,29 @@
     "pickupTime": "13:00",
     "createdAt": "2026-02-19T20:37:59.169Z",
     "marketingConsent": true
+  },
+  {
+    "id": "CUST-1771545826321",
+    "firstName": "Joel",
+    "lastName": "Abreu De La Rosa",
+    "phone": "8097926278",
+    "email": "jlab.abreu@gmail.com",
+    "cedulaLast4": null,
+    "deliveryDate": "2026-02-22",
+    "pickupTime": "19:30",
+    "createdAt": "2026-02-20T00:03:46.321Z",
+    "marketingConsent": true
+  },
+  {
+    "id": "CUST-1771545863527",
+    "firstName": "Joel",
+    "lastName": "Abreu De La Rosa",
+    "phone": "8097926278",
+    "email": "jlab.abreu@gmail.com",
+    "cedulaLast4": null,
+    "deliveryDate": "2026-02-22",
+    "pickupTime": "19:30",
+    "createdAt": "2026-02-20T00:04:23.527Z",
+    "marketingConsent": true
   }
 ]

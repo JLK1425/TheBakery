@@ -580,6 +580,71 @@ async function createCheckoutSessionFromBody(body) { ... stripe.checkout.session
 app.get('/checkout-session/:sessionId', async (req, res) => { ... stripe.checkout.sessions.retrieve ... });
 */
 
+// Parsear nombre de item CardNet/Stripe para extraer nombre de pastel y tamaño
+// Input: "Pastel de Coco (6\")" o "Matcha Strawberry (8\")"
+// Output: { cakeName: "Pastel de Coco", size: "6" }
+function parseItemName(itemName) {
+  const match = itemName.match(/^(.+?)\s*\((\d+)["'"]?\)$/);
+  if (match) {
+    return { cakeName: match[1].trim(), size: match[2] };
+  }
+  return { cakeName: itemName, size: null };
+}
+
+// Descontar stock de pasteles basado en los items de una orden
+function decreaseStockFromOrder(items) {
+  if (!items || items.length === 0) return;
+
+  const cakes = readCakes();
+  let stockUpdated = false;
+
+  items.forEach(item => {
+    // Extraer nombre del item (soporta formato Stripe y plano)
+    let itemName = '';
+    let qty = item.quantity || 1;
+
+    if (item.name) {
+      itemName = item.name;
+    } else if (item.price_data && item.price_data.product_data) {
+      itemName = item.price_data.product_data.name || '';
+    }
+
+    if (!itemName) return;
+
+    const { cakeName, size } = parseItemName(itemName);
+    if (!size) {
+      console.log(`[STOCK] No se pudo extraer tamaño de: "${itemName}"`);
+      return;
+    }
+
+    // Buscar el pastel por nombre (case-insensitive, sin acentos)
+    const normalize = (str) => str.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .trim();
+
+    const cake = cakes.find(c => normalize(c.name) === normalize(cakeName));
+
+    if (!cake) {
+      console.log(`[STOCK] Pastel no encontrado: "${cakeName}"`);
+      return;
+    }
+
+    if (cake.sizes && cake.sizes[size] !== undefined) {
+      const before = cake.sizes[size];
+      cake.sizes[size] = Math.max(0, cake.sizes[size] - qty);
+      console.log(`[STOCK] ${cake.name} (${size}"): ${before} → ${cake.sizes[size]} (-${qty})`);
+      stockUpdated = true;
+    } else {
+      console.log(`[STOCK] Tamaño ${size}" no existe para ${cake.name}`);
+    }
+  });
+
+  if (stockUpdated) {
+    writeCakes(cakes);
+    console.log('[STOCK] Stock actualizado en inventory_cakes.json');
+  }
+}
+
 // === CARDNET: Verificar resultado de pago ===
 app.get('/api/pay/verify', async (req, res) => {
   try {
@@ -612,11 +677,13 @@ app.get('/api/pay/verify', async (req, res) => {
         tax: result.originalData.tax,
         total: result.originalData.total,
         items: result.originalData.items,
-        status: 'paid',
+        status: 'Pendiente',
         createdAt: new Date().toISOString()
       });
 
       fs.writeFileSync(ordersPath, JSON.stringify(orders, null, 2));
+      // Descontar stock
+      decreaseStockFromOrder(result.originalData.items);
       console.log('[CARDNET] Orden guardada:', result.ordenId);
     }
 

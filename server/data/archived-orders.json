@@ -453,22 +453,22 @@
   },
   "2026-02-20": {
     "date": "2026-02-20",
-    "archivedAt": "2026-02-20T00:06:01.103Z",
+    "archivedAt": "2026-02-20T18:00:04.182Z",
     "summary": {
-      "totalOrders": 1,
-      "totalRevenue": 6450,
-      "totalTax": 1161,
-      "totalWithTax": 7611,
+      "totalOrders": 2,
+      "totalRevenue": 12900,
+      "totalTax": 2322,
+      "totalWithTax": 15222,
       "topCakes": [
         {
           "name": "Matcha Strawberry (6\")",
-          "quantity": 1,
-          "revenue": 3900
+          "quantity": 2,
+          "revenue": 7800
         },
         {
           "name": "Pastel de Fresas (6\")",
-          "quantity": 1,
-          "revenue": 2550
+          "quantity": 2,
+          "revenue": 5100
         }
       ]
     },
@@ -508,6 +508,42 @@
         ],
         "status": "Entregado",
         "createdAt": "2026-02-20T00:04:43.370Z"
+      },
+      {
+        "id": "ORD-1771610311212",
+        "paymentMethod": "cardnet",
+        "responseCode": "00",
+        "authorizationCode": "012449",
+        "cardNumber": "476134______0050",
+        "referenceNumber": "000000000115",
+        "txToken": "txn-39wbxuN5dLlI97AadLZjyhoDNuy",
+        "subtotal": 6450,
+        "tax": 1161,
+        "total": 7611,
+        "items": [
+          {
+            "price_data": {
+              "currency": "dop",
+              "product_data": {
+                "name": "Matcha Strawberry (6\")"
+              },
+              "unit_amount": 390000
+            },
+            "quantity": 1
+          },
+          {
+            "price_data": {
+              "currency": "dop",
+              "product_data": {
+                "name": "Pastel de Fresas (6\")"
+              },
+              "unit_amount": 255000
+            },
+            "quantity": 1
+          }
+        ],
+        "status": "Entregado",
+        "createdAt": "2026-02-20T17:58:53.088Z"
       }
     ]
   }

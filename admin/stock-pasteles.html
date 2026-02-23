@@ -86,7 +86,19 @@
         <button type="button" id="bulkUpdateBtn" class="px-4 py-2 bg-rose-500 text-white rounded-lg font-semibold hover:bg-rose-600">Actualizar seleccionados</button>
       </div>
       <div id="stockTableContainer">
-        <div class="loading">Cargando...</div>
+        <table class="stock-table" style="width:100%;">
+          <thead>
+            <tr>
+              <th style="padding: 1rem;">Producto</th>
+              <th style="padding: 1rem;">Stock por Tamaño</th>
+              <th style="padding: 1rem; text-align: center;">Total</th>
+              <th style="padding: 1rem;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="stockTableBody">
+            <tr><td colspan="4" class="loading">Cargando...</td></tr>
+          </tbody>
+        </table>
       </div>
       <button type="button" class="btn-save-all" id="saveAllBtn" style="display:none">Actualizar todo</button>
     </div>

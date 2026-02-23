@@ -3,7 +3,7 @@
   "lastAlert": {
     "1-10": "2026-02-13T18:15:57.538Z",
     "2-10": "2026-02-13T18:15:57.538Z",
-    "4-10": "2026-02-19T22:58:47.839Z"
+    "4-10": "2026-02-23T17:45:40.325Z"
   },
   "alerts": [
     {
@@ -190,6 +190,42 @@
     },
     {
       "timestamp": "2026-02-19T22:58:47.839Z",
+      "items": [
+        {
+          "productId": "4",
+          "name": "Pastel de Fresas",
+          "size": "10",
+          "current": 1,
+          "threshold": 3
+        }
+      ]
+    },
+    {
+      "timestamp": "2026-02-20T18:02:27.350Z",
+      "items": [
+        {
+          "productId": "4",
+          "name": "Pastel de Fresas",
+          "size": "10",
+          "current": 1,
+          "threshold": 3
+        }
+      ]
+    },
+    {
+      "timestamp": "2026-02-21T13:04:48.132Z",
+      "items": [
+        {
+          "productId": "4",
+          "name": "Pastel de Fresas",
+          "size": "10",
+          "current": 1,
+          "threshold": 3
+        }
+      ]
+    },
+    {
+      "timestamp": "2026-02-23T17:45:40.325Z",
       "items": [
         {
           "productId": "4",

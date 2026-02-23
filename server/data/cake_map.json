@@ -1,9 +1,8 @@
 {
-  "Pastel Chocolate Deluxe": "TheBakery/assets/imagenes/cake_1.png",
-  "Pastel de Fresa Fresca": "TheBakery/assets/imagenes/cake_2.png",
-  "Dubai Chocolate Cake": "TheBakery/assets/imagenes/cake_3.png",
-  "Fresas con Crema Cake": "TheBakery/assets/imagenes/cake_4.png",
-  "Blueberry Lemon Cake": "TheBakery/assets/imagenes/cake_5.png",
-  "Lemon Pie Cake": "TheBakery/assets/imagenes/cake_6.png",
-  "Tropical Passionfruit Cake": "TheBakery/assets/imagenes/cake_7.png"
+  "Pastel de Coco": "TheBakery/assets/imagenes/pastel-coco/pastel-coco-1.png",
+  "Matcha Strawberry": "TheBakery/assets/imagenes/matcha-strawberry/matcha-strawberry-1.png",
+  "Pastel de Fresas": "TheBakery/assets/imagenes/pastel-fresas/pastel-fresas-1.png",
+  "Pastel de Arandanos": "TheBakery/assets/imagenes/pastel-arandanos/pastel-arandanos-1.png",
+  "Pastel Lemon Pie": "TheBakery/assets/imagenes/pastel-lemon-pie/pastel-lemon-pie-1.png",
+  "Pastel de Chinola": "TheBakery/assets/imagenes/pastel-chinola/pastel-chinola-1.png"
 }

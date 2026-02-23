@@ -165,5 +165,17 @@
     "pickupTime": "18:30",
     "createdAt": "2026-02-23T17:56:06.579Z",
     "marketingConsent": true
+  },
+  {
+    "id": "CUST-1771870401790",
+    "firstName": "Joel",
+    "lastName": "Abreu De La Rosa",
+    "phone": "8097926278",
+    "email": "jlab.abreu@gmail.com",
+    "cedulaLast4": null,
+    "deliveryDate": "2026-02-26",
+    "pickupTime": "18:00",
+    "createdAt": "2026-02-23T18:13:21.790Z",
+    "marketingConsent": true
   }
 ]

@@ -3,7 +3,7 @@
     "id": "1",
     "name": "Pastel de Coco",
     "sizes": {
-      "6": 99,
+      "6": 98,
       "8": 100
     }
   },
@@ -11,7 +11,7 @@
     "id": "2",
     "name": "Matcha Strawberry",
     "sizes": {
-      "6": 99,
+      "6": 98,
       "8": 100
     }
   },
@@ -19,7 +19,7 @@
     "id": "4",
     "name": "Pastel de Fresas",
     "sizes": {
-      "6": 99,
+      "6": 98,
       "8": 100
     }
   },
@@ -27,7 +27,7 @@
     "id": "5",
     "name": "Pastel de Arandanos",
     "sizes": {
-      "6": 99,
+      "6": 98,
       "8": 100
     }
   },
@@ -35,7 +35,7 @@
     "id": "6",
     "name": "Pastel Lemon Pie",
     "sizes": {
-      "6": 99,
+      "6": 98,
       "8": 100
     }
   },
@@ -43,7 +43,7 @@
     "id": "7",
     "name": "Pastel de Chinola",
     "sizes": {
-      "6": 99,
+      "6": 98,
       "8": 100
     }
   }

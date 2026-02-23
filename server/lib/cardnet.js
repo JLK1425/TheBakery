@@ -76,7 +76,7 @@ function formatAmount(amount) {
  * @param {Object} params - { subtotal, tax, total, ordenId, clientIp, items }
  * @returns {Object} - { SESSION, authorizeUrl, ordenId }
  */
-async function createSession({ subtotal, tax, total, ordenId, clientIp, items }) {
+async function createSession({ subtotal, tax, total, ordenId, clientIp, items, customer }) {
   const transactionId = generateTransactionId();
   const finalOrdenId = ordenId || generateOrdenId();
 
@@ -144,7 +144,7 @@ async function createSession({ subtotal, tax, total, ordenId, clientIp, items })
     console.error('[CARDNET] session-key ausente. responseText completo:', responseText);
   }
 
-  // Guardar session-key para verificación posterior (NUNCA enviar al frontend)
+  // Guardar session-key y datos del cliente para verificación posterior (NUNCA enviar al frontend)
   const storedData = {
     sessionKey: data['session-key'],
     ordenId: finalOrdenId,
@@ -153,6 +153,7 @@ async function createSession({ subtotal, tax, total, ordenId, clientIp, items })
     total,
     tax,
     items,
+    customer: customer || {},
     createdAt: new Date().toISOString()
   };
   sessionStore.set(data.SESSION, storedData);

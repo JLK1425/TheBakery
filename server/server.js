@@ -525,7 +525,7 @@ app.post('/api/pay/redirect', async function (req, res) { ... });
 // === CARDNET: Crear sesión de pago ===
 app.post('/api/pay/session', async (req, res) => {
   try {
-    const { line_items, items, total } = req.body;
+    const { line_items, items, total, customer } = req.body;
 
     console.log('[CARDNET] Recibido request de pago');
 
@@ -558,7 +558,8 @@ app.post('/api/pay/session', async (req, res) => {
       tax,
       total: totalAmount,
       clientIp,
-      items: line_items || items
+      items: line_items || items,
+      customer: customer || {}
     });
 
     // Responder al frontend con SESSION y URL del gateway
@@ -665,6 +666,9 @@ app.get('/api/pay/verify', async (req, res) => {
         orders = [];
       }
 
+      // Obtener datos del cliente desde la sesión guardada
+      const sessionData = result.originalData.customer || {};
+
       orders.push({
         id: result.ordenId,
         paymentMethod: 'cardnet',
@@ -677,6 +681,17 @@ app.get('/api/pay/verify', async (req, res) => {
         tax: result.originalData.tax,
         total: result.originalData.total,
         items: result.originalData.items,
+        customerName: [sessionData.firstName, sessionData.lastName].filter(Boolean).join(' ') || 'Cliente',
+        customer: {
+          name: [sessionData.firstName, sessionData.lastName].filter(Boolean).join(' ') || 'Cliente',
+          firstName: sessionData.firstName || '',
+          lastName: sessionData.lastName || '',
+          phone: sessionData.phone || '',
+          email: sessionData.email || null,
+          cedulaLast4: sessionData.cedulaLast4 || null,
+          deliveryDate: sessionData.deliveryDate || null,
+          pickupTime: sessionData.pickupTime || null
+        },
         status: 'Pendiente',
         createdAt: new Date().toISOString()
       });

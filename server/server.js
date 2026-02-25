@@ -542,7 +542,7 @@ app.post('/api/pay/redirect', async function (req, res) { ... });
 // === CARDNET: Crear sesión de pago ===
 app.post('/api/pay/session', async (req, res) => {
   try {
-    const { line_items, items, total, customer } = req.body;
+    const { line_items, items, total, customer, discount } = req.body;
 
     console.log('[CARDNET] Recibido request de pago');
 
@@ -576,7 +576,8 @@ app.post('/api/pay/session', async (req, res) => {
       total: totalAmount,
       clientIp,
       items: line_items || items,
-      customer: customer || {}
+      customer: customer || {},
+      discount: discount || null
     });
 
     // Responder al frontend con SESSION y URL del gateway
@@ -698,6 +699,7 @@ app.get('/api/pay/verify', async (req, res) => {
         tax: result.originalData.tax,
         total: result.originalData.total,
         items: result.originalData.items,
+        discount: result.originalData.discount || null,
         customerName: [sessionData.firstName, sessionData.lastName].filter(Boolean).join(' ') || 'Cliente',
         customer: {
           name: [sessionData.firstName, sessionData.lastName].filter(Boolean).join(' ') || 'Cliente',

@@ -76,7 +76,7 @@ function formatAmount(amount) {
  * @param {Object} params - { subtotal, tax, total, ordenId, clientIp, items }
  * @returns {Object} - { SESSION, authorizeUrl, ordenId }
  */
-async function createSession({ subtotal, tax, total, ordenId, clientIp, items, customer }) {
+async function createSession({ subtotal, tax, total, ordenId, clientIp, items, customer, discount }) {
   const transactionId = generateTransactionId();
   const finalOrdenId = ordenId || generateOrdenId();
 
@@ -154,6 +154,7 @@ async function createSession({ subtotal, tax, total, ordenId, clientIp, items, c
     tax,
     items,
     customer: customer || {},
+    discount: discount || null,
     createdAt: new Date().toISOString()
   };
   sessionStore.set(data.SESSION, storedData);

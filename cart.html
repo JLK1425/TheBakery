@@ -109,6 +109,28 @@
       background: #d1d5db;
       cursor: not-allowed;
     }
+    .discount-section {
+      margin: 1rem 0;
+      padding: 1rem 0;
+      border-top: 1px dashed #e5e7eb;
+      border-bottom: 1px dashed #e5e7eb;
+    }
+    .discount-input-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .discount-input-row input:focus {
+      outline: none;
+      border-color: #8b5cf6;
+    }
+    #applyDiscountBtn:hover {
+      background: #7c3aed;
+    }
+    #applyDiscountBtn:disabled {
+      background: #c4b5fd;
+      cursor: not-allowed;
+    }
     .empty-cart {
       text-align: center;
       padding: 60px 20px;
@@ -284,6 +306,34 @@
         <div class="summary-row">
           <span>Subtotal</span>
           <span id="subtotal">RD$0.00</span>
+        </div>
+
+        <!-- Código de Descuento -->
+        <div class="discount-section" id="discountSection">
+          <div class="discount-input-row">
+            <input type="text" id="discountCode" placeholder="Código de descuento"
+              maxlength="20" autocomplete="off"
+              style="flex: 1; padding: 0.625rem 1rem; border: 2px solid #e5e7eb; border-radius: 8px;
+              font-size: 0.875rem; text-transform: uppercase; font-family: monospace; letter-spacing: 1px;
+              transition: border-color 0.2s;">
+            <button id="applyDiscountBtn" onclick="window.applyDiscount()"
+              style="padding: 0.625rem 1.25rem; background: #8b5cf6; color: white; border: none;
+              border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.875rem;
+              transition: background 0.2s; white-space: nowrap;">
+              Aplicar
+            </button>
+          </div>
+          <div id="discountMessage" style="display: none; margin-top: 0.5rem; font-size: 0.813rem; padding: 0.5rem 0.75rem; border-radius: 6px;"></div>
+          <div id="discountApplied" style="display: none; margin-top: 0.5rem; align-items: center; justify-content: space-between; background: #f0fdf4; padding: 0.625rem 1rem; border-radius: 8px; border: 1px solid #bbf7d0;">
+            <span id="discountText" style="color: #15803d; font-weight: 600; font-size: 0.875rem;"></span>
+            <button onclick="window.removeDiscount()"
+              style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1rem; padding: 0.25rem;">✕</button>
+          </div>
+        </div>
+
+        <div class="summary-row" id="discountSummaryRow" style="display: none;">
+          <span>Descuento (<span id="discountSummaryCode"></span>)</span>
+          <span id="discountSummaryAmount" style="color: #15803d; font-weight: 600;"></span>
         </div>
 
         <div class="summary-row">

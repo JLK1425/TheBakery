@@ -317,6 +317,10 @@ function readAdminUsers() {
   }
 }
 
+function writeAdminUsers(users) {
+  fs.writeFileSync(ADMIN_USERS_FILE, JSON.stringify(users, null, 2));
+}
+
 function findUserByEmail(email) {
   const users = readAdminUsers();
   const e = (email || '').trim().toLowerCase();
@@ -753,8 +757,8 @@ app.get('/api/promotions/:id', requireAdmin, (req, res) => {
   res.json(promo);
 });
 
-// ── POST /api/promotions — Crear nueva promoción (admin) ──
-app.post('/api/promotions', requireAdmin, (req, res) => {
+// ── POST /api/promotions — Crear nueva promoción (solo superadmin) ──
+app.post('/api/promotions', requireAdmin, requireSuperAdmin, (req, res) => {
   const { code, description, type, value, minPurchase, maxUses, startDate, endDate, onePerCustomer } = req.body;
 
   // Validaciones
@@ -802,8 +806,8 @@ app.post('/api/promotions', requireAdmin, (req, res) => {
   res.status(201).json(newPromo);
 });
 
-// ── PUT /api/promotions/:id — Editar promoción (admin) ──
-app.put('/api/promotions/:id', requireAdmin, (req, res) => {
+// ── PUT /api/promotions/:id — Editar promoción (solo superadmin) ──
+app.put('/api/promotions/:id', requireAdmin, requireSuperAdmin, (req, res) => {
   const promotions = readPromotions();
   const index = promotions.findIndex(p => p.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Promoción no encontrada' });
@@ -837,8 +841,8 @@ app.put('/api/promotions/:id', requireAdmin, (req, res) => {
   res.json(promotions[index]);
 });
 
-// ── DELETE /api/promotions/:id — Eliminar promoción (admin) ──
-app.delete('/api/promotions/:id', requireAdmin, (req, res) => {
+// ── DELETE /api/promotions/:id — Eliminar promoción (solo superadmin) ──
+app.delete('/api/promotions/:id', requireAdmin, requireSuperAdmin, (req, res) => {
   let promotions = readPromotions();
   const promo = promotions.find(p => p.id === req.params.id);
   if (!promo) return res.status(404).json({ error: 'Promoción no encontrada' });
@@ -850,8 +854,8 @@ app.delete('/api/promotions/:id', requireAdmin, (req, res) => {
   res.json({ ok: true, deleted: promo.code });
 });
 
-// ── PATCH /api/promotions/:id/toggle — Activar/desactivar (admin) ──
-app.patch('/api/promotions/:id/toggle', requireAdmin, (req, res) => {
+// ── PATCH /api/promotions/:id/toggle — Activar/desactivar (solo superadmin) ──
+app.patch('/api/promotions/:id/toggle', requireAdmin, requireSuperAdmin, (req, res) => {
   const promotions = readPromotions();
   const promo = promotions.find(p => p.id === req.params.id);
   if (!promo) return res.status(404).json({ error: 'Promoción no encontrada' });
@@ -1315,6 +1319,146 @@ app.post('/api/auth/logout', (req, res) => {
     res.clearCookie('connect.sid', { path: '/' });
     res.json({ ok: true });
   });
+});
+
+// =====================
+//  GESTIÓN DE USUARIOS ADMIN
+// =====================
+
+// GET /api/admin/users — Listar usuarios (solo superadmin)
+app.get('/api/admin/users', requireAdmin, requireSuperAdmin, (req, res) => {
+  const users = readAdminUsers();
+  const safeUsers = users.map(u => ({
+    id: u.id,
+    email: u.email,
+    name: u.name || '',
+    role: u.role || 'admin',
+    createdAt: u.createdAt || null,
+    updatedAt: u.updatedAt || null
+  }));
+  res.json(safeUsers);
+});
+
+// POST /api/admin/users — Crear usuario (solo superadmin)
+app.post('/api/admin/users', requireAdmin, requireSuperAdmin, async (req, res) => {
+  const { email, name, password, role } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+  }
+
+  const validRoles = ['admin', 'superadmin'];
+  const userRole = validRoles.includes(role) ? role : 'admin';
+
+  const users = readAdminUsers();
+  const emailNorm = email.trim().toLowerCase();
+
+  if (users.some(u => u.email.toLowerCase() === emailNorm)) {
+    return res.status(400).json({ error: 'Ya existe un usuario con ese email' });
+  }
+
+  try {
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const newUser = {
+      id: 'admin-' + Date.now(),
+      email: emailNorm,
+      name: (name || '').trim(),
+      passwordHash: passwordHash,
+      role: userRole,
+      createdAt: new Date().toISOString()
+    };
+
+    users.push(newUser);
+    writeAdminUsers(users);
+
+    console.log(`[USERS] Usuario creado: ${emailNorm} (${userRole})`);
+    res.status(201).json({
+      id: newUser.id,
+      email: newUser.email,
+      name: newUser.name,
+      role: newUser.role,
+      createdAt: newUser.createdAt
+    });
+  } catch (err) {
+    console.error('Error creando usuario:', err);
+    res.status(500).json({ error: 'Error interno al crear usuario' });
+  }
+});
+
+// PUT /api/admin/users/:id — Editar usuario (solo superadmin)
+app.put('/api/admin/users/:id', requireAdmin, requireSuperAdmin, async (req, res) => {
+  const users = readAdminUsers();
+  const index = users.findIndex(u => String(u.id) === String(req.params.id));
+  if (index === -1) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+  const { email, name, password, role } = req.body;
+
+  if (String(users[index].id) === String(req.session.user.id) && role && role !== 'superadmin') {
+    return res.status(400).json({ error: 'No puedes cambiar tu propio rol de superadmin' });
+  }
+
+  if (email) {
+    const emailNorm = email.trim().toLowerCase();
+    const duplicate = users.find(u => u.email.toLowerCase() === emailNorm && String(u.id) !== String(req.params.id));
+    if (duplicate) {
+      return res.status(400).json({ error: 'Ya existe otro usuario con ese email' });
+    }
+    users[index].email = emailNorm;
+  }
+
+  if (name !== undefined) users[index].name = name.trim();
+  if (role) {
+    const validRoles = ['admin', 'superadmin'];
+    if (validRoles.includes(role)) users[index].role = role;
+  }
+
+  if (password && password.length >= 6) {
+    try {
+      users[index].passwordHash = await bcrypt.hash(password, 10);
+    } catch (err) {
+      return res.status(500).json({ error: 'Error al hashear contraseña' });
+    }
+  }
+
+  users[index].updatedAt = new Date().toISOString();
+  writeAdminUsers(users);
+
+  console.log(`[USERS] Usuario actualizado: ${users[index].email}`);
+  res.json({
+    id: users[index].id,
+    email: users[index].email,
+    name: users[index].name,
+    role: users[index].role,
+    updatedAt: users[index].updatedAt
+  });
+});
+
+// DELETE /api/admin/users/:id — Eliminar usuario (solo superadmin)
+app.delete('/api/admin/users/:id', requireAdmin, requireSuperAdmin, (req, res) => {
+  let users = readAdminUsers();
+  const user = users.find(u => String(u.id) === String(req.params.id));
+
+  if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+  if (String(user.id) === String(req.session.user.id)) {
+    return res.status(400).json({ error: 'No puedes eliminar tu propia cuenta' });
+  }
+
+  const superadmins = users.filter(u => u.role === 'superadmin');
+  if (user.role === 'superadmin' && superadmins.length <= 1) {
+    return res.status(400).json({ error: 'No puedes eliminar el último superadmin' });
+  }
+
+  users = users.filter(u => String(u.id) !== String(req.params.id));
+  writeAdminUsers(users);
+
+  console.log(`[USERS] Usuario eliminado: ${user.email}`);
+  res.json({ ok: true, deleted: user.email });
 });
 
 // =========================

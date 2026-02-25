@@ -1,98 +1,115 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestión de Usuarios - The Bakery Admin</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Usuarios - The Bakery by Fresarte</title>
   <script src="../TheBakery/assets/js/auth-guard.js"></script>
-  <link rel="stylesheet" href="../TheBakery/assets/css/style.css" />
-
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../TheBakery/assets/css/style.css">
+  <link rel="stylesheet" href="../TheBakery/assets/css/admin-sidebar.css">
   <style>
-    body {
-      background: #f9fafb;
-      font-family: var(--font);
-    }
-
     .admin-page {
       min-height: 100vh;
-      padding-top: 100px;
+      padding-top: 140px;
+      background: #f9fafb;
+      width: 100%;
+      margin: 0;
+      box-sizing: border-box;
     }
-
-    .admin-header {
+    .admin-top-header {
+      position: fixed;
+      top: 0;
+      left: 230px;
+      right: 0;
+      height: 60px;
       background: #fff;
-      border-bottom: 2px solid #e5e7eb;
-      padding: 2rem 0;
-      margin-bottom: 2rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,.05);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      transition: left 0.3s ease;
     }
+    .admin-top-header-logo img { width: 150px; height: auto; }
+    .admin-header-actions { display: flex; align-items: center; gap: 0.5rem; }
+    .admin-header-btn {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: transparent;
+      border: none;
+      color: #6b7280;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+    .admin-header-btn:hover { background: #f9fafb; color: #374151; }
+    .admin-header-btn-danger { color: #d7263d; }
+    .admin-header-btn-danger:hover { background: #d91a6b; color: #fff; }
 
-    .admin-header .container {
+    .users-container { max-width: 1000px; margin: 0 auto; padding: 0 24px 2rem; }
+    .users-section-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       flex-wrap: wrap;
       gap: 1rem;
+      margin-bottom: 2rem;
     }
-
-    .admin-title {
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--fg);
-      margin: 0;
-    }
-
-    .pink-btn {
-      background: #ef42a8;
-      color: white;
-      padding: 0.8rem 1.4rem;
-      border-radius: 10px;
-      font-weight: 700;
+    .users-section-header h1 { font-size: 2rem; font-weight: 800; color: var(--fg); margin: 0; }
+    .users-section-header p { color: var(--muted); margin: 0.25rem 0 0 0; font-size: 1rem; }
+    .users-note { font-size: 0.813rem; color: var(--muted); margin-top: 0.5rem; }
+    .btn-primary {
+      background: #8b5cf6;
+      color: #fff;
       border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
       cursor: pointer;
+      transition: background 0.2s;
     }
+    .btn-primary:hover { background: #7c3aed; }
 
-    .pink-btn:hover {
-      background: #d93697;
-    }
-
-    table {
-      width: 100%;
-      background: white;
+    .users-table-wrap {
+      background: #fff;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
     }
-
-    th, td {
-      padding: 1rem;
-      border-bottom: 1px solid #e5e7eb;
-      text-align: left;
+    .users-table { width: 100%; border-collapse: collapse; }
+    .users-table th, .users-table td { padding: 1rem; border-bottom: 1px solid #e5e7eb; text-align: left; }
+    .users-table th { background: #f3f4f6; font-weight: 700; color: #374151; }
+    .users-table tr:hover { background: #f9fafb; }
+    .role-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
     }
-
-    th {
-      background: #ffe9f5;
-      font-weight: 700;
-      color: #b11c7a;
-    }
-
-    tr:hover {
-      background: #fff3fa;
-    }
-
-    .delete-btn {
-      background: #ef4444;
-      color: white;
-      padding: 6px 12px;
+    .role-badge.role-superadmin { background: #ede9fe; color: #6d28d9; }
+    .role-badge.role-admin { background: #fce7f3; color: #be185d; }
+    .btn-action {
+      padding: 0.4rem 0.75rem;
       border-radius: 6px;
       border: none;
+      font-size: 0.813rem;
+      font-weight: 500;
       cursor: pointer;
+      margin-right: 0.5rem;
+      transition: background 0.2s;
     }
+    .btn-action.btn-edit { background: #e0e7ff; color: #4338ca; }
+    .btn-action.btn-edit:hover { background: #c7d2fe; }
+    .btn-action.btn-delete { background: #fee2e2; color: #b91c1c; }
+    .btn-action.btn-delete:hover { background: #fecaca; }
+    .btn-action.btn-delete:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .delete-btn:hover {
-      background: #dc2626;
-    }
-
-    /* Modal */
-    .modal-bg {
+    .user-modal {
       display: none;
       position: fixed;
       top: 0; left: 0;
@@ -103,112 +120,170 @@
       align-items: center;
       z-index: 5000;
     }
-
-    .modal {
+    .user-modal.show { display: flex; }
+    .user-modal-content {
       background: white;
       padding: 2rem;
       border-radius: 16px;
       width: 90%;
       max-width: 450px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-      animation: fadeIn 0.2s ease;
     }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    .modal input, .modal select {
+    .user-modal-content h2 { margin: 0 0 1.5rem 0; font-size: 1.25rem; color: #374151; }
+    .user-modal-content input,
+    .user-modal-content select {
       width: 100%;
-      padding: 12px;
+      padding: 0.75rem 1rem;
       margin-bottom: 1rem;
-      border-radius: 10px;
+      border-radius: 8px;
       border: 2px solid #e5e7eb;
+      font-size: 0.875rem;
+      box-sizing: border-box;
     }
-
-    .modal input:focus, .modal select:focus {
-      border-color: #ef42a8;
+    .user-modal-content input:focus,
+    .user-modal-content select:focus {
       outline: none;
+      border-color: #8b5cf6;
     }
-
-    .modal-actions {
+    .user-modal-actions {
       display: flex;
       justify-content: flex-end;
-      gap: 1rem;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
     }
+    .user-modal-actions .btn-primary { margin: 0; }
+    .user-modal-actions button:last-child {
+      background: #e5e7eb;
+      color: #374151;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .user-modal-actions button:last-child:hover { background: #d1d5db; }
 
+    @media (max-width: 768px) {
+      .admin-sidebar.collapsed ~ .admin-top-header,
+      .admin-top-header { left: 0; }
+      .admin-page { padding-top: 100px; }
+      .users-container { padding: 0 1rem 2rem; }
+    }
   </style>
 </head>
 
 <body id="bakery-landing" class="is-white">
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-  <!-- NAV -->
-  <nav class="nav" id="nav">
-    <div class="container wrap">
-      <div class="brand">
-        <a href="../index-original.html">
-          <img src="../TheBakery/assets/imagenes/logo.png" style="height:36px" />
-        </a>
-      </div>
-      <div class="nav-actions">
-        <a href="clientes.html" class="nav-action-btn">Clientes</a>
-        <a href="pedidos.html" class="nav-action-btn">← Volver</a>
-      </div>
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-header">
+      <img src="../TheBakery/assets/imagenes/logo.png" alt="The Bakery" class="sidebar-logo">
     </div>
-  </nav>
-
-  <!-- PAGE -->
-  <main class="admin-page">
-    <div class="admin-header">
-      <div class="container" id="usuariosHeader">
-        <h1 class="admin-title">Gestión de Usuarios</h1>
-        <button class="pink-btn" id="btnNuevoUser">Crear Usuario</button>
-      </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Inicio</span>
+      </a>
+      <a href="pedidos.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+        <span>Pedidos</span>
+      </a>
+      <a href="clientes.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span>Clientes</span>
+      </a>
+      <a href="stock-pasteles.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-4M4 7h4m0 0v13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7m0 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3M10 7V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v3m8 0h4"></path></svg>
+        <span>Stock de Pasteles</span>
+      </a>
+      <a href="reportes.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Reportes</span>
+      </a>
+      <a href="promociones.html" class="sidebar-nav-item"><span>🏷️</span><span>Promociones</span></a>
+      <a href="usuarios.html" class="sidebar-nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <span>Usuarios</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" class="sidebar-footer-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path></svg>
+        <span>Configuración</span>
+      </a>
     </div>
+  </aside>
 
-    <div class="container">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Rol</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody id="usersTableBody">
-          <tr><td colspan="5" style="text-align:center;">Cargando...</td></tr>
-        </tbody>
-      </table>
+  <header class="admin-top-header">
+    <div class="admin-top-header-logo">
+      <img src="../TheBakery/assets/imagenes/logo.png" alt="The Bakery">
     </div>
-  </main>
+    <div class="admin-header-actions">
+      <button class="admin-header-btn" id="refreshBtn">Actualizar</button>
+      <button class="admin-header-btn admin-header-btn-danger" id="logoutBtn">Cerrar Sesión</button>
+    </div>
+  </header>
 
-  <!-- MODAL CREAR USUARIO -->
-  <div class="modal-bg" id="modalUser">
-    <div class="modal">
-      <h2 style="margin-top:0;">Crear Usuario</h2>
+  <div class="admin-content-wrapper">
+    <main class="admin-page">
+      <div id="mainContent" class="users-container">
+        <div class="users-section-header">
+          <div>
+            <h1>Gestión de Usuarios</h1>
+            <p>Administra quién tiene acceso al panel</p>
+            <p class="users-note">Solo visible para SuperAdmin</p>
+          </div>
+          <button type="button" class="btn-primary" id="createUserBtn">➕ Nuevo Usuario</button>
+        </div>
 
-      <input id="newName" placeholder="Nombre completo" />
-      <input id="newEmail" placeholder="Correo" type="email" />
-      <input id="newPass" placeholder="Contraseña" type="password" />
-
-      <select id="newRole">
-        <option value="admin">Admin</option>
-        <option value="superadmin">SuperAdmin</option>
-      </select>
-
-      <div class="modal-actions">
-        <button class="pink-btn" id="btnGuardarUser">Guardar</button>
-        <button class="delete-btn" id="btnCerrarModal">Cancelar</button>
+        <div class="users-table-wrap">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Creado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr><td colspan="5" style="text-align:center;padding:2rem;">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
+    </main>
+  </div>
+
+  <!-- Modal crear/editar usuario -->
+  <div class="user-modal" id="userModal">
+    <div class="user-modal-content">
+      <h2 id="userModalTitle">Nuevo Usuario</h2>
+      <form id="userForm" onsubmit="event.preventDefault(); window.saveUser();">
+        <input type="text" id="userName" placeholder="Nombre completo" autocomplete="name">
+        <input type="email" id="userEmail" placeholder="Email" required autocomplete="email">
+        <input type="password" id="userPassword" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+        <select id="userRole">
+          <option value="admin">Admin</option>
+          <option value="superadmin">SuperAdmin</option>
+        </select>
+        <div class="user-modal-actions">
+          <button type="submit" class="btn-primary">Guardar</button>
+          <button type="button" onclick="window.closeUserModal()">Cancelar</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="../TheBakery/assets/js/usuarios.js"></script>
-
+  <script src="../TheBakery/assets/js/admin-sidebar.js"></script>
+  <script src="../TheBakery/assets/js/admin-usuarios.js"></script>
 </body>
 </html>
-

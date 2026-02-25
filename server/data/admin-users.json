@@ -1,16 +1,5 @@
 [
-  {
-    "id": 1,
-    "email": "admin@ejemplo.com",
-    "passwordHash": "$2b$10$4sg0MrRDR5ERXofDe7rFwel/8jsW.Mx6xhKFBg4fMKZ9d7OlnjeZK",
-    "role": "admin"
-  },
-  {
-    "id": "admin-1770418234091",
-    "email": "admin@thebakery.com",
-    "passwordHash": "$2b$10$lPufUfxavokBjTU/.7XkKuqanRJyoa0OrYi.3vSvluVGHJBZ8oF.6",
-    "role": "admin",
-    "createdAt": "2026-02-06T22:50:33.854Z",
-    "updatedAt": "2026-02-08T13:48:44.237Z"
-  }
+  {"id":1,"email":"admin@ejemplo.com","passwordHash":"$2b$10$4sg0MrRDR5ERXofDe7rFwel/8jsW.Mx6xhKFBg4fMKZ9d7OlnjeZK","role":"admin"},
+  {"id":"admin-1770418234091","email":"admin@thebakery.com","passwordHash":"$2b$10$lPufUfxavokBjTU/.7XkKuqanRJyoa0OrYi.3vSvluVGHJBZ8oF.6","role":"admin","createdAt":"2026-02-06T22:50:33.854Z","updatedAt":"2026-02-08T13:48:44.237Z"},
+  {"id":"superadmin-001","email":"j.abreu@grupopeguero.com","name":"Joel Abreu","passwordHash":"$2b$10$XTRULA6VjwB67l0vC6K5BuEU81dLnrPVD1Q4/xICR5zH.k2OQx5vO","role":"superadmin","createdAt":"2026-02-24T00:00:00.000Z"}
 ]

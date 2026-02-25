@@ -1,0 +1,18 @@
+[
+  {
+    "id": "PROMO-1771980632125",
+    "code": "PRUEBA10",
+    "description": "",
+    "type": "percentage",
+    "value": 10,
+    "minPurchase": 500,
+    "maxUses": 2500,
+    "currentUses": 0,
+    "startDate": "2026-02-25",
+    "endDate": "2026-02-26",
+    "onePerCustomer": true,
+    "usedBy": [],
+    "active": true,
+    "createdAt": "2026-02-25T00:50:32.125Z"
+  }
+]

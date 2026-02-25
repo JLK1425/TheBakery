@@ -139,6 +139,23 @@ function writeArchivedOrders(data) {
   fs.writeFileSync(ARCHIVED_ORDERS_FILE, JSON.stringify(data, null, 2));
 }
 
+// =====================
+//  PROMOTIONS / DESCUENTOS
+// =====================
+const PROMOTIONS_FILE = path.join(__dirname, 'data', 'promotions.json');
+
+function readPromotions() {
+  try {
+    return JSON.parse(fs.readFileSync(PROMOTIONS_FILE, 'utf8'));
+  } catch (e) {
+    return [];
+  }
+}
+
+function writePromotions(promotions) {
+  fs.writeFileSync(PROMOTIONS_FILE, JSON.stringify(promotions, null, 2));
+}
+
 // Generar resumen de un grupo de pedidos
 function generateDaySummary(orders) {
   const cakeMap = {};
@@ -714,6 +731,230 @@ app.get('/api/pay/verify', async (req, res) => {
 // Health check (para validar conectividad desde el frontend)
 app.get('/health', (req, res) => {
   res.json({ ok: true, status: 'ok', message: 'The Bakery Server is running' });
+});
+
+// =========================
+//  PROMOCIONES / DESCUENTOS
+// =========================
+
+// ── GET /api/promotions — Listar todas las promociones (admin) ──
+app.get('/api/promotions', requireAdmin, (req, res) => {
+  const promotions = readPromotions();
+  res.json(promotions);
+});
+
+// ── GET /api/promotions/:id — Obtener una promoción (admin) ──
+app.get('/api/promotions/:id', requireAdmin, (req, res) => {
+  const promotions = readPromotions();
+  const promo = promotions.find(p => p.id === req.params.id);
+  if (!promo) return res.status(404).json({ error: 'Promoción no encontrada' });
+  res.json(promo);
+});
+
+// ── POST /api/promotions — Crear nueva promoción (admin) ──
+app.post('/api/promotions', requireAdmin, (req, res) => {
+  const { code, description, type, value, minPurchase, maxUses, startDate, endDate, onePerCustomer } = req.body;
+
+  // Validaciones
+  if (!code || !type || !value) {
+    return res.status(400).json({ error: 'Código, tipo y valor son obligatorios' });
+  }
+
+  if (!['percentage', 'fixed'].includes(type)) {
+    return res.status(400).json({ error: 'Tipo debe ser "percentage" o "fixed"' });
+  }
+
+  if (type === 'percentage' && (value < 1 || value > 100)) {
+    return res.status(400).json({ error: 'Porcentaje debe ser entre 1 y 100' });
+  }
+
+  const promotions = readPromotions();
+
+  // Verificar código único (case-insensitive)
+  const codeUpper = code.toUpperCase().trim();
+  if (promotions.some(p => p.code === codeUpper)) {
+    return res.status(400).json({ error: 'Ya existe una promoción con ese código' });
+  }
+
+  const newPromo = {
+    id: 'PROMO-' + Date.now(),
+    code: codeUpper,
+    description: description || '',
+    type: type,
+    value: parseFloat(value),
+    minPurchase: parseFloat(minPurchase) || 0,
+    maxUses: parseInt(maxUses) || 0, // 0 = ilimitado
+    currentUses: 0,
+    startDate: startDate || null,
+    endDate: endDate || null,
+    onePerCustomer: onePerCustomer || false,
+    usedBy: [], // emails/cédulas de quienes lo usaron
+    active: true,
+    createdAt: new Date().toISOString()
+  };
+
+  promotions.push(newPromo);
+  writePromotions(promotions);
+
+  console.log(`[PROMO] Nueva promoción creada: ${codeUpper} (${type} ${value})`);
+  res.status(201).json(newPromo);
+});
+
+// ── PUT /api/promotions/:id — Editar promoción (admin) ──
+app.put('/api/promotions/:id', requireAdmin, (req, res) => {
+  const promotions = readPromotions();
+  const index = promotions.findIndex(p => p.id === req.params.id);
+  if (index === -1) return res.status(404).json({ error: 'Promoción no encontrada' });
+
+  const { code, description, type, value, minPurchase, maxUses, startDate, endDate, onePerCustomer, active } = req.body;
+
+  // Si cambian el código, verificar que no exista otro con ese código
+  if (code) {
+    const codeUpper = code.toUpperCase().trim();
+    const duplicate = promotions.find(p => p.code === codeUpper && p.id !== req.params.id);
+    if (duplicate) {
+      return res.status(400).json({ error: 'Ya existe otra promoción con ese código' });
+    }
+    promotions[index].code = codeUpper;
+  }
+
+  if (description !== undefined) promotions[index].description = description;
+  if (type) promotions[index].type = type;
+  if (value !== undefined) promotions[index].value = parseFloat(value);
+  if (minPurchase !== undefined) promotions[index].minPurchase = parseFloat(minPurchase) || 0;
+  if (maxUses !== undefined) promotions[index].maxUses = parseInt(maxUses) || 0;
+  if (startDate !== undefined) promotions[index].startDate = startDate;
+  if (endDate !== undefined) promotions[index].endDate = endDate;
+  if (onePerCustomer !== undefined) promotions[index].onePerCustomer = onePerCustomer;
+  if (active !== undefined) promotions[index].active = active;
+
+  promotions[index].updatedAt = new Date().toISOString();
+  writePromotions(promotions);
+
+  console.log(`[PROMO] Promoción actualizada: ${promotions[index].code}`);
+  res.json(promotions[index]);
+});
+
+// ── DELETE /api/promotions/:id — Eliminar promoción (admin) ──
+app.delete('/api/promotions/:id', requireAdmin, (req, res) => {
+  let promotions = readPromotions();
+  const promo = promotions.find(p => p.id === req.params.id);
+  if (!promo) return res.status(404).json({ error: 'Promoción no encontrada' });
+
+  promotions = promotions.filter(p => p.id !== req.params.id);
+  writePromotions(promotions);
+
+  console.log(`[PROMO] Promoción eliminada: ${promo.code}`);
+  res.json({ ok: true, deleted: promo.code });
+});
+
+// ── PATCH /api/promotions/:id/toggle — Activar/desactivar (admin) ──
+app.patch('/api/promotions/:id/toggle', requireAdmin, (req, res) => {
+  const promotions = readPromotions();
+  const promo = promotions.find(p => p.id === req.params.id);
+  if (!promo) return res.status(404).json({ error: 'Promoción no encontrada' });
+
+  promo.active = !promo.active;
+  promo.updatedAt = new Date().toISOString();
+  writePromotions(promotions);
+
+  console.log(`[PROMO] ${promo.code} ${promo.active ? 'activada' : 'desactivada'}`);
+  res.json(promo);
+});
+
+// ── POST /api/promotions/validate — Validar código de descuento (público) ──
+app.post('/api/promotions/validate', (req, res) => {
+  const { code, subtotal, customerEmail, customerCedula } = req.body;
+
+  if (!code) {
+    return res.status(400).json({ error: 'Código requerido' });
+  }
+
+  const promotions = readPromotions();
+  const promo = promotions.find(p => p.code === code.toUpperCase().trim());
+
+  if (!promo) {
+    return res.status(404).json({ error: 'Código de descuento no válido' });
+  }
+
+  // Verificar si está activa
+  if (!promo.active) {
+    return res.status(400).json({ error: 'Esta promoción no está activa' });
+  }
+
+  // Verificar fechas
+  const now = new Date();
+  if (promo.startDate && new Date(promo.startDate) > now) {
+    return res.status(400).json({ error: 'Esta promoción aún no está vigente' });
+  }
+  if (promo.endDate && new Date(promo.endDate) < now) {
+    return res.status(400).json({ error: 'Esta promoción ha expirado' });
+  }
+
+  // Verificar usos máximos
+  if (promo.maxUses > 0 && promo.currentUses >= promo.maxUses) {
+    return res.status(400).json({ error: 'Esta promoción ha alcanzado su límite de usos' });
+  }
+
+  // Verificar monto mínimo
+  if (promo.minPurchase > 0 && subtotal < promo.minPurchase) {
+    return res.status(400).json({
+      error: `Compra mínima de RD$${promo.minPurchase.toLocaleString()} requerida`
+    });
+  }
+
+  // Verificar un uso por cliente
+  if (promo.onePerCustomer) {
+    const identifier = customerEmail || customerCedula;
+    if (identifier && promo.usedBy.includes(identifier.toLowerCase())) {
+      return res.status(400).json({ error: 'Ya has usado este código de descuento' });
+    }
+  }
+
+  // Calcular descuento
+  let discount = 0;
+  if (promo.type === 'percentage') {
+    discount = Math.round((subtotal * promo.value / 100) * 100) / 100;
+  } else {
+    discount = Math.min(promo.value, subtotal); // No puede ser mayor que el subtotal
+  }
+
+  res.json({
+    valid: true,
+    code: promo.code,
+    type: promo.type,
+    value: promo.value,
+    discount: discount,
+    description: promo.description,
+    message: promo.type === 'percentage'
+      ? `${promo.value}% de descuento aplicado`
+      : `RD$${promo.value.toLocaleString()} de descuento aplicado`
+  });
+});
+
+// ── POST /api/promotions/use — Registrar uso de promoción (se llama al confirmar pago) ──
+app.post('/api/promotions/use', (req, res) => {
+  const { code, customerEmail, customerCedula } = req.body;
+
+  if (!code) return res.status(400).json({ error: 'Código requerido' });
+
+  const promotions = readPromotions();
+  const promo = promotions.find(p => p.code === code.toUpperCase().trim());
+
+  if (!promo) return res.status(404).json({ error: 'Promoción no encontrada' });
+
+  promo.currentUses += 1;
+
+  const identifier = (customerEmail || customerCedula || '').toLowerCase();
+  if (identifier && !promo.usedBy.includes(identifier)) {
+    promo.usedBy.push(identifier);
+  }
+
+  promo.lastUsedAt = new Date().toISOString();
+  writePromotions(promotions);
+
+  console.log(`[PROMO] Código ${promo.code} usado (uso #${promo.currentUses})`);
+  res.json({ ok: true });
 });
 
 // =========================

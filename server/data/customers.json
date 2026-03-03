@@ -213,5 +213,17 @@
     "pickupTime": "21:00",
     "createdAt": "2026-02-25T00:20:15.576Z",
     "marketingConsent": true
+  },
+  {
+    "id": "CUST-1772228494887",
+    "firstName": "Camila",
+    "lastName": "santos",
+    "phone": "8097926278",
+    "email": "marcusloungeandgrill@gmail.com",
+    "cedulaLast4": null,
+    "deliveryDate": "2026-03-03",
+    "pickupTime": "17:00",
+    "createdAt": "2026-02-27T21:41:34.889Z",
+    "marketingConsent": true
   }
 ]

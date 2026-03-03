@@ -3,7 +3,7 @@
     "id": "1",
     "name": "Pastel de Coco",
     "sizes": {
-      "6": 96,
+      "6": 95,
       "8": 100
     }
   },
@@ -11,7 +11,7 @@
     "id": "2",
     "name": "Matcha Strawberry",
     "sizes": {
-      "6": 98,
+      "6": 97,
       "8": 100
     }
   },
@@ -19,7 +19,7 @@
     "id": "4",
     "name": "Pastel de Fresas",
     "sizes": {
-      "6": 98,
+      "6": 97,
       "8": 100
     }
   },

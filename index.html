@@ -4,55 +4,514 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Bakery by Fresarte | Coming Soon</title>
+  <title>The Bakery by Fresarte</title>
+  <link rel="stylesheet" href="TheBakery/assets/css/style.css">
   <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-family: 'Poppins', sans-serif;
-      background-color: #fffafc;
-      color: #374151;
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      color: #e47b91;
-      margin-bottom: 10px;
-    }
-
-    p {
-      font-size: 1.2rem;
-      margin-bottom: 20px;
-    }
-
-    .img-logo {
-      width: 180px;
-      display: block;
-      margin: 80px auto 20px;
-    }
-
-    .footer {
-      position: absolute;
-      bottom: 20px;
-      font-size: 0.9rem;
-      color: #aaa;
-    }
+    .frame-carousel { padding: 0; overflow: hidden; height: 300px; max-height: 300px; }
+    .carousel-historia { position: relative; width: 100%; height: 300px; max-height: 300px; border-radius: 28px; overflow: hidden; background: #f3f4f6; }
+    .carousel-track { display: flex; transition: transform 0.4s ease-out; height: 100%; }
+    .carousel-slide { flex: 0 0 100%; height: 100%; max-height: 300px; display: flex; align-items: center; justify-content: center; background: #f3f4f6; overflow: hidden; }
+    .carousel-slide img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; object-position: center; display: block; }
+    .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 44px; height: 44px; border: none; border-radius: 50%; background: rgba(255,255,255,0.9); color: #be185d; font-size: 1.5rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: background 0.2s, transform 0.2s; }
+    .carousel-btn:hover { background: #fff; transform: translateY(-50%) scale(1.05); }
+    .carousel-prev { left: 12px; }
+    .carousel-next { right: 12px; }
+    .carousel-dots { position: absolute; bottom: 12px; left: 0; right: 0; display: flex; justify-content: center; gap: 8px; z-index: 2; }
+    .carousel-dots span { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.6); cursor: pointer; transition: background 0.2s, transform 0.2s; }
+    .carousel-dots span.active { background: var(--accent, #be185d); transform: scale(1.2); }
   </style>
 </head>
 
-<body>
-  <img src="assets/imagenes/logo.png" alt="The Bakery by fresarte" class="img-logo">
-  <h1>¡Estamos horneando algo delicioso!</h1>
-  <p>Nuestro nuevo sitio web estará disponible muy pronto.</p>
-  <p>Síguenos en <a href="https://www.instagram.com/fresartebakery" target="_blank"
-      style="color:#e47b91; text-decoration:none;">Instagram</a> para ver las novedades 🍰</p>
+<body id="bakery-landing" class="is-white">
 
-  <div class="footer">© 2025 The Bakery by Fresarte</div>
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <div class="container wrap">
+      <div class="brand">
+        <a href="index.html" style="display:inline-block">
+          <img src="TheBakery/assets/imagenes/logo.png" alt="The Bakery by Fresarte" style="height:36px">
+        </a>
+      </div>
+      <div class="nav-center">
+        <div class="links" id="navLinks">
+          <a href="#home" class="nav-link">Inicio</a>
+          <a href="pasteles-de-autor.html" class="nav-link">Pasteles de Autor</a>
+          <a href="#reviews" class="nav-link">Reseñas</a>
+          <a href="#about" class="nav-link">Nosotros</a>
+          <a href="#contact" class="nav-link">Contacto</a>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <!-- Search -->
+        <div class="search-container">
+          <button class="search-btn" id="searchBtn" aria-label="Buscar">
+            <svg class="icon-search" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <span class="search-text">Search</span>
+          </button>
+          <div class="search-overlay" id="searchOverlay">
+            <div class="search-box">
+              <input type="text" id="searchInput" placeholder="Buscar productos..." autocomplete="off">
+              <button class="search-close" id="searchClose" aria-label="Cerrar búsqueda">×</button>
+            </div>
+            <div class="search-results" id="searchResults"></div>
+          </div>
+        </div>
+        <!-- Login -->
+        <button class="nav-action-btn" id="loginBtn">
+          <svg class="icon-action" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span>Log in</span>
+        </button>
+        <!-- Cart -->
+        <button class="nav-action-btn" id="cartBtn">
+          <svg class="icon-action" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          <span>Cart</span>
+          <span class="cart-badge" id="cartBadge">0</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Login Modal -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal-content">
+      <button class="modal-close" id="loginClose" aria-label="Cerrar">×</button>
+      
+      <!-- Login Form -->
+      <div id="loginTitle">
+        <h2>Iniciar Sesión</h2>
+      </div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%" id="loginSubmitBtn">Iniciar Sesión</button>
+      </form>
+      <p class="modal-footer-text" id="loginFooter">
+        ¿No tienes cuenta? <a href="#" id="registerLink">Regístrate</a>
+      </p>
+
+      <!-- Register Form -->
+      <div id="registerTitle" style="display:none">
+        <h2>Crear Cuenta</h2>
+      </div>
+      <form id="registerForm" style="display:none">
+        <div class="form-group">
+          <label for="registerName">Nombre Completo</label>
+          <input type="text" id="registerName" required autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label for="registerEmail">Email</label>
+          <input type="email" id="registerEmail" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="registerPassword">Contraseña</label>
+          <input type="password" id="registerPassword" required autocomplete="new-password" minlength="6">
+          <small style="color:var(--muted); font-size:0.875rem">Mínimo 6 caracteres</small>
+        </div>
+        <div class="form-group">
+          <label for="registerConfirmPassword">Confirmar Contraseña</label>
+          <input type="password" id="registerConfirmPassword" required autocomplete="new-password" minlength="6">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Registrarse</button>
+      </form>
+      <p class="modal-footer-text" id="registerFooter" style="display:none">
+        ¿Ya tienes cuenta? <a href="#" id="switchToLogin">Inicia sesión</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Cart Modal -->
+  <div class="modal-overlay" id="cartModal">
+    <div class="modal-content cart-modal">
+      <button class="modal-close" id="cartClose" aria-label="Cerrar">×</button>
+      <h2>Carrito de Compras</h2>
+      <div class="cart-items" id="cartItems">
+        <p class="cart-empty">Tu carrito está vacío</p>
+      </div>
+      <div class="cart-footer" id="cartFooter" style="display:none">
+        <div class="cart-total">
+          <strong>Total: <span id="cartTotal">RD$0.00</span></strong>
+        </div>
+        <button class="btn btn-primary" id="checkoutBtn" style="width:100%">Ver Carrito Completo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Detail Modal -->
+  <div class="modal-overlay product-detail-overlay" id="productDetailModal">
+    <div class="product-detail-modal">
+      <button class="modal-close" id="productDetailClose" aria-label="Cerrar">×</button>
+      <div class="product-detail-container">
+        <!-- Left: Main Image and Thumbnails -->
+        <div class="product-images">
+          <div class="product-main-image">
+            <img id="productMainImage" src="" alt="Pastel">
+          </div>
+          <div class="product-thumbnails" id="productThumbnails">
+            <!-- Thumbnails will be generated by JS -->
+          </div>
+        </div>
+        <!-- Right: Product Info -->
+        <div class="product-info">
+          <div class="breadcrumbs" id="productBreadcrumbs">
+            <a href="#home">Inicio</a> > <a href="#products">Pasteles Personalizados</a> > <span id="productBreadcrumbName"></span>
+          </div>
+          <h1 id="productName" class="product-title"></h1>
+          <div class="product-rating">
+            <div class="stars">★★★★★</div>
+            <span class="reviews-count" id="productReviews">0 reseñas</span>
+          </div>
+          <div class="product-price">
+            <span id="productPrice">RD$0.00</span>
+            <span class="tax-note">Impuestos incluidos.</span>
+          </div>
+          
+          <div class="product-options">
+            <div class="form-group">
+              <label for="productSize">Tamaño</label>
+              <select id="productSize" class="form-select">
+                <option value="6">6" (Sirve 8 personas)</option>
+                <option value="8">8" (Sirve 12 personas)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="product-description product-description-elegant" id="productDescription"></div>
+
+          <button class="btn btn-primary add-to-cart-detail" id="addToCartDetail" style="width:100%; margin-top:1.5rem">
+            AGREGAR AL CARRITO
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <header id="home" class="hero">
+    <div class="blob pink"></div>
+    <div class="blob dark"></div>
+
+    <div class="inner container">
+      <div class="badge muted">THE BAKERY BY FRESARTE</div>
+      <h1>
+        <span>The Bakery</span><br>
+        <span class="pink">BY FRESARTE</span>
+      </h1>
+      <p>Donde cada creación es una obra de arte comestible</p>
+      <div class="cta">
+        <a href="#products" class="btn btn-primary">Explorar Productos</a>
+        <a href="#about" class="btn btn-ghost">Conócenos</a>
+      </div>
+    </div>
+
+    <a href="#products" class="scroll-down" aria-label="Bajar">
+      <svg class="icon" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2">
+        <polyline points="6 9 12 15 18 9" />
+      </svg>
+    </a>
+  </header>
+
+  <!-- PRODUCTS -->
+  <section id="products" class="section" style="background:#f9fafb">
+    <div class="container">
+      <div style="text-align:center; margin-bottom:28px">
+        <h2><span>Nuestras</span> <span class="pink">Especialidades</span></h2>
+        <p class="muted">Cada producto es una obra maestra diseñada para sorprender y deleitar</p>
+      </div>
+      
+      <!-- Featured Cakes Slider -->
+      <div class="featured-slider-container">
+        <div class="featured-slider" id="featuredSlider">
+          <button class="slider-nav-btn slider-prev" id="sliderPrev" aria-label="Anterior">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <div class="slider-track" id="sliderTrack">
+            <!-- Slides will be generated by JS -->
+          </div>
+          <button class="slider-nav-btn slider-next" id="sliderNext" aria-label="Siguiente">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+          <div class="slider-dots" id="sliderDots">
+            <!-- Dots will be generated by JS -->
+          </div>
+        </div>
+      </div>
+      
+      <div class="cakes-gallery">
+        <div class="cake-item" data-cake-id="1">
+          <img src="TheBakery/assets/imagenes/pastel-coco/pastel-coco-1.png" alt="Pastel de Coco" class="cake-image">
+        </div>
+        <div class="cake-item" data-cake-id="2">
+          <img src="TheBakery/assets/imagenes/matcha-strawberry/matcha-strawberry-1.png" alt="Matcha Strawberry" class="cake-image">
+        </div>
+        <div class="cake-item" data-cake-id="4">
+          <img src="TheBakery/assets/imagenes/pastel-fresas/pastel-fresas-1.png" alt="Pastel de Fresas" class="cake-image">
+        </div>
+        <div class="cake-item" data-cake-id="5">
+          <img src="TheBakery/assets/imagenes/pastel-arandanos/pastel-arandanos-1.png" alt="Pastel de Arandanos" class="cake-image">
+        </div>
+        <div class="cake-item" data-cake-id="6">
+          <img src="TheBakery/assets/imagenes/pastel-lemon-pie/pastel-lemon-pie-1.png" alt="Pastel Lemon Pie" class="cake-image">
+        </div>
+        <div class="cake-item" data-cake-id="7">
+          <img src="TheBakery/assets/imagenes/pastel-chinola/pastel-chinola-1.png" alt="Pastel de Chinola" class="cake-image">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section id="reviews" class="section reviews-section" style="background:#ffffff">
+    <div class="container">
+      <h2 style="text-align:center; margin-bottom:2rem"><span>Reseñas de</span> <span class="pink">Clientes</span></h2>
+      
+      <!-- Reviews Summary -->
+      <div class="reviews-summary">
+        <div class="summary-left">
+          <div class="rating-overview">
+            <div class="rating-number">
+              <span class="rating-value" id="averageRating">4.91</span>
+              <div class="rating-stars-large">
+                <span class="stars-display" id="averageStars">★★★★★</span>
+              </div>
+              <p class="rating-count" id="totalReviews">Basado en 1971 reseñas</p>
+            </div>
+            <div class="rating-breakdown">
+              <div class="star-bar-item">
+                <span class="star-label">5</span>
+                <div class="star-bar">
+                  <div class="star-bar-fill" data-rating="5" style="width:85%"></div>
+                </div>
+                <span class="star-count" data-rating="5">1675</span>
+              </div>
+              <div class="star-bar-item">
+                <span class="star-label">4</span>
+                <div class="star-bar">
+                  <div class="star-bar-fill" data-rating="4" style="width:10%"></div>
+                </div>
+                <span class="star-count" data-rating="4">197</span>
+              </div>
+              <div class="star-bar-item">
+                <span class="star-label">3</span>
+                <div class="star-bar">
+                  <div class="star-bar-fill" data-rating="3" style="width:3%"></div>
+                </div>
+                <span class="star-count" data-rating="3">59</span>
+              </div>
+              <div class="star-bar-item">
+                <span class="star-label">2</span>
+                <div class="star-bar">
+                  <div class="star-bar-fill" data-rating="2" style="width:1%"></div>
+                </div>
+                <span class="star-count" data-rating="2">20</span>
+              </div>
+              <div class="star-bar-item">
+                <span class="star-label">1</span>
+                <div class="star-bar">
+                  <div class="star-bar-fill" data-rating="1" style="width:1%"></div>
+                </div>
+                <span class="star-count" data-rating="1">20</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="summary-right">
+          <div class="authenticity-badges">
+            <div class="badge-item gold">
+              <div class="badge-icon">🏆</div>
+              <div class="badge-info">
+                <div class="badge-title">GOLD AUTHENTICITY</div>
+                <div class="badge-value">98.7</div>
+              </div>
+            </div>
+            <div class="badge-item diamond">
+              <div class="badge-icon">💎</div>
+              <div class="badge-info">
+                <div class="badge-title">DIAMOND TRANSPARENCY</div>
+                <div class="badge-value">100.0</div>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary write-review-btn" id="writeReviewBtn" style="width:100%; margin-top:1.5rem">
+            Escribir una Reseña
+          </button>
+        </div>
+      </div>
+
+      <!-- Customer Photos & Videos -->
+      <div class="customer-photos-section">
+        <h3 class="photos-title">Fotos y Videos de Clientes</h3>
+        <div class="photos-gallery" id="photosGallery">
+          <!-- Photos will be loaded by JS -->
+        </div>
+        <button class="see-more-btn" id="seeMorePhotos" style="display:none">Ver más</button>
+      </div>
+
+      <!-- Individual Reviews -->
+      <div class="reviews-list" id="reviewsList">
+        <!-- Reviews will be loaded by JS -->
+      </div>
+
+      <!-- Load More Reviews Button -->
+      <div style="text-align:center; margin-top:2rem">
+        <button class="btn btn-ghost" id="loadMoreReviews" style="display:none">Cargar más reseñas</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Write Review Modal -->
+  <div class="modal-overlay" id="writeReviewModal">
+    <div class="modal-content review-modal">
+      <button class="modal-close" id="closeReviewModal" aria-label="Cerrar">×</button>
+      <h2>Escribir una Reseña</h2>
+      <form id="reviewForm">
+        <div class="form-group">
+          <label>Calificación</label>
+          <div class="star-rating-input">
+            <input type="radio" name="rating" value="5" id="star5">
+            <label for="star5" class="star-label-input">★</label>
+            <input type="radio" name="rating" value="4" id="star4">
+            <label for="star4" class="star-label-input">★</label>
+            <input type="radio" name="rating" value="3" id="star3">
+            <label for="star3" class="star-label-input">★</label>
+            <input type="radio" name="rating" value="2" id="star2">
+            <label for="star2" class="star-label-input">★</label>
+            <input type="radio" name="rating" value="1" id="star1">
+            <label for="star1" class="star-label-input">★</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="reviewerName">Tu Nombre</label>
+          <input type="text" id="reviewerName" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="reviewLocation">Ubicación (opcional)</label>
+          <input type="text" id="reviewLocation" class="form-input" placeholder="Ej: Santo Domingo, RD">
+        </div>
+        <div class="form-group">
+          <label for="reviewTitle">Título de tu Reseña</label>
+          <input type="text" id="reviewTitle" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label for="reviewComment">Tu Comentario</label>
+          <textarea id="reviewComment" class="form-textarea" rows="5" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="reviewPhoto">Subir Foto (opcional)</label>
+          <input type="file" id="reviewPhoto" class="form-input" accept="image/*">
+          <div class="photo-preview" id="photoPreview" style="display:none">
+            <img id="previewImage" src="" alt="Preview">
+            <button type="button" class="remove-photo-btn" id="removePhoto">×</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Publicar Reseña</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <section id="about" class="section">
+    <div class="container about-grid">
+      <div>
+        <h2><span>Nuestra</span><br><span class="pink">Historia</span></h2>
+        <p class="muted">En The Bakery by Fresarte, transformamos ingredientes premium en experiencias inolvidables.
+          Cada producto es elaborado con pasión y un toque artístico que nos distingue.</p>
+      </div>
+      <div class="frame frame-carousel">
+        <div class="carousel-historia" id="carouselHistoria" aria-label="Nuestra Historia">
+          <div class="carousel-track">
+            <div class="carousel-slide"><img src="TheBakery/assets/imagenes/nuestra-historia/preparacion-1.png" alt="Preparación de pasteles - decoración"></div>
+            <div class="carousel-slide"><img src="TheBakery/assets/imagenes/nuestra-historia/preparacion-2.png" alt="Preparación de pasteles - detalle"></div>
+            <div class="carousel-slide"><img src="TheBakery/assets/imagenes/nuestra-historia/preparacion-3.png" alt="Preparación de pasteles - mezclando"></div>
+            <div class="carousel-slide"><img src="TheBakery/assets/imagenes/nuestra-historia/preparacion-4.png" alt="Preparación de pasteles - decorando"></div>
+            <div class="carousel-slide"><img src="TheBakery/assets/imagenes/nuestra-historia/preparacion-5.png" alt="Preparación de pasteles - toques finales"></div>
+            <div class="carousel-slide"><img src="TheBakery/assets/imagenes/nuestra-historia/preparacion-6.png" alt="Preparación de pasteles - repostería artesanal"></div>
+            <div class="carousel-slide"><img src="TheBakery/assets/imagenes/nuestra-historia/preparacion-7.png" alt="Preparación de pasteles - glaseado"></div>
+            <div class="carousel-slide"><img src="TheBakery/assets/imagenes/nuestra-historia/preparacion-8.png" alt="Preparación de pasteles - The Bakery"></div>
+          </div>
+          <button type="button" class="carousel-btn carousel-prev" id="carouselPrev" aria-label="Anterior">‹</button>
+          <button type="button" class="carousel-btn carousel-next" id="carouselNext" aria-label="Siguiente">›</button>
+          <div class="carousel-dots" id="carouselDots" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Se eliminó la antigua sección de pago y su espacio visual. -->
+
+  <!-- CONTACT -->
+  <section id="contact" class="section">
+    <div class="container">
+      <h2><span>Hagamos realidad</span> <span class="pink">tu dulce sueño</span></h2>
+      <p class="muted">Estamos listos para crear algo especial para ti.</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="brand">The Bakery <span class="pink">by Fresarte</span></div>
+      <div class="muted" style="margin-top:10px">© 2025 The Bakery by Fresarte. Todos los derechos reservados.</div>
+    </div>
+  </footer>
+
+  <script src="TheBakery/assets/js/auth.js"></script>
+  <script src="TheBakery/assets/js/inventory-utils.js"></script>
+  <script src="TheBakery/assets/js/script.js"></script>
+  <script>
+    (function() {
+      var track = document.querySelector('#carouselHistoria .carousel-track');
+      var prevBtn = document.getElementById('carouselPrev');
+      var nextBtn = document.getElementById('carouselNext');
+      var dotsEl = document.getElementById('carouselDots');
+      if (!track || !track.children.length) return;
+      var total = track.children.length;
+      var index = 0;
+      var interval = 4500;
+
+      function goTo(i) {
+        index = (i + total) % total;
+        track.style.transform = 'translateX(-' + (index * 100) + '%)';
+        var dots = dotsEl.querySelectorAll('span');
+        dots.forEach(function(d, j) { d.classList.toggle('active', j === index); });
+      }
+
+      for (var d = 0; d < total; d++) {
+        (function(i) {
+          var span = document.createElement('span');
+          span.addEventListener('click', function() { goTo(i); });
+          dotsEl.appendChild(span);
+        })(d);
+      }
+      goTo(0);
+
+      if (prevBtn) prevBtn.addEventListener('click', function() { goTo(index - 1); });
+      if (nextBtn) nextBtn.addEventListener('click', function() { goTo(index + 1); });
+
+      var tid = setInterval(function() { goTo(index + 1); }, interval);
+      track.closest('.carousel-historia').addEventListener('mouseenter', function() { clearInterval(tid); });
+      track.closest('.carousel-historia').addEventListener('mouseleave', function() { tid = setInterval(function() { goTo(index + 1); }, interval); });
+    })();
+  </script>
 </body>
 
 </html>

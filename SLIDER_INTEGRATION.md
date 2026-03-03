@@ -36,7 +36,7 @@ Se ha agregado un carrusel/slider dinámico y elegante dentro de la sección "Nu
 ## 📁 Archivos Creados/Modificados
 
 ### Archivos Modificados:
-1. **index-original.html**
+1. **index.html**
    - Slider agregado en la sección de productos (líneas 214-234)
 
 2. **TheBakery/assets/css/style.css**

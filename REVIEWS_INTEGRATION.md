@@ -50,7 +50,7 @@ Se ha agregado una sección completa de reseñas de clientes (Customer Reviews) 
 ## 📁 Archivos Modificados/Creados
 
 ### Archivos Modificados:
-1. **index-original.html**
+1. **index.html**
    - Sección de reviews agregada (líneas 238-385)
    - Modal de escribir reseña agregado
    - Enlace "Reseñas" agregado a la navegación

@@ -68,7 +68,7 @@ El selector incluye 5 opciones:
 
 ### Navegación
 - Cada producto es clickeable
-- Al hacer clic, redirige a `index-original.html` y abre el modal de detalle
+- Al hacer clic, redirige a `index.html` y abre el modal de detalle
 - Integración perfecta con el sistema existente
 
 ## 📁 Estructura del JSON
@@ -113,12 +113,12 @@ Edita la función `sortProducts()` en `pasteles-autor.js` para cambiar la lógic
 ## 🎯 Integración con el Sistema Existente
 
 ### Navegación
-- La página usa la misma navegación que `index-original.html`
-- Los enlaces del menú apuntan a `index-original.html#seccion`
+- La página usa la misma navegación que `index.html`
+- Los enlaces del menú apuntan a `index.html#seccion`
 - El logo lleva a la página principal
 
 ### Modal de Detalle
-- Al hacer clic en un producto, se redirige a `index-original.html`
+- Al hacer clic en un producto, se redirige a `index.html`
 - Se abre automáticamente el modal de detalle del producto
 - Usa `sessionStorage` para pasar el ID del producto
 
@@ -174,7 +174,7 @@ La página está completamente funcional y lista para usar. Solo necesitas:
 
 ## 🔗 Agregar Enlace en el Menú
 
-Para agregar un enlace a esta página en tu menú principal, edita `index-original.html`:
+Para agregar un enlace a esta página en tu menú principal, edita `index.html`:
 
 ```html
 <a href="pasteles-de-autor.html" class="nav-link">Pasteles de Autor</a>

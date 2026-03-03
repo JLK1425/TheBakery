@@ -425,18 +425,18 @@
   </script>
   <script>
 function sendWhatsAppOrder() {
-  var cart = JSON.parse(localStorage.getItem('cart') || '[]');
+  var cart = JSON.parse(localStorage.getItem('bakeryCart') || '[]');
   
   if (cart.length === 0) {
     alert('Tu carrito está vacío');
     return;
   }
 
-  var nombre = document.getElementById('nombre') ? document.getElementById('nombre').value : '';
-  var apellido = document.getElementById('apellido') ? document.getElementById('apellido').value : '';
-  var telefono = document.getElementById('telefono') ? document.getElementById('telefono').value : '';
-  var fechaEntrega = document.getElementById('fecha-entrega') ? document.getElementById('fecha-entrega').value : '';
-  var horaRecogida = document.getElementById('hora-recogida') ? document.getElementById('hora-recogida').value : '';
+  var nombre = document.getElementById('customer-firstName') ? document.getElementById('customer-firstName').value : '';
+  var apellido = document.getElementById('customer-lastName') ? document.getElementById('customer-lastName').value : '';
+  var telefono = document.getElementById('customer-phone') ? document.getElementById('customer-phone').value : '';
+  var fechaEntrega = document.getElementById('customer-deliveryDate') ? document.getElementById('customer-deliveryDate').value : '';
+  var horaRecogida = document.getElementById('customer-pickupTime') ? document.getElementById('customer-pickupTime').value : '';
 
   if (!nombre || !apellido || !telefono || !fechaEntrega || !horaRecogida) {
     alert('Por favor completa todos los datos de entrega antes de ordenar');

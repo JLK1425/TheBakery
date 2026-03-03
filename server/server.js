@@ -25,9 +25,24 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://127.0.0.1:5503';
 const TEST_MODE = process.env.TEST_MODE === 'true';
 const IS_PROD = process.env.NODE_ENV === 'production';
 
-// CORS: aplicado a todas las rutas (incluye /api y /public/inventory/cakes)
+// CORS: local + producción (thebakerybyfresarte.com)
+const allowedOrigins = [
+  'http://127.0.0.1:5503',
+  'http://localhost:5503',
+  'http://127.0.0.1:5500',
+  'http://localhost:5500',
+  'https://thebakerybyfresarte.com',
+  'https://www.thebakerybyfresarte.com'
+];
+
 app.use(cors({
-  origin: ['http://127.0.0.1:5503', 'http://localhost:5503', 'http://localhost:5500', 'http://127.0.0.1:5500'],
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 
@@ -373,14 +388,19 @@ function requireSuperAdmin(req, res, next) {
 }
 
 app.use(cookieParser());
+
+// Trust proxy (Railway usa proxy)
+app.set('trust proxy', 1);
+
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'dev-session-secret-change-in-prod', // Solo para desarrollo local
+  secret: process.env.SESSION_SECRET || 'dev-session-secret-change-in-prod',
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    sameSite: 'lax',
-    secure: false
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 24 * 60 * 60 * 1000 // 24 horas
   }
 }));
 app.use(express.static(path.join(__dirname, '..'))); // Servir archivos estáticos del proyecto

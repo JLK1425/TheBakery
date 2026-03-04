@@ -452,7 +452,8 @@ function sendWhatsAppOrder() {
 
   var subtotal = 0;
   cart.forEach(function(item) {
-    var itemTotal = item.price * item.quantity;
+    var precio = typeof item.price === 'string' ? parseFloat(item.price.replace(/[^0-9.]/g, '')) : (item.price || 0);
+    var itemTotal = precio * item.quantity;
     subtotal += itemTotal;
     mensaje += '• ' + item.name + ' x' + item.quantity + ' - RD$' + itemTotal.toLocaleString('es-DO', {minimumFractionDigits: 2}) + '\n';
   });

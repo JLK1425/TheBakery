@@ -1073,7 +1073,7 @@ app.get('/api/orders/:id', (req, res) => {
   }
 });
 
-// Crear un nuevo pedido
+// Crear un nuevo pedido (CardNet o WhatsApp)
 app.post('/api/orders', (req, res) => {
   try {
     const {
@@ -1085,13 +1085,17 @@ app.post('/api/orders', (req, res) => {
       items,
       total,
       status,
+      subtotal,
+      tax,
       deliveryDate,
       deliverySlot,
       deliverySlotLabel,
+      pickupTime,
       notes,
       address,
       deliveryType,
-      reservationId
+      reservationId,
+      paymentMethod
     } = req.body;
 
     // Validar campos requeridos
@@ -1104,6 +1108,11 @@ app.post('/api/orders', (req, res) => {
     if (!total || typeof total !== 'number') {
       return res.status(400).json({ error: 'total es requerido y debe ser un número' });
     }
+
+    // paymentMethod: 'cardnet' | 'whatsapp' (por defecto cardnet para compatibilidad)
+    const method = (paymentMethod === 'whatsapp' || paymentMethod === 'cardnet') ? paymentMethod : 'cardnet';
+    // WhatsApp: status inicial 'pendiente' (sin confirmación de pago); CardNet puede venir con otro status
+    const initialStatus = method === 'whatsapp' ? (status || 'pendiente') : (status || 'Pendiente');
 
     // Leer pedidos existentes ANTES de crear uno nuevo
     const orders = readOrders();
@@ -1122,19 +1131,30 @@ app.post('/api/orders', (req, res) => {
     // Generar ID si no se proporciona
     const orderId = id || `ORD-${Date.now()}`;
 
+    const customer = {
+      name: customerName || 'Cliente',
+      phone: customerPhone || null,
+      email: customerEmail || null
+    };
+
     // Crear objeto del pedido (campos de reserva/entrega opcionales)
     const newOrder = {
       id: orderId,
       sessionId: sessionId,
-      customerEmail: customerEmail || 'sin-email@ejemplo.com',
-      customerName: customerName || 'Cliente',
-      customerPhone: customerPhone || null,
+      customer: customer,
+      customerEmail: customer.email || 'sin-email@ejemplo.com',
+      customerName: customer.name,
+      customerPhone: customer.phone,
       items: items,
-      total: total,
-      status: status || 'Pendiente',
       deliveryDate: deliveryDate || null,
+      pickupTime: pickupTime != null ? pickupTime : (deliverySlot || null),
       deliverySlot: deliverySlot || null,
       deliverySlotLabel: deliverySlotLabel || null,
+      subtotal: typeof subtotal === 'number' ? subtotal : null,
+      tax: typeof tax === 'number' ? tax : null,
+      total: total,
+      paymentMethod: method,
+      status: initialStatus,
       notes: notes || null,
       address: address || null,
       deliveryType: deliveryType || null,

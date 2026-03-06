@@ -2,6 +2,7 @@
 <html lang="es">
 
 <head>
+  <link rel="icon" type="image/png" href="/TheBakery/assets/imagenes/logo.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clientes - The Bakery by Fresarte</title>
@@ -20,6 +21,7 @@
       padding-right: 0;
       box-sizing: border-box;
     }
+
     .admin-top-header {
       position: fixed;
       top: 0;
@@ -35,11 +37,27 @@
       padding: 0 24px;
       transition: left 0.3s ease;
     }
-    .admin-top-header-logo { display: flex; align-items: center; }
-    .admin-top-header-logo img { width: 150px; height: auto; }
-    .admin-header-actions { display: flex; align-items: center; gap: 0.5rem; }
+
+    .admin-top-header-logo {
+      display: flex;
+      align-items: center;
+    }
+
+    .admin-top-header-logo img {
+      width: 150px;
+      height: auto;
+    }
+
+    .admin-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
     .admin-header-btn {
-      display: flex; align-items: center; gap: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
       padding: 0.5rem 1rem;
       background: transparent;
       border: none;
@@ -50,14 +68,30 @@
       border-radius: 6px;
       transition: all 0.2s ease;
     }
-    .admin-header-btn:hover { background: #f9fafb; color: #374151; }
+
+    .admin-header-btn:hover {
+      background: #f9fafb;
+      color: #374151;
+    }
+
     .admin-header-btn.btn-export {
       background: var(--accent);
       color: #fff;
     }
-    .admin-header-btn.btn-export:hover { background: var(--accent-600); }
-    .admin-header-btn-danger { color: #d7263d; }
-    .admin-header-btn-danger:hover { background: #d91a6b; color: #fff; }
+
+    .admin-header-btn.btn-export:hover {
+      background: var(--accent-600);
+    }
+
+    .admin-header-btn-danger {
+      color: #d7263d;
+    }
+
+    .admin-header-btn-danger:hover {
+      background: #d91a6b;
+      color: #fff;
+    }
+
     .admin-header {
       background: #fff;
       border-bottom: 2px solid #e5e7eb;
@@ -66,36 +100,88 @@
       width: 100%;
       box-sizing: border-box;
     }
-    .admin-header .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 0; max-width: none; }
-    .admin-page-title { font-size: 2rem; font-weight: 800; color: var(--fg); margin: 0; }
-    .customers-container { width: 100%; padding: 0 24px; max-width: none; }
+
+    .admin-header .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      padding: 0;
+      max-width: none;
+    }
+
+    .admin-page-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--fg);
+      margin: 0;
+    }
+
+    .customers-container {
+      width: 100%;
+      padding: 0 24px;
+      max-width: none;
+    }
+
     .orders-stats {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
       margin-bottom: 2rem;
     }
+
     .stat-card {
       background: #fff;
       border-radius: var(--radius);
       padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
       border-left: 4px solid var(--accent);
     }
-    .stat-label { font-size: 0.875rem; color: var(--muted); margin-bottom: 0.5rem; font-weight: 600; }
-    .stat-value { font-size: 2rem; font-weight: 800; color: var(--fg); }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--fg);
+    }
+
     .customers-table {
       width: 100%;
       border-collapse: collapse;
       background: #fff;
       border-radius: var(--radius);
-      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
       overflow: hidden;
     }
-    .customers-table th, .customers-table td { padding: 1rem 1.25rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
-    .customers-table th { background: #f9fafb; font-weight: 700; color: var(--fg); }
-    .customers-table tr:last-child td { border-bottom: none; }
-    .customers-table tr:hover { background: #f9fafb; }
+
+    .customers-table th,
+    .customers-table td {
+      padding: 1rem 1.25rem;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .customers-table th {
+      background: #f9fafb;
+      font-weight: 700;
+      color: var(--fg);
+    }
+
+    .customers-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .customers-table tr:hover {
+      background: #f9fafb;
+    }
+
     .search-input {
       width: 100%;
       padding: 0.75rem 1rem;
@@ -105,12 +191,30 @@
       margin-bottom: 1.5rem;
       transition: border-color 0.2s;
     }
-    .search-input:focus { outline: none; border-color: var(--accent); }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
     @media (max-width: 768px) {
-      .admin-top-header { left: 0; }
-      .admin-page { padding-top: 100px; }
-      .customers-container { padding: 0 1rem; }
-      .customers-table th, .customers-table td { padding: 0.75rem; font-size: 0.875rem; }
+      .admin-top-header {
+        left: 0;
+      }
+
+      .admin-page {
+        padding-top: 100px;
+      }
+
+      .customers-container {
+        padding: 0 1rem;
+      }
+
+      .customers-table th,
+      .customers-table td {
+        padding: 0.75rem;
+        font-size: 0.875rem;
+      }
     }
   </style>
 </head>
@@ -131,34 +235,63 @@
     </div>
     <nav class="sidebar-nav">
       <a href="#" class="sidebar-nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
         <span>Inicio</span>
       </a>
       <a href="pedidos.html" class="sidebar-nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+        </svg>
         <span>Pedidos</span>
       </a>
       <a href="clientes.html" class="sidebar-nav-item active">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
         <span>Clientes</span>
       </a>
       <a href="stock-pasteles.html" class="sidebar-nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-4M4 7h4m0 0v13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7m0 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3M10 7V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v3m8 0h4"></path></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path
+            d="M20 7h-4M4 7h4m0 0v13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7m0 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3M10 7V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v3m8 0h4">
+          </path>
+        </svg>
         <span>Stock de Pasteles</span>
       </a>
       <a href="reportes.html" class="sidebar-nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
         <span>Reportes</span>
       </a>
       <a href="promociones.html" class="sidebar-nav-item"><span>🏷️</span><span>Promociones</span></a>
       <a href="usuarios.html" class="sidebar-nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
         <span>Usuarios</span>
       </a>
     </nav>
     <div class="sidebar-footer">
       <a href="#" class="sidebar-footer-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path
+            d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24">
+          </path>
+        </svg>
         <span>Configuración</span>
       </a>
     </div>
@@ -197,55 +330,58 @@
   </header>
 
   <div class="admin-content-wrapper">
-  <main class="admin-page">
-    <div class="admin-header">
-      <div class="container">
-        <div id="adminPageTitle" class="admin-page-title"></div>
-      </div>
-    </div>
-
-    <div class="customers-container">
-      <!-- Resumen -->
-      <div class="orders-stats">
-        <div class="stat-card">
-          <div class="stat-label">Total Clientes</div>
-          <div class="stat-value" id="total-customers">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Con Email</div>
-          <div class="stat-value" id="customers-email">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Solo Cédula</div>
-          <div class="stat-value" id="customers-cedula">0</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Hoy</div>
-          <div class="stat-value" id="customers-today">0</div>
+    <main class="admin-page">
+      <div class="admin-header">
+        <div class="container">
+          <div id="adminPageTitle" class="admin-page-title"></div>
         </div>
       </div>
 
-      <!-- Búsqueda -->
-      <input type="text" id="customer-search" class="search-input" placeholder="Buscar por nombre, email o teléfono...">
+      <div class="customers-container">
+        <!-- Resumen -->
+        <div class="orders-stats">
+          <div class="stat-card">
+            <div class="stat-label">Total Clientes</div>
+            <div class="stat-value" id="total-customers">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Con Email</div>
+            <div class="stat-value" id="customers-email">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Solo Cédula</div>
+            <div class="stat-value" id="customers-cedula">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Hoy</div>
+            <div class="stat-value" id="customers-today">0</div>
+          </div>
+        </div>
 
-      <!-- Tabla -->
-      <table class="customers-table">
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Nombre</th>
-            <th>Teléfono</th>
-            <th>Email / Cédula</th>
-            <th>Fecha Entrega</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="customers-tbody">
-          <tr><td colspan="6" style="text-align:center; padding:40px; color:#999;">Cargando...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </main>
+        <!-- Búsqueda -->
+        <input type="text" id="customer-search" class="search-input"
+          placeholder="Buscar por nombre, email o teléfono...">
+
+        <!-- Tabla -->
+        <table class="customers-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Nombre</th>
+              <th>Teléfono</th>
+              <th>Email / Cédula</th>
+              <th>Fecha Entrega</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="customers-tbody">
+            <tr>
+              <td colspan="6" style="text-align:center; padding:40px; color:#999;">Cargando...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
   </div>
 
   <script src="../TheBakery/assets/js/admin-common.js"></script>
@@ -274,9 +410,9 @@
       var todayEl = document.getElementById('customers-today');
 
       if (totalEl) totalEl.textContent = customers.length;
-      if (emailEl) emailEl.textContent = customers.filter(function(c) { return c.email; }).length;
-      if (cedulaEl) cedulaEl.textContent = customers.filter(function(c) { return !c.email && c.cedulaLast4; }).length;
-      if (todayEl) todayEl.textContent = customers.filter(function(c) { return c.createdAt && c.createdAt.startsWith(today); }).length;
+      if (emailEl) emailEl.textContent = customers.filter(function (c) { return c.email; }).length;
+      if (cedulaEl) cedulaEl.textContent = customers.filter(function (c) { return !c.email && c.cedulaLast4; }).length;
+      if (todayEl) todayEl.textContent = customers.filter(function (c) { return c.createdAt && c.createdAt.startsWith(today); }).length;
     }
 
     function renderTable(customers) {
@@ -288,7 +424,7 @@
         return;
       }
 
-      tbody.innerHTML = customers.map(function(c) {
+      tbody.innerHTML = customers.map(function (c) {
         var date = new Date(c.createdAt);
         var dateStr = date.toLocaleDateString('es-DO', { day: 'numeric', month: 'short', year: 'numeric' });
         var timeStr = date.toLocaleTimeString('es-DO', { hour: '2-digit', minute: '2-digit' });
@@ -312,7 +448,7 @@
           '<td>' + contact + '</td>' +
           '<td>' + deliveryFormatted + '</td>' +
           '<td><button onclick="deleteCustomer(\'' + safeId + '\')" style="background:#dc3545; color:white; border:none; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:12px;">Eliminar</button></td>' +
-        '</tr>';
+          '</tr>';
       }).join('');
     }
 
@@ -320,9 +456,9 @@
       var searchInput = document.getElementById('customer-search');
       if (!searchInput) return;
 
-      searchInput.addEventListener('input', function() {
+      searchInput.addEventListener('input', function () {
         var term = this.value.toLowerCase();
-        var filtered = customers.filter(function(c) {
+        var filtered = customers.filter(function (c) {
           return (c.firstName + ' ' + c.lastName).toLowerCase().includes(term) ||
             (c.email || '').toLowerCase().includes(term) ||
             (c.phone || '').includes(term);
@@ -336,7 +472,7 @@
       try {
         var res = await fetch(API_URL + '/api/customers/' + id, { method: 'DELETE' });
         if (!res.ok) {
-          var err = await res.json().catch(function() { return {}; });
+          var err = await res.json().catch(function () { return {}; });
           alert(err.error || 'Error eliminando cliente');
           return;
         }
@@ -348,10 +484,10 @@
 
     function exportCSV() {
       fetch(API_URL + '/api/customers')
-        .then(function(r) { return r.json(); })
-        .then(function(customers) {
+        .then(function (r) { return r.json(); })
+        .then(function (customers) {
           var csv = 'ID,Nombre,Apellido,Telefono,Email,Cedula4,FechaEntrega,HoraRecogida,FechaRegistro\n';
-          customers.forEach(function(c) {
+          customers.forEach(function (c) {
             csv += [c.id || '', c.firstName || '', c.lastName || '', c.phone || '', c.email || '', c.cedulaLast4 || '', c.deliveryDate || '', c.pickupTime || '', c.createdAt || ''].join(',') + '\n';
           });
           var blob = new Blob([csv], { type: 'text/csv' });
@@ -368,7 +504,7 @@
     loadCustomers();
   </script>
   <script>
-    (function() {
+    (function () {
       var sidebar = document.getElementById('adminSidebar');
       var toggleBtn = document.getElementById('sidebarToggle');
       var overlay = document.getElementById('sidebarOverlay');
@@ -376,8 +512,8 @@
       function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('active'); }
       if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
       if (overlay) overlay.addEventListener('click', closeSidebar);
-      document.querySelectorAll('.sidebar-nav-item, .sidebar-footer-item').forEach(function(link) {
-        link.addEventListener('click', function() { if (window.innerWidth <= 768) closeSidebar(); });
+      document.querySelectorAll('.sidebar-nav-item, .sidebar-footer-item').forEach(function (link) {
+        link.addEventListener('click', function () { if (window.innerWidth <= 768) closeSidebar(); });
       });
     })();
   </script>

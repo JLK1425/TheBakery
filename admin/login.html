@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+  <link rel="icon" type="image/png" href="/TheBakery/assets/imagenes/logo.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Iniciar Sesión - The Bakery Admin</title>
   <link rel="stylesheet" href="../TheBakery/assets/css/style.css">
-  
+
   <style>
     body {
       margin: 0;
@@ -23,14 +25,21 @@
       max-width: 420px;
       padding: 2.5rem;
       border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
       text-align: center;
       animation: fadeIn 0.4s ease;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .login-logo img {
@@ -93,6 +102,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <div class="login-card">
@@ -106,7 +116,8 @@
     <form id="loginForm">
       <div id="loginError" class="error-message"></div>
       <input type="email" id="email" class="login-input" placeholder="Correo electrónico" autocomplete="email" required>
-      <input type="password" id="password" class="login-input" placeholder="Contraseña" autocomplete="current-password" required>
+      <input type="password" id="password" class="login-input" placeholder="Contraseña" autocomplete="current-password"
+        required>
       <button type="submit" class="login-btn" id="loginBtn">Iniciar Sesión</button>
     </form>
   </div>
@@ -114,4 +125,5 @@
   <script src="../TheBakery/assets/js/login.js"></script>
 
 </body>
+
 </html>

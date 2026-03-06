@@ -2,6 +2,7 @@
 <html lang="es">
 
 <head>
+  <link rel="icon" type="image/png" href="/TheBakery/assets/imagenes/logo.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestión de Pedidos - The Bakery by Fresarte</title>
@@ -20,6 +21,7 @@
       padding-right: 0;
       box-sizing: border-box;
     }
+
     /* Admin Top Header */
     .admin-top-header {
       position: fixed;
@@ -36,19 +38,23 @@
       padding: 0 24px;
       transition: left 0.3s ease;
     }
+
     .admin-top-header-logo {
       display: flex;
       align-items: center;
     }
+
     .admin-top-header-logo img {
       width: 150px;
       height: auto;
     }
+
     .admin-header-actions {
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
+
     .admin-header-btn {
       display: flex;
       align-items: center;
@@ -63,20 +69,25 @@
       border-radius: 6px;
       transition: all 0.2s ease;
     }
+
     .admin-header-btn:hover {
       background: #f9fafb;
       color: #374151;
     }
+
     .admin-header-btn svg {
       flex-shrink: 0;
     }
+
     .admin-header-btn-danger {
       color: #d7263d;
     }
-      .admin-header-btn-danger:hover {
+
+    .admin-header-btn-danger:hover {
       background: #d91a6b;
       color: #fff;
     }
+
     .archive-btn {
       background: #8b5cf6;
       color: white;
@@ -91,13 +102,16 @@
       gap: 0.5rem;
       transition: background 0.2s;
     }
+
     .archive-btn:hover {
       background: #7c3aed;
     }
+
     .archive-btn:disabled {
       background: #c4b5fd;
       cursor: not-allowed;
     }
+
     .admin-header {
       background: #fff;
       border-bottom: 2px solid #e5e7eb;
@@ -106,6 +120,7 @@
       width: 100%;
       box-sizing: border-box;
     }
+
     .admin-header .container {
       display: flex;
       justify-content: flex-start;
@@ -115,12 +130,14 @@
       padding: 0;
       max-width: none;
     }
+
     .admin-page-title {
       font-size: 2rem;
       font-weight: 800;
       color: var(--fg);
       margin: 0;
     }
+
     .refresh-btn {
       display: flex;
       align-items: center;
@@ -134,53 +151,76 @@
       cursor: pointer;
       transition: background 0.2s;
     }
+
     .refresh-btn:hover {
       background: var(--accent-600);
     }
+
     .orders-container {
       width: 100%;
       padding: 0 24px;
       max-width: none;
     }
+
     .orders-stats {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
       margin-bottom: 2rem;
     }
+
     .stat-card {
       background: #fff;
       border-radius: var(--radius);
       padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
       border-left: 4px solid var(--accent);
     }
-    .stat-card.pending { border-left-color: #f59e0b; }
-    .stat-card.preparing { border-left-color: #3b82f6; }
-    .stat-card.ready { border-left-color: #10b981; }
-    .stat-card.delivery { border-left-color: #8b5cf6; }
-    .stat-card.delivered { border-left-color: #6b7280; }
+
+    .stat-card.pending {
+      border-left-color: #f59e0b;
+    }
+
+    .stat-card.preparing {
+      border-left-color: #3b82f6;
+    }
+
+    .stat-card.ready {
+      border-left-color: #10b981;
+    }
+
+    .stat-card.delivery {
+      border-left-color: #8b5cf6;
+    }
+
+    .stat-card.delivered {
+      border-left-color: #6b7280;
+    }
+
     .stat-label {
       font-size: 0.875rem;
       color: var(--muted);
       margin-bottom: 0.5rem;
       font-weight: 600;
     }
+
     .stat-value {
       font-size: 2rem;
       font-weight: 800;
       color: var(--fg);
     }
+
     .orders-list {
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
     }
+
     .order-card {
       background: #fff;
       border-radius: var(--radius);
       padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
       transition: box-shadow 0.2s;
       display: grid;
       grid-template-columns: 1fr;
@@ -189,83 +229,103 @@
       min-height: 0;
       border: 1px solid #e5e7eb;
     }
+
     @media (min-width: 900px) {
       .order-card {
         grid-template-columns: 1fr 1.5fr 1fr;
         align-items: start;
       }
     }
+
     .order-card:hover {
-      box-shadow: 0 4px 16px rgba(0,0,0,.15);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .15);
     }
+
     .order-col-info {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
     }
-    .order-col-items { min-width: 0; }
+
+    .order-col-items {
+      min-width: 0;
+    }
+
     .order-col-status {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
       justify-content: space-between;
     }
+
     .order-id {
       font-size: 1.1rem;
       font-weight: 700;
       color: var(--fg);
     }
+
     .order-date {
       color: var(--muted);
       font-size: 0.9rem;
     }
+
     .order-customer {
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
     }
+
     .customer-name {
       font-weight: 600;
       color: var(--fg);
     }
+
     .customer-email {
       color: var(--muted);
       font-size: 0.85rem;
     }
+
     .order-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
       margin-top: 0.5rem;
     }
+
     .order-items {
       margin-bottom: 1rem;
       padding: 1rem;
       background: #f9fafb;
       border-radius: 8px;
     }
+
     .order-item {
       display: flex;
       justify-content: space-between;
       padding: 0.5rem 0;
       border-bottom: 1px solid #e5e7eb;
     }
+
     .order-item:last-child {
       border-bottom: none;
     }
+
     .item-name {
       font-weight: 600;
       color: var(--fg);
     }
+
     .item-details {
       font-size: 0.875rem;
       color: var(--muted);
       margin-top: 0.25rem;
     }
+
     .item-price {
       font-weight: 600;
       color: var(--accent);
     }
+
     .order-footer {
       display: flex;
       justify-content: space-between;
@@ -277,21 +337,25 @@
       gap: 1rem;
       clear: both;
     }
+
     .order-total {
       font-size: 1.5rem;
       font-weight: 800;
       color: var(--fg);
     }
+
     .order-status {
       display: flex;
       align-items: center;
       gap: 1rem;
       flex-wrap: wrap;
     }
+
     .status-label {
       font-weight: 600;
       color: var(--fg);
     }
+
     .status-select {
       padding: 0.5rem 1rem;
       border: 2px solid #e5e7eb;
@@ -302,44 +366,66 @@
       transition: border-color 0.2s;
       background: #fff;
     }
+
     .status-select:focus {
       outline: none;
       border-color: var(--accent);
     }
-    .status-select.pending { color: #f59e0b; }
-    .status-select.preparing { color: #3b82f6; }
-    .status-select.ready { color: #10b981; }
-    .status-select.delivery { color: #8b5cf6; }
-    .status-select.delivered { color: #6b7280; }
+
+    .status-select.pending {
+      color: #f59e0b;
+    }
+
+    .status-select.preparing {
+      color: #3b82f6;
+    }
+
+    .status-select.ready {
+      color: #10b981;
+    }
+
+    .status-select.delivery {
+      color: #8b5cf6;
+    }
+
+    .status-select.delivered {
+      color: #6b7280;
+    }
+
     .empty-state {
       text-align: center;
       padding: 4rem 2rem;
       background: #fff;
       border-radius: var(--radius);
-      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
     }
+
     .empty-state-icon {
       font-size: 4rem;
       margin-bottom: 1rem;
     }
+
     .empty-state h3 {
       font-size: 1.5rem;
       margin-bottom: 0.5rem;
       color: var(--fg);
     }
+
     .empty-state p {
       color: var(--muted);
     }
+
     .loading {
       text-align: center;
       padding: 4rem 2rem;
       color: var(--muted);
     }
+
     /* Modal detalle de pedido */
     .order-detail-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.4);
+      background: rgba(0, 0, 0, 0.4);
       z-index: 2000;
       display: flex;
       align-items: center;
@@ -349,10 +435,12 @@
       visibility: hidden;
       transition: opacity 0.2s, visibility 0.2s;
     }
+
     .order-detail-overlay.open {
       opacity: 1;
       visibility: visible;
     }
+
     .order-detail-modal {
       background: #fff;
       border-radius: var(--radius);
@@ -360,13 +448,15 @@
       width: 100%;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
       transform: scale(0.95);
       transition: transform 0.2s;
     }
+
     .order-detail-overlay.open .order-detail-modal {
       transform: scale(1);
     }
+
     .order-detail-header {
       padding: 1.25rem 1.5rem;
       border-bottom: 2px solid #e5e7eb;
@@ -374,12 +464,14 @@
       justify-content: space-between;
       align-items: center;
     }
+
     .order-detail-title {
       font-size: 1.25rem;
       font-weight: 800;
       color: var(--fg);
       margin: 0;
     }
+
     .order-detail-close {
       background: none;
       border: none;
@@ -389,18 +481,23 @@
       padding: 0.25rem;
       line-height: 1;
     }
+
     .order-detail-close:hover {
       color: var(--fg);
     }
+
     .order-detail-body {
       padding: 1.5rem;
     }
+
     .order-detail-section {
       margin-bottom: 1.25rem;
     }
+
     .order-detail-section:last-child {
       margin-bottom: 0;
     }
+
     .order-detail-section-title {
       font-size: 0.75rem;
       font-weight: 700;
@@ -409,6 +506,7 @@
       color: var(--muted);
       margin-bottom: 0.5rem;
     }
+
     .order-detail-row {
       display: flex;
       justify-content: space-between;
@@ -416,29 +514,35 @@
       padding: 0.35rem 0;
       font-size: 0.95rem;
     }
+
     .order-detail-row .label {
       color: var(--muted);
       margin-right: 0.5rem;
     }
+
     .order-detail-row .value {
       font-weight: 600;
       color: var(--fg);
       text-align: right;
     }
+
     .order-detail-items {
       list-style: none;
       padding: 0;
       margin: 0;
     }
+
     .order-detail-items li {
       display: flex;
       justify-content: space-between;
       padding: 0.5rem 0;
       border-bottom: 1px solid #f3f4f6;
     }
+
     .order-detail-items li:last-child {
       border-bottom: none;
     }
+
     .order-detail-total {
       font-size: 1.25rem;
       font-weight: 800;
@@ -447,6 +551,7 @@
       margin-top: 0.75rem;
       border-top: 2px solid #e5e7eb;
     }
+
     .btn-ver-detalle {
       display: inline-flex;
       align-items: center;
@@ -461,36 +566,45 @@
       cursor: pointer;
       transition: background 0.2s;
     }
+
     .btn-ver-detalle:hover {
       background: var(--accent-600, #d8379a);
     }
+
     @media (max-width: 768px) {
       .admin-top-header {
         left: 0;
       }
+
       .admin-page {
         padding-top: 100px;
       }
+
       .admin-header {
         padding: 2rem 1rem;
       }
+
       .admin-header .container {
         flex-direction: column;
         align-items: flex-start;
         padding: 0;
       }
+
       .orders-container {
         width: 100%;
         margin-left: 0 !important;
         padding: 0 1rem;
       }
+
       .order-col-status {
         border-top: 1px solid #e5e7eb;
         padding-top: 1rem;
       }
+
       .order-card {
         padding: 1rem;
       }
+
       .orders-stats {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -516,7 +630,7 @@
     <div class="sidebar-header">
       <img src="../TheBakery/assets/imagenes/logo.png" alt="The Bakery" class="sidebar-logo">
     </div>
-    
+
     <nav class="sidebar-nav">
       <a href="#" class="sidebar-nav-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -525,7 +639,7 @@
         </svg>
         <span>Inicio</span>
       </a>
-      
+
       <a href="pedidos.html" class="sidebar-nav-item active">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
@@ -533,7 +647,7 @@
         </svg>
         <span>Pedidos</span>
       </a>
-      
+
       <a href="clientes.html" class="sidebar-nav-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -543,21 +657,27 @@
         </svg>
         <span>Clientes</span>
       </a>
-      
+
       <a href="stock-pasteles.html" class="sidebar-nav-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20 7h-4M4 7h4m0 0v13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7m0 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3M10 7V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v3m8 0h4"></path>
+          <path
+            d="M20 7h-4M4 7h4m0 0v13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7m0 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3M10 7V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v3m8 0h4">
+          </path>
         </svg>
         <span>Stock de Pasteles</span>
       </a>
-      
+
       <a href="reportes.html" class="sidebar-nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
         <span>Reportes</span>
       </a>
-      
+
       <a href="promociones.html" class="sidebar-nav-item"><span>🏷️</span><span>Promociones</span></a>
-      
+
       <a href="usuarios.html" class="sidebar-nav-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -568,12 +688,14 @@
         <span>Usuarios</span>
       </a>
     </nav>
-    
+
     <div class="sidebar-footer">
       <a href="#" class="sidebar-footer-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="3"></circle>
-          <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
+          <path
+            d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24">
+          </path>
         </svg>
         <span>Configuración</span>
       </a>
@@ -586,14 +708,16 @@
       <img src="../TheBakery/assets/imagenes/logo.png" alt="The Bakery">
     </div>
     <div class="admin-header-actions">
-      <button type="button" class="admin-header-btn relative" id="stockAlertBtn" title="Stock bajo" style="display:none">
+      <button type="button" class="admin-header-btn relative" id="stockAlertBtn" title="Stock bajo"
+        style="display:none">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
           <line x1="12" y1="9" x2="12" y2="13"></line>
           <line x1="12" y1="17" x2="12.01" y2="17"></line>
         </svg>
         <span>Stock bajo</span>
-        <span id="stockAlertBadge" class="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[20px] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">0</span>
+        <span id="stockAlertBadge"
+          class="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[20px] h-5 px-1 text-xs font-bold text-white bg-red-500 rounded-full">0</span>
       </button>
       <button class="admin-header-btn" id="refreshBtn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -627,129 +751,126 @@
 
   <!-- Admin Page -->
   <div class="admin-content-wrapper">
-  <main class="admin-page">
-    <div class="admin-header">
-      <div class="container">
-        <div id="adminPageTitle" class="admin-page-title"></div>
-      </div>
-    </div>
-
-    <div class="orders-container">
-      <!-- Stats -->
-      <div class="orders-stats" id="ordersStats">
-        <!-- Stats will be generated by JS -->
+    <main class="admin-page">
+      <div class="admin-header">
+        <div class="container">
+          <div id="adminPageTitle" class="admin-page-title"></div>
+        </div>
       </div>
 
-      <!-- Search Bar -->
-      <div style="margin-bottom: 1.5rem;">
-        <input 
-          type="text" 
-          id="searchOrders" 
-          placeholder="Buscar pedido por ID, nombre o email..." 
-          style="
+      <div class="orders-container">
+        <!-- Stats -->
+        <div class="orders-stats" id="ordersStats">
+          <!-- Stats will be generated by JS -->
+        </div>
+
+        <!-- Search Bar -->
+        <div style="margin-bottom: 1.5rem;">
+          <input type="text" id="searchOrders" placeholder="Buscar pedido por ID, nombre o email..." style="
             width: 100%;
             padding: 0.75rem 1rem;
             border: 2px solid #e5e7eb;
             border-radius: 8px;
             font-size: 1rem;
             transition: border-color 0.2s;
-          "
-          onfocus="this.style.borderColor='#ef42a8'"
-          onblur="this.style.borderColor='#e5e7eb'"
-        />
-      </div>
-
-      <!-- Orders List -->
-      <div class="orders-list" id="ordersList">
-        <div class="loading">Cargando pedidos...</div>
-      </div>
-    </div>
-  </main>
-
-  <!-- Modal Stock Bajo -->
-  <div id="stockAlertModal" class="fixed inset-0 z-[1100] hidden" aria-hidden="true">
-    <div class="fixed inset-0 bg-black/50" id="stockAlertModalBackdrop"></div>
-    <div class="fixed inset-0 flex items-center justify-center p-4">
-      <div class="relative bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
-        <div class="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 class="text-xl font-bold text-gray-900">Productos con stock bajo</h2>
-          <button type="button" id="stockAlertModalClose" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </button>
+          " onfocus="this.style.borderColor='#ef42a8'" onblur="this.style.borderColor='#e5e7eb'" />
         </div>
-        <div class="p-4 overflow-auto max-h-[60vh]">
-          <table class="w-full text-left">
-            <thead>
-              <tr class="border-b border-gray-200">
-                <th class="py-2 px-3 font-semibold text-gray-700">Producto</th>
-                <th class="py-2 px-3 font-semibold text-gray-700">Tamaño</th>
-                <th class="py-2 px-3 font-semibold text-gray-700">Stock actual</th>
-                <th class="py-2 px-3 font-semibold text-gray-700">Umbral</th>
-              </tr>
-            </thead>
-            <tbody id="stockAlertTableBody">
-              <!-- Se llena por JS -->
-            </tbody>
-          </table>
-          <p id="stockAlertEmpty" class="text-gray-500 text-center py-8 hidden">No hay productos con stock bajo.</p>
+
+        <!-- Orders List -->
+        <div class="orders-list" id="ordersList">
+          <div class="loading">Cargando pedidos...</div>
         </div>
       </div>
-    </div>
-  </div>
+    </main>
 
-  <!-- Modal Detalle de Pedido -->
-  <div class="order-detail-overlay" id="orderDetailOverlay" aria-hidden="true">
-    <div class="order-detail-modal" id="orderDetailModal" role="dialog" aria-labelledby="orderDetailTitle">
-      <div class="order-detail-header">
-        <h2 class="order-detail-title" id="orderDetailTitle">Detalle del pedido</h2>
-        <button type="button" class="order-detail-close" id="orderDetailClose" aria-label="Cerrar">&times;</button>
-      </div>
-      <div class="order-detail-body" id="orderDetailBody">
-        <!-- Se rellena por JS -->
+    <!-- Modal Stock Bajo -->
+    <div id="stockAlertModal" class="fixed inset-0 z-[1100] hidden" aria-hidden="true">
+      <div class="fixed inset-0 bg-black/50" id="stockAlertModalBackdrop"></div>
+      <div class="fixed inset-0 flex items-center justify-center p-4">
+        <div class="relative bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+          <div class="flex items-center justify-between p-4 border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-900">Productos con stock bajo</h2>
+            <button type="button" id="stockAlertModalClose"
+              class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          <div class="p-4 overflow-auto max-h-[60vh]">
+            <table class="w-full text-left">
+              <thead>
+                <tr class="border-b border-gray-200">
+                  <th class="py-2 px-3 font-semibold text-gray-700">Producto</th>
+                  <th class="py-2 px-3 font-semibold text-gray-700">Tamaño</th>
+                  <th class="py-2 px-3 font-semibold text-gray-700">Stock actual</th>
+                  <th class="py-2 px-3 font-semibold text-gray-700">Umbral</th>
+                </tr>
+              </thead>
+              <tbody id="stockAlertTableBody">
+                <!-- Se llena por JS -->
+              </tbody>
+            </table>
+            <p id="stockAlertEmpty" class="text-gray-500 text-center py-8 hidden">No hay productos con stock bajo.</p>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="container">
-      <div class="brand">The Bakery <span class="pink">by Fresarte</span></div>
-      <div class="muted" style="margin-top:10px">© 2025 The Bakery by Fresarte. Todos los derechos reservados.</div>
+    <!-- Modal Detalle de Pedido -->
+    <div class="order-detail-overlay" id="orderDetailOverlay" aria-hidden="true">
+      <div class="order-detail-modal" id="orderDetailModal" role="dialog" aria-labelledby="orderDetailTitle">
+        <div class="order-detail-header">
+          <h2 class="order-detail-title" id="orderDetailTitle">Detalle del pedido</h2>
+          <button type="button" class="order-detail-close" id="orderDetailClose" aria-label="Cerrar">&times;</button>
+        </div>
+        <div class="order-detail-body" id="orderDetailBody">
+          <!-- Se rellena por JS -->
+        </div>
+      </div>
     </div>
-  </footer>
-  </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="container">
+        <div class="brand">The Bakery <span class="pink">by Fresarte</span></div>
+        <div class="muted" style="margin-top:10px">© 2025 The Bakery by Fresarte. Todos los derechos reservados.</div>
+      </div>
+    </footer>
+    </main>
   </div>
 
   <!-- Scripts -->
   <script src="../TheBakery/assets/js/admin-common.js"></script>
   <script src="../TheBakery/assets/js/admin-alerts.js"></script>
   <script src="../TheBakery/assets/js/admin-pedidos.js"></script>
-  
+
   <!-- Sidebar Toggle Script -->
   <script>
-    (function() {
+    (function () {
       const sidebar = document.getElementById('adminSidebar');
       const toggleBtn = document.getElementById('sidebarToggle');
       const overlay = document.getElementById('sidebarOverlay');
-      
+
       function toggleSidebar() {
         sidebar.classList.toggle('open');
         overlay.classList.toggle('active');
       }
-      
+
       function closeSidebar() {
         sidebar.classList.remove('open');
         overlay.classList.remove('active');
       }
-      
+
       if (toggleBtn) {
         toggleBtn.addEventListener('click', toggleSidebar);
       }
-      
+
       if (overlay) {
         overlay.addEventListener('click', closeSidebar);
       }
-      
+
       // Cerrar sidebar al hacer clic en un enlace (móvil)
       const sidebarLinks = document.querySelectorAll('.sidebar-nav-item, .sidebar-footer-item');
       sidebarLinks.forEach(link => {
@@ -762,7 +883,7 @@
     })();
 
     // Botón de Ayuda
-    (function() {
+    (function () {
       const helpBtn = document.getElementById('helpBtn');
       if (helpBtn) {
         helpBtn.addEventListener('click', () => {
@@ -774,4 +895,3 @@
 </body>
 
 </html>
-

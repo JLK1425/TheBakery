@@ -466,52 +466,7 @@
       });
     });
   </script>
-  <script>
-    function sendWhatsAppOrder() {
-      var cart = JSON.parse(localStorage.getItem('bakeryCart') || '[]');
 
-      if (cart.length === 0) {
-        alert('Tu carrito está vacío');
-        return;
-      }
-
-      var nombre = document.getElementById('customer-firstName') ? document.getElementById('customer-firstName').value : '';
-      var apellido = document.getElementById('customer-lastName') ? document.getElementById('customer-lastName').value : '';
-      var telefono = document.getElementById('customer-phone') ? document.getElementById('customer-phone').value : '';
-      var fechaEntrega = document.getElementById('customer-deliveryDate') ? document.getElementById('customer-deliveryDate').value : '';
-      var horaRecogida = document.getElementById('customer-pickupTime') ? document.getElementById('customer-pickupTime').value : '';
-
-      if (!nombre || !apellido || !telefono || !fechaEntrega || !horaRecogida) {
-        alert('Por favor completa todos los datos de entrega antes de ordenar');
-        return;
-      }
-
-      var mensaje = '🎂 *Nuevo Pedido - The Bakery by Fresarte*\n\n';
-      mensaje += '👤 *Cliente:* ' + nombre + ' ' + apellido + '\n';
-      mensaje += '📞 *Teléfono:* ' + telefono + '\n';
-      mensaje += '📅 *Fecha de entrega:* ' + fechaEntrega + '\n';
-      mensaje += '🕐 *Hora de recogida:* ' + horaRecogida + '\n\n';
-      mensaje += '🛒 *Productos:*\n';
-
-      var subtotal = 0;
-      cart.forEach(function (item) {
-        var precio = typeof item.price === 'string' ? parseFloat(item.price.replace(/[^0-9.]/g, '')) : (item.price || 0);
-        var itemTotal = precio * item.quantity;
-        subtotal += itemTotal;
-        mensaje += '• ' + item.name + ' x' + item.quantity + ' - RD$' + itemTotal.toLocaleString('es-DO', { minimumFractionDigits: 2 }) + '\n';
-      });
-
-      var tax = Math.round(subtotal * 0.18 * 100) / 100;
-      var total = subtotal + tax;
-
-      mensaje += '\n💰 *Subtotal:* RD$' + subtotal.toLocaleString('es-DO', { minimumFractionDigits: 2 });
-      mensaje += '\n📋 *ITBIS (18%):* RD$' + tax.toLocaleString('es-DO', { minimumFractionDigits: 2 });
-      mensaje += '\n✅ *Total:* RD$' + total.toLocaleString('es-DO', { minimumFractionDigits: 2 });
-
-      window.open('https://wa.me/18495704705?text=' + encodeURIComponent(mensaje), '_blank');
-    }
-    window.sendWhatsAppOrder = sendWhatsAppOrder;
-  </script>
 </body>
 
 </html>

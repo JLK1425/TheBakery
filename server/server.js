@@ -64,13 +64,13 @@ app.use((req, res, next) => {
 });
 
 // [REQ] log para OPTIONS/POST checkout y api/pay/session (ruta neutral evita cancel por blockers)
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   var isLogged = (req.method === 'OPTIONS' || req.method === 'POST') &&
     (req.path === '/create-checkout-session' || req.path === '/api/pay/session' || req.path === '/debug/ping');
   if (!isLogged) return next();
   var origin = req.get('origin') || '(none)';
   console.log('[REQ]', req.method, req.path, 'origin=', origin);
-  res.on('finish', function() {
+  res.on('finish', function () {
     console.log('[REQ]', req.method, req.path, 'status=', res.statusCode);
   });
   next();
@@ -408,7 +408,7 @@ app.use(express.static(path.join(__dirname, '..'))); // Servir archivos estátic
 // Rutas de datos (para compatibilidad con el frontend)
 app.get('/api/products', async (req, res) => {
   try {
-      const data = await fsPromises.readFile(path.join(__dirname, '..', 'TheBakery', 'assets', 'data', 'pasteles-autor.json'), 'utf8');
+    const data = await fsPromises.readFile(path.join(__dirname, '..', 'TheBakery', 'assets', 'data', 'pasteles-autor.json'), 'utf8');
     res.json(JSON.parse(data));
   } catch (error) {
     res.status(500).json({ error: 'Error al cargar productos' });
@@ -444,7 +444,7 @@ app.post('/api/register', async (req, res) => {
     // Leer usuarios existentes
     const usersPath = path.join(__dirname, '..', 'TheBakery', 'assets', 'data', 'users.json');
     let users = [];
-    
+
     try {
       const data = await fsPromises.readFile(usersPath, 'utf8');
       users = JSON.parse(data);
@@ -475,17 +475,17 @@ app.post('/api/register', async (req, res) => {
 
     // No enviar la contraseña en la respuesta
     const { password: _, ...userResponse } = newUser;
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       user: userResponse,
-      message: 'Usuario registrado correctamente' 
+      message: 'Usuario registrado correctamente'
     });
 
   } catch (error) {
     console.error('Error al registrar usuario:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Error al registrar usuario',
-      message: error.message 
+      message: error.message
     });
   }
 });
@@ -502,7 +502,7 @@ app.post('/api/login', async (req, res) => {
     // Leer usuarios
     const usersPath = path.join(__dirname, '..', 'TheBakery', 'assets', 'data', 'users.json');
     let users = [];
-    
+
     try {
       const data = await fsPromises.readFile(usersPath, 'utf8');
       users = JSON.parse(data);
@@ -511,8 +511,8 @@ app.post('/api/login', async (req, res) => {
     }
 
     // Buscar usuario
-    const user = users.find(u => 
-      u.email.toLowerCase() === email.toLowerCase() && 
+    const user = users.find(u =>
+      u.email.toLowerCase() === email.toLowerCase() &&
       u.password === password // En producción, comparar hash
     );
 
@@ -526,17 +526,17 @@ app.post('/api/login', async (req, res) => {
 
     // No enviar la contraseña en la respuesta
     const { password: _, ...userResponse } = user;
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       user: userResponse,
-      message: 'Inicio de sesión exitoso' 
+      message: 'Inicio de sesión exitoso'
     });
 
   } catch (error) {
     console.error('Error al iniciar sesión:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Error al iniciar sesión',
-      message: error.message 
+      message: error.message
     });
   }
 });
@@ -586,9 +586,9 @@ app.post('/api/pay/session', async (req, res) => {
       return res.status(400).json({ error: 'El monto debe ser mayor a 0' });
     }
 
-    // Calcular ITBIS (18%)
-    const tax = Math.round(subtotal * 0.18 * 100) / 100;
-    const totalAmount = Math.round((subtotal + tax) * 100) / 100;
+    // El total es igual al subtotal (sin ITBIS)
+    const tax = 0;
+    const totalAmount = subtotal;
 
     // Obtener IP del cliente
     let clientIp = req.ip || req.connection.remoteAddress || '127.0.0.1';
@@ -1165,11 +1165,11 @@ app.post('/api/orders', (req, res) => {
 
     console.log('Creando pedido:', orderId);
     console.log('❗ Detalle del pedido:', newOrder);
-    
+
     // NO descontar inventario aquí - ya se descontó al agregar al carrito
     // El inventario ya está sincronizado desde que el usuario agregó items al carrito
     console.log('[INVENTORY UPDATE] Pedido creado - inventario ya fue descontado al agregar al carrito');
-    
+
     // Agregar nuevo pedido
     orders.push(newOrder);
 
@@ -1177,18 +1177,18 @@ app.post('/api/orders', (req, res) => {
     writeOrders(orders);
 
     console.log('✓ Pedido creado exitosamente:', orderId);
-    
+
     res.status(201).json({
-      success: true, 
+      success: true,
       orderId: orderId,
       order: newOrder
     });
 
   } catch (error) {
     console.error('Error al crear pedido:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Error al crear el pedido',
-      message: error.message 
+      message: error.message
     });
   }
 });
@@ -1594,12 +1594,12 @@ app.get('/inventory/ingredients', requireAdmin, (req, res) => {
 app.post('/inventory/ingredients/update', requireAdmin, (req, res) => {
   const updatedIngredient = req.body;
   const ingredients = readIngredients();
-  
+
   const index = ingredients.findIndex(i => i.id === updatedIngredient.id);
   if (index === -1) {
     return res.status(404).json({ error: 'Ingrediente no encontrado' });
   }
-  
+
   ingredients[index] = updatedIngredient;
   writeIngredients(ingredients);
   res.json(updatedIngredient);
@@ -1609,13 +1609,13 @@ app.post('/inventory/ingredients/update', requireAdmin, (req, res) => {
 app.post('/inventory/ingredients/add', requireAdmin, (req, res) => {
   const newIngredient = req.body;
   const ingredients = readIngredients();
-  
+
   // Validar que tenga id
   if (!newIngredient.id) {
     const maxId = ingredients.length > 0 ? Math.max(...ingredients.map(i => i.id || 0)) : 0;
     newIngredient.id = maxId + 1;
   }
-  
+
   ingredients.push(newIngredient);
   writeIngredients(ingredients);
   res.status(201).json(newIngredient);
@@ -1625,13 +1625,13 @@ app.post('/inventory/ingredients/add', requireAdmin, (req, res) => {
 app.post('/inventory/ingredients/delete', requireAuth, (req, res) => {
   const { id } = req.body;
   const ingredients = readIngredients();
-  
+
   const filtered = ingredients.filter(i => i.id !== id);
-  
+
   if (filtered.length === ingredients.length) {
     return res.status(404).json({ error: 'Ingrediente no encontrado' });
   }
-  
+
   writeIngredients(filtered);
   res.json({ message: 'Ingrediente eliminado' });
 });
@@ -1883,30 +1883,37 @@ app.get('/server/data/cake_map.json', (req, res) => {
 app.post('/inventory/cakes/update', requireAdmin, (req, res) => {
   const updatedCake = req.body;
   const cakes = readCakes();
-  
+
   const index = cakes.findIndex(c => c.id === updatedCake.id);
   if (index === -1) {
     return res.status(404).json({ error: 'Pastel no encontrado' });
   }
-  
-  cakes[index] = updatedCake;
+
+  // Preserve existing fields while merging new sizes and prices
+  cakes[index] = {
+    ...cakes[index],
+    name: updatedCake.name || cakes[index].name,
+    sizes: updatedCake.sizes || cakes[index].sizes,
+    prices: updatedCake.prices || cakes[index].prices || {}
+  };
+
   writeCakes(cakes);
-  res.json(updatedCake);
+  res.json(cakes[index]);
 });
 
 // POST /api/inventory/decrease - Validar contra reservas o descontar (legacy sin sessionId)
 app.post('/api/inventory/decrease', (req, res) => {
   try {
     const { productId, size, quantity = 1, sessionId } = req.body;
-    
+
     if (!productId || !size) {
       return res.status(400).json({ error: 'productId y size son requeridos' });
     }
-    
+
     const prodId = String(productId);
     const sz = String(size);
     const qty = Number(quantity) || 1;
-    
+
     if (sessionId) {
       const reservation = findReservationBySessionId(sessionId);
       if (!reservation) {
@@ -1930,27 +1937,27 @@ app.post('/api/inventory/decrease', (req, res) => {
         cakeName: (cake && cake.name) || 'Producto'
       });
     }
-    
+
     // Sin sessionId: solo validar stock disponible (NO descontar - el descuento real ocurre al reservar en checkout)
     const cakes = readCakes();
     const cake = cakes.find(c => String(c.id) === prodId);
-    
+
     if (!cake || !cake.sizes) {
       console.warn('[INVENTORY UPDATE] Pastel no encontrado:', productId);
       return res.status(404).json({ error: 'Pastel no encontrado en inventario' });
     }
-    
+
     const currentStock = cake.sizes[sz] || 0;
-    
+
     if (currentStock < qty) {
       console.log('[INVENTORY UPDATE] Stock insuficiente:', cake.name, sz, 'Disponible:', currentStock, 'Solicitado:', qty);
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: 'Stock insuficiente',
         available: currentStock,
         requested: qty
       });
     }
-    
+
     console.log('[STOCK-RESERVATION] decrease sin sessionId: solo validado, stock:', currentStock);
     res.json({
       success: true,
@@ -1960,7 +1967,7 @@ app.post('/api/inventory/decrease', (req, res) => {
       newQuantity: currentStock,
       cakeName: cake.name
     });
-    
+
   } catch (error) {
     console.error('Error al descontar inventario:', error);
     res.status(500).json({ error: 'Error al descontar inventario', message: error.message });
@@ -1971,22 +1978,22 @@ app.post('/api/inventory/decrease', (req, res) => {
 app.post('/api/inventory/increase', (req, res) => {
   try {
     const { productId, size, quantity = 1 } = req.body;
-    
+
     if (!productId || !size) {
       return res.status(400).json({ error: 'productId y size son requeridos' });
     }
-    
+
     const cakes = readCakes();
     const cake = cakes.find(c => String(c.id) === String(productId));
-    
+
     if (!cake || !cake.sizes) {
       console.warn('[INVENTORY UPDATE] Pastel no encontrado al recuperar:', productId);
       return res.status(404).json({ error: 'Pastel no encontrado en inventario' });
     }
-    
+
     const currentStock = cake.sizes[size] || 0;
     console.log('[STOCK-RESERVATION] increase: no-op (stock no se descontó en add-to-cart), actual:', currentStock);
-    
+
     res.json({
       success: true,
       productId: String(productId),
@@ -1995,7 +2002,7 @@ app.post('/api/inventory/increase', (req, res) => {
       newQuantity: currentStock,
       cakeName: cake.name
     });
-    
+
   } catch (error) {
     console.error('Error al recuperar inventario:', error);
     res.status(500).json({ error: 'Error al recuperar inventario', message: error.message });
@@ -2006,31 +2013,31 @@ app.post('/api/inventory/increase', (req, res) => {
 app.post('/api/inventory/confirm-payment', (req, res) => {
   try {
     const { sessionId } = req.body;
-    
+
     if (!sessionId) {
       return res.status(400).json({ error: 'sessionId es requerido' });
     }
-    
+
     const reservation = findReservationBySessionId(sessionId);
     if (!reservation) {
       console.log('[STOCK-RESERVATION] confirm-payment: reserva no encontrada o ya expirada/confirmada:', sessionId);
       return res.status(404).json({ error: 'Reserva no encontrada o expirada' });
     }
-    
+
     reservation.status = 'confirmed';
     const data = readStockReservations();
     const idx = data.reservations.findIndex(r => r.id === reservation.id);
     if (idx >= 0) data.reservations[idx] = reservation;
     writeStockReservations(data);
-    
+
     console.log('[STOCK-RESERVATION] Pago confirmado:', reservation.id, 'sessionId:', sessionId);
-    
+
     res.json({
       success: true,
       reservationId: reservation.id,
       message: 'Reserva confirmada'
     });
-    
+
   } catch (error) {
     console.error('[STOCK-RESERVATION] Error confirm-payment:', error);
     res.status(500).json({ error: 'Error al confirmar pago', message: error.message });
@@ -2121,7 +2128,7 @@ app.get('/api/stock', async (req, res) => {
     let products = [];
     try {
       products = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'TheBakery', 'assets', 'data', 'pasteles-autor.json'), 'utf8'));
-    } catch (e) {}
+    } catch (e) { }
     const byId = {};
     (products || []).forEach((p) => { byId[String(p.id)] = p.name || ''; });
     if (!stock.items || Object.keys(stock.items).length === 0) {
@@ -2233,7 +2240,7 @@ app.put('/api/stock', requireAdmin, (req, res) => {
     let products = [];
     try {
       products = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'TheBakery', 'assets', 'data', 'pasteles-autor.json'), 'utf8'));
-    } catch (e) {}
+    } catch (e) { }
     const byId = {};
     (products || []).forEach((p) => { byId[String(p.id)] = p.name || ''; });
     for (const [id, available] of Object.entries(updates)) {
@@ -2629,7 +2636,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n🍰 The Bakery Server running on http://127.0.0.1:${PORT} (listening on 0.0.0.0:${PORT})`);
   console.log(`📦 Frontend URL: ${FRONTEND_URL}`);
   console.log(`💳 Stripe configured: ${!!(process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.includes('XXXX'))}\n`);
-  
+
   if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('XXXX')) {
     console.log('⚠️  ADVERTENCIA: Stripe no está configurado.');
     console.log('   Por favor, configura tus claves en server/.env\n');

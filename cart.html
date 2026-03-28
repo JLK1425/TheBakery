@@ -378,11 +378,6 @@
           <span id="discountSummaryAmount" style="color: #15803d; font-weight: 600;"></span>
         </div>
 
-        <div class="summary-row">
-          <span>Impuestos (18%)</span>
-          <span id="taxes">RD$0.00</span>
-        </div>
-
         <div class="summary-row summary-total">
           <span>Total</span>
           <span id="total">RD$0.00</span>
@@ -449,6 +444,120 @@
 
   <script src="TheBakery/assets/js/cart.js?v=2.0"></script>
   <script>
+    // Función para procesar y enviar pedido por WhatsApp
+    function sendWhatsAppOrder() {
+      // Validar carrito
+      var cartData = localStorage.getItem('bakeryCart');
+      var cart = cartData ? JSON.parse(cartData) : [];
+      if (cart.length === 0) {
+        alert('El carrito está vacío');
+        return;
+      }
+
+      // ── Validar formulario del cliente ──
+      var firstName = document.getElementById('customer-firstName');
+      var lastName = document.getElementById('customer-lastName');
+      var phone = document.getElementById('customer-phone');
+      var deliveryDate = document.getElementById('customer-deliveryDate');
+      var pickupTime = document.getElementById('customer-pickupTime');
+      var email = document.getElementById('customer-email');
+      var cedula4 = document.getElementById('customer-cedula4');
+      var contactType = document.querySelector('input[name="contact-type"]:checked');
+      var errorMsg = document.getElementById('form-error-msg');
+
+      // Reset estilos
+      [firstName, lastName, phone, deliveryDate, pickupTime, email, cedula4].forEach(function (el) {
+        if (el) el.style.borderColor = '#ddd';
+      });
+      if (errorMsg) { errorMsg.style.display = 'none'; errorMsg.textContent = ''; }
+
+      function showError(msg, field) {
+        if (errorMsg) {
+          errorMsg.textContent = msg;
+          errorMsg.style.display = 'block';
+        }
+        if (field) field.style.borderColor = '#dc3545';
+        if (field) field.focus();
+        return false;
+      }
+
+      if (!firstName || !firstName.value.trim()) return showError('Por favor ingresa tu nombre', firstName);
+      if (!lastName || !lastName.value.trim()) return showError('Por favor ingresa tu apellido', lastName);
+
+      var phoneValue = phone ? phone.value.trim().replace(/[^0-9]/g, '') : '';
+      if (phoneValue.length < 10) return showError('Por favor ingresa un número de teléfono válido', phone);
+
+      if (!deliveryDate || !deliveryDate.value) return showError('Por favor selecciona una fecha de entrega', deliveryDate);
+      if (!pickupTime || !pickupTime.value) return showError('Por favor selecciona una hora de recogida', pickupTime);
+
+      var contactValue = contactType ? contactType.value : 'email';
+      if (contactValue === 'email') {
+        var emailValue = email ? email.value.trim() : '';
+        if (!emailValue || !emailValue.includes('@')) return showError('Por favor ingresa un email válido', email);
+      } else {
+        var cedulaValue = cedula4 ? cedula4.value.trim() : '';
+        if (cedulaValue.length !== 4) return showError('Por favor ingresa 4 dígitos de cédula', cedula4);
+      }
+
+      // Preparar totales
+      var subtotal = 0;
+      for (var i = 0; i < cart.length; i++) {
+        var p = typeof cart[i].price === 'number' ? cart[i].price : parseFloat(String(cart[i].price).replace(/[^0-9.]/g, '')) || 0;
+        subtotal += p * (cart[i].quantity || 1);
+      }
+
+      // Leer descuento si aplica (está en el DOM)
+      var discountAmount = 0;
+      var discountCode = '';
+      var discountRow = document.getElementById('discountSummaryRow');
+      if (discountRow && discountRow.style.display !== 'none') {
+        var amtText = document.getElementById('discountSummaryAmount').textContent || '';
+        discountAmount = parseFloat(amtText.replace(/[^0-9.]/g, '')) || 0;
+        discountCode = document.getElementById('discountSummaryCode').textContent || '';
+      }
+
+      var subtotalAfterDiscount = Math.max(0, subtotal - discountAmount);
+      var total = subtotalAfterDiscount;
+
+      // ── MENSAGE PARA WS ── 
+      var mensaje = 'Hola The Bakery, quiero realizar el siguiente pedido por WhatsApp:\n\n';
+      mensaje += '👤 *DATOS DEL CLIENTE*\n';
+      mensaje += 'Nombre: ' + firstName.value.trim() + ' ' + lastName.value.trim() + '\n';
+      mensaje += 'Teléfono: ' + phone.value.trim() + '\n';
+      mensaje += 'Fecha de Entrega: ' + deliveryDate.value + '\n';
+      mensaje += 'Hora de Recogida: ' + pickupTime.options[pickupTime.selectedIndex].text + '\n';
+      if (contactValue === 'email') {
+        mensaje += 'Email: ' + email.value.trim() + '\n';
+      } else {
+        mensaje += 'Cédula (últimos 4): ' + cedula4.value.trim() + '\n';
+      }
+      mensaje += '\n🛒 *PEDIDO*\n';
+
+      for (var j = 0; j < cart.length; j++) {
+        var item = cart[j];
+        var itemPrice = typeof item.price === 'number' ? item.price : parseFloat(String(item.price).replace(/[^0-9.]/g, '')) || 0;
+        var itemName = item.name || 'Producto';
+        if (item.size && !itemName.includes(item.size + '"')) {
+          itemName += ' (' + item.size + '")';
+        }
+        mensaje += '▪ ' + item.quantity + 'x ' + itemName + ' - RD$' + itemPrice.toLocaleString('es-DO', { minimumFractionDigits: 2 }) + ' c/u\n';
+      }
+
+      mensaje += '\n💰 *RESUMEN*\n';
+      mensaje += 'Subtotal: RD$' + subtotal.toLocaleString('es-DO', { minimumFractionDigits: 2 }) + '\n';
+      if (discountAmount > 0) {
+        mensaje += 'Descuento (' + discountCode + '): -RD$' + discountAmount.toLocaleString('es-DO', { minimumFractionDigits: 2 }) + '\n';
+      }
+      mensaje += '✅ *Total a Pagar:* RD$' + total.toLocaleString('es-DO', { minimumFractionDigits: 2 }) + '\n\n';
+      mensaje += '¿Cuáles son los métodos de pago disponibles?';
+
+      // Reemplazar número aquí (el número oficial de WB de The Bakery)
+      var whatsappNumber = '18495704705';
+      var textEncoded = encodeURIComponent(mensaje);
+      var url = 'https://wa.me/' + whatsappNumber + '?text=' + textEncoded;
+      window.open(url, '_blank');
+    }
+
     // Toggle entre email y cédula
     document.querySelectorAll('input[name="contact-type"]').forEach(function (radio) {
       radio.addEventListener('change', function () {

@@ -1,283 +1,4 @@
 {
-  "2026-02-23": {
-    "date": "2026-02-23",
-    "archivedAt": "2026-02-27T21:42:49.570Z",
-    "summary": {
-      "totalOrders": 4,
-      "totalRevenue": 47750,
-      "totalTax": 8595,
-      "totalWithTax": 56345,
-      "topCakes": [
-        {
-          "name": "Pastel de Coco (6\")",
-          "quantity": 4,
-          "revenue": 10600
-        },
-        {
-          "name": "Matcha Strawberry (6\")",
-          "quantity": 3,
-          "revenue": 11700
-        },
-        {
-          "name": "Pastel de Fresas (6\")",
-          "quantity": 3,
-          "revenue": 7650
-        },
-        {
-          "name": "Pastel de Arandanos (6\")",
-          "quantity": 2,
-          "revenue": 5800
-        },
-        {
-          "name": "Pastel Lemon Pie (6\")",
-          "quantity": 2,
-          "revenue": 5800
-        },
-        {
-          "name": "Pastel de Chinola (6\")",
-          "quantity": 2,
-          "revenue": 6200
-        }
-      ]
-    },
-    "orders": [
-      {
-        "id": "ORD-1771868185311",
-        "paymentMethod": "cardnet",
-        "responseCode": "00",
-        "authorizationCode": "002595",
-        "cardNumber": "476134______0050",
-        "referenceNumber": "000000000128",
-        "txToken": "txn-3A52eK5h77Spz4nu33KQACYiUOJ",
-        "subtotal": 9100,
-        "tax": 1638,
-        "total": 10738,
-        "items": [
-          {
-            "price_data": {
-              "currency": "dop",
-              "product_data": {
-                "name": "Pastel de Coco (6\")"
-              },
-              "unit_amount": 265000
-            },
-            "quantity": 1
-          },
-          {
-            "price_data": {
-              "currency": "dop",
-              "product_data": {
-                "name": "Matcha Strawberry (6\")"
-              },
-              "unit_amount": 390000
-            },
-            "quantity": 1
-          },
-          {
-            "price_data": {
-              "currency": "dop",
-              "product_data": {
-                "name": "Pastel de Fresas (6\")"
-              },
-              "unit_amount": 255000
-            },
-            "quantity": 1
-          }
-        ],
-        "status": "Entregado",
-        "createdAt": "2026-02-23T17:36:46.229Z"
-      },
-      {
-        "id": "ORD-1771869366664",
-        "paymentMethod": "cardnet",
-        "responseCode": "00",
-        "authorizationCode": "006442",
-        "cardNumber": "476134______0050",
-        "referenceNumber": "000000000129",
-        "txToken": "txn-3A552W8dwL3d1Ho1eutuq4a7E2f",
-        "subtotal": 18000,
-        "tax": 3240,
-        "total": 21240,
-        "items": [
-          {
-            "price_data": {
-              "currency": "dop",
-              "product_data": {
-                "name": "Pastel de Fresas (6\")"
-              },
-              "unit_amount": 255000
-            },
-            "quantity": 1
-          },
-          {
-            "price_data": {
-              "currency": "dop",
-              "product_data": {
-                "name": "Pastel de Coco (6\")"
-              },
-              "unit_amount": 265000
-            },
-            "quantity": 1
-          },
-          {
-            "price_data": {
-              "currency": "dop",
-              "product_data": {
-                "name": "Matcha Strawberry (6\")"
-              },
-              "unit_amount": 390000
-            },
-            "quantity": 1
-          },
-          {
-            "price_data": {
-              "currency": "dop",
-              "product_data": {
-                "name": "Pastel de Arandanos (6\")"
-              },
-              "unit_amount": 290000
-            },
-            "quantity": 1
-          },
-          {
-            "price_data": {
-              "currency": "dop",
-              "product_data": {
-                "name": "Pastel Lemon Pie (6\")"
-              },
-              "unit_amount": 290000
-            },
-            "quantity": 1
-          },
-          {
-            "price_data": {
-              "currency": "dop",
-              "product_data": {
-                "name": "Pastel de Chinola (6\")"
-              },
-              "unit_amount": 310000
-            },
-            "quantity": 1
-          }
-        ],
-        "status": "Entregado",
-        "createdAt": "2026-02-23T17:56:24.687Z"
-      },
-      {
-        "id": "ORD-1771870401797",
-        "paymentMethod": "cardnet",
-        "responseCode": "00",
-        "authorizationCode": "009832",
-        "cardNumber": "476134______0050",
-        "referenceNumber": "000000000130",
-        "txToken": "txn-3A578yvC2rAMoUc8yg9aSnyE7JI",
-        "subtotal": 18000,
-        "tax": 3240,
-        "total": 21240,
-        "items": [
-          {
-            "price_data": {
-              "currency": "dop",
-              "product_data": {
-                "name": "Pastel de Chinola (6\")"
-              },
-              "unit_amount": 310000
-            },
-            "quantity": 1
-          },
-          {
-            "price_data": {
-              "currency": "dop",
-              "product_data": {
-                "name": "Pastel Lemon Pie (6\")"
-              },
-              "unit_amount": 290000
-            },
-            "quantity": 1
-          },
-          {
-            "price_data": {
-              "currency": "dop",
-              "product_data": {
-                "name": "Pastel de Arandanos (6\")"
-              },
-              "unit_amount": 290000
-            },
-            "quantity": 1
-          },
-          {
-            "price_data": {
-              "currency": "dop",
-              "product_data": {
-                "name": "Pastel de Fresas (6\")"
-              },
-              "unit_amount": 255000
-            },
-            "quantity": 1
-          },
-          {
-            "price_data": {
-              "currency": "dop",
-              "product_data": {
-                "name": "Matcha Strawberry (6\")"
-              },
-              "unit_amount": 390000
-            },
-            "quantity": 1
-          },
-          {
-            "price_data": {
-              "currency": "dop",
-              "product_data": {
-                "name": "Pastel de Coco (6\")"
-              },
-              "unit_amount": 265000
-            },
-            "quantity": 1
-          }
-        ],
-        "status": "Entregado",
-        "createdAt": "2026-02-23T18:13:43.163Z"
-      },
-      {
-        "id": "ORD-1771872321104",
-        "paymentMethod": "cardnet",
-        "responseCode": "00",
-        "authorizationCode": "016079",
-        "cardNumber": "476134______0050",
-        "referenceNumber": "000000000131",
-        "txToken": "txn-3A5B1MgNXveEJFWIPXseUGgG84E",
-        "subtotal": 2650,
-        "tax": 477,
-        "total": 3127,
-        "items": [
-          {
-            "price_data": {
-              "currency": "dop",
-              "product_data": {
-                "name": "Pastel de Coco (6\")"
-              },
-              "unit_amount": 265000
-            },
-            "quantity": 1
-          }
-        ],
-        "customerName": "Joel Abreu De La Rosa",
-        "customer": {
-          "name": "Joel Abreu De La Rosa",
-          "firstName": "Joel",
-          "lastName": "Abreu De La Rosa",
-          "phone": "8097926278",
-          "email": "jlab.abreu@gmail.com",
-          "cedulaLast4": null,
-          "deliveryDate": "2026-02-26",
-          "pickupTime": "19:00"
-        },
-        "status": "Entregado",
-        "createdAt": "2026-02-23T18:45:35.371Z"
-      }
-    ]
-  },
   "2026-02-27": {
     "date": "2026-02-27",
     "archivedAt": "2026-02-27T21:42:49.570Z",
@@ -332,6 +53,93 @@
         },
         "status": "Entregado",
         "createdAt": "2026-02-27T21:42:01.923Z"
+      }
+    ]
+  },
+  "2026-03-03": {
+    "date": "2026-03-03",
+    "archivedAt": "2026-03-10T07:00:06.610Z",
+    "summary": {
+      "totalOrders": 1,
+      "totalRevenue": 9100,
+      "totalTax": 1638,
+      "totalWithTax": 10738,
+      "topCakes": [
+        {
+          "name": "Pastel de Coco (6\")",
+          "quantity": 1,
+          "revenue": 2650
+        },
+        {
+          "name": "Matcha Strawberry (6\")",
+          "quantity": 1,
+          "revenue": 3900
+        },
+        {
+          "name": "Pastel de Fresas (6\")",
+          "quantity": 1,
+          "revenue": 2550
+        }
+      ]
+    },
+    "orders": [
+      {
+        "id": "ORD-1772543875361",
+        "paymentMethod": "cardnet",
+        "responseCode": "00",
+        "authorizationCode": "013636",
+        "cardNumber": "476134______0050",
+        "referenceNumber": "000000000171",
+        "txToken": "txn-3AR8BecuOknEqlMEm089cWiVDVp",
+        "subtotal": 9100,
+        "tax": 1638,
+        "total": 10738,
+        "items": [
+          {
+            "price_data": {
+              "currency": "dop",
+              "product_data": {
+                "name": "Pastel de Coco (6\")"
+              },
+              "unit_amount": 265000
+            },
+            "quantity": 1
+          },
+          {
+            "price_data": {
+              "currency": "dop",
+              "product_data": {
+                "name": "Matcha Strawberry (6\")"
+              },
+              "unit_amount": 390000
+            },
+            "quantity": 1
+          },
+          {
+            "price_data": {
+              "currency": "dop",
+              "product_data": {
+                "name": "Pastel de Fresas (6\")"
+              },
+              "unit_amount": 255000
+            },
+            "quantity": 1
+          }
+        ],
+        "discount": null,
+        "customerName": "Joel Abreu De La Rosa",
+        "customer": {
+          "name": "Joel Abreu De La Rosa",
+          "firstName": "Joel",
+          "lastName": "Abreu De La Rosa",
+          "phone": "8097926278",
+          "email": "jlab.abreu@gmail.com",
+          "cedulaLast4": null,
+          "deliveryDate": "2026-03-07",
+          "pickupTime": "18:00"
+        },
+        "status": "Entregado",
+        "createdAt": "2026-03-03T13:18:09.594Z"
       }
     ]
   }

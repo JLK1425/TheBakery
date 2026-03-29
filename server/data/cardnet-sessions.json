@@ -1,1 +1,33 @@
-{}
+{
+  "sess-3BdBR1qY2dLI8Ztjff1HhqnyJa4": {
+    "sessionKey": "f571b749db34c580f5dee0acb2aa18f76fa65988",
+    "ordenId": "ORD-1774809056278",
+    "transactionId": "056278",
+    "subtotal": 2650,
+    "total": 2650,
+    "tax": 0,
+    "items": [
+      {
+        "price_data": {
+          "currency": "dop",
+          "product_data": {
+            "name": "Pastel de Coco (6\")"
+          },
+          "unit_amount": 265000
+        },
+        "quantity": 1
+      }
+    ],
+    "customer": {
+      "firstName": "Joel",
+      "lastName": "Abreu De La Rosa",
+      "phone": "8097926278",
+      "email": "jlab.abreu@gmail.com",
+      "cedulaLast4": null,
+      "deliveryDate": "2026-04-02",
+      "pickupTime": "17:00"
+    },
+    "discount": null,
+    "createdAt": "2026-03-29T18:30:56.717Z"
+  }
+}

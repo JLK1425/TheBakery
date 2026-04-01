@@ -18,6 +18,22 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const reservationsLib = require('./lib/reservations');
 const usersReservations = require('./lib/users-reservations');
+const multer = require('multer');
+const IMAGES_DIR = path.join(__dirname, '..', 'TheBakery', 'assets', 'imagenes');
+const cakeImageStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, IMAGES_DIR),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `cake-${Date.now()}${ext}`);
+  }
+});
+const uploadCakeImage = multer({
+  storage: cakeImageStorage,
+  fileFilter: (req, file, cb) => {
+    if (/\.(png|jpe?g|webp)$/i.test(file.originalname)) cb(null, true);
+    else cb(new Error('Solo se permiten imágenes png, jpg, jpeg, webp'));
+  }
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -1889,16 +1905,83 @@ app.post('/inventory/cakes/update', requireAdmin, (req, res) => {
     return res.status(404).json({ error: 'Pastel no encontrado' });
   }
 
-  // Preserve existing fields while merging new sizes and prices
   cakes[index] = {
     ...cakes[index],
     name: updatedCake.name || cakes[index].name,
-    sizes: updatedCake.sizes || cakes[index].sizes,
-    prices: updatedCake.prices || cakes[index].prices || {}
+    ...(updatedCake.variants && { variants: updatedCake.variants }),
+    ...(updatedCake.sizes && { sizes: updatedCake.sizes })
   };
 
   writeCakes(cakes);
   res.json(cakes[index]);
+});
+
+// POST /api/inventory/cakes/add
+app.post('/api/inventory/cakes/add', requireAdmin, (req, res) => {
+  const { name, description, variants, image } = req.body;
+  if (!name || !variants || !Array.isArray(variants) || variants.length === 0) {
+    return res.status(400).json({ error: 'name y variants (array) son requeridos' });
+  }
+  const cakes = readCakes();
+  const maxId = cakes.reduce((max, c) => Math.max(max, parseInt(c.id) || 0), 0);
+  const newCake = {
+    id: String(maxId + 1),
+    name,
+    description: description || '',
+    image: image || '',
+    sizes: {},
+    variants: variants.map(v => ({
+      name: String(v.name || '').trim(),
+      price: Math.max(0, parseInt(v.price) || 0),
+      enabled: v.enabled !== false
+    })).filter(v => v.name)
+  };
+  cakes.push(newCake);
+  writeCakes(cakes);
+  res.status(201).json(newCake);
+});
+
+// PUT /api/inventory/cakes/:id/toggle
+app.put('/api/inventory/cakes/:id/toggle', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const { variantName, enabled } = req.body;
+  console.log(`[TOGGLE] id=${id} variantName=${variantName} enabled=${enabled} (type:${typeof enabled})`);
+  if (!variantName || typeof enabled !== 'boolean') {
+    console.log('[TOGGLE] 400 - validación fallida');
+    return res.status(400).json({ error: 'variantName y enabled (boolean) son requeridos' });
+  }
+  const cakes = readCakes();
+  const index = cakes.findIndex(c => c.id === id);
+  console.log(`[TOGGLE] findIndex result: ${index} (buscando id="${id}" entre ${cakes.map(c=>c.id)})`);
+  if (index === -1) return res.status(404).json({ error: 'Pastel no encontrado' });
+  const variants = cakes[index].variants;
+  if (!variants) {
+    console.log('[TOGGLE] 400 - sin variantes en el pastel');
+    return res.status(400).json({ error: 'El pastel no tiene variantes definidas' });
+  }
+  const vi = variants.findIndex(v => v.name === variantName);
+  console.log(`[TOGGLE] variante idx=${vi} (buscando "${variantName}" en [${variants.map(v=>v.name)}])`);
+  if (vi === -1) return res.status(404).json({ error: 'Variante no encontrada' });
+  variants[vi].enabled = enabled;
+  writeCakes(cakes);
+  console.log(`[TOGGLE] OK - ${cakes[index].name} / ${variantName} => enabled=${enabled}`);
+  res.json(cakes[index]);
+});
+
+// POST /api/inventory/cakes/upload-image
+app.post('/api/inventory/cakes/upload-image', requireAdmin, (req, res, next) => {
+  uploadCakeImage.single('image')(req, res, (err) => {
+    if (err) {
+      console.error('[UPLOAD-IMAGE] Multer error:', err.message);
+      return res.status(400).json({ error: err.message || 'Error al procesar imagen' });
+    }
+    if (!req.file) {
+      console.error('[UPLOAD-IMAGE] No file received');
+      return res.status(400).json({ error: 'No se recibió imagen' });
+    }
+    console.log('[UPLOAD-IMAGE] OK -', req.file.filename, '- path:', IMAGES_DIR);
+    res.json({ path: `/TheBakery/assets/imagenes/${req.file.filename}` });
+  });
 });
 
 // POST /api/inventory/decrease - Validar contra reservas o descontar (legacy sin sessionId)

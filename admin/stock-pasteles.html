@@ -253,7 +253,8 @@
       <div class="stock-container">
         <p style="color:var(--muted); margin-bottom:1rem;">Actualiza la cantidad disponible por producto. Este stock se
           valida al reservar fecha y hora.</p>
-        <div class="flex flex-wrap gap-2 mb-4">
+        <div class="flex flex-wrap gap-2 mb-4" style="justify-content: space-between; align-items: center;">
+          <div class="flex flex-wrap gap-2">
           <button type="button"
             class="filter-btn active px-4 py-2 rounded-lg font-medium text-sm bg-gray-200 text-gray-800"
             data-filter="all">Todos</button>
@@ -263,6 +264,11 @@
           <button type="button"
             class="filter-btn px-4 py-2 rounded-lg font-medium text-sm bg-gray-100 text-gray-600 hover:bg-gray-200"
             data-filter="zero">Sin Stock</button>
+          </div>
+          <button type="button" id="addProductBtn"
+            style="background: #ec4899; color: #fff; border: none; padding: 0.5rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: 0.875rem; cursor: pointer;">
+            + Agregar Producto
+          </button>
         </div>
         <div id="bulkActions" class="hidden mb-4 p-4 bg-gray-50 rounded-lg flex flex-wrap items-center gap-3">
           <span class="text-sm font-medium text-gray-700">Seleccionados: <span id="selectedCount">0</span></span>
@@ -277,7 +283,7 @@
             <thead>
               <tr>
                 <th style="padding: 1rem;">Producto</th>
-                <th style="padding: 1rem;">Stock por Tamaño</th>
+                <th style="padding: 1rem;">Disponibilidad</th>
                 <th style="padding: 1rem;">Precio por Tamaño</th>
                 <th style="padding: 1rem; text-align: center;">Stock Total</th>
                 <th style="padding: 1rem;">Acción</th>
@@ -301,6 +307,52 @@
       <div class="muted" style="margin-top:10px">© 2025 The Bakery by Fresarte.</div>
     </div>
   </footer>
+
+  <!-- Modal Agregar Producto -->
+  <div id="addProductModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:4000; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:12px; padding:2rem; width:100%; max-width:500px; margin:1rem; box-shadow:0 8px 32px rgba(0,0,0,0.2); max-height:90vh; overflow-y:auto;">
+      <h2 style="font-size:1.25rem; font-weight:700; margin:0 0 1.5rem;">Agregar Producto</h2>
+      <form id="addProductForm">
+        <div style="margin-bottom:1rem;">
+          <label style="font-size:0.875rem; font-weight:600; color:#374151; display:block; margin-bottom:0.25rem;">Nombre *</label>
+          <input type="text" id="newName" required style="width:100%; padding:0.5rem 0.75rem; border:2px solid #e5e7eb; border-radius:8px; font-size:0.95rem; box-sizing:border-box;">
+        </div>
+        <div style="margin-bottom:1rem;">
+          <label style="font-size:0.875rem; font-weight:600; color:#374151; display:block; margin-bottom:0.25rem;">Descripción</label>
+          <input type="text" id="newDescription" style="width:100%; padding:0.5rem 0.75rem; border:2px solid #e5e7eb; border-radius:8px; font-size:0.95rem; box-sizing:border-box;">
+        </div>
+
+        <!-- Variantes dinámicas -->
+        <div style="margin-bottom:1.25rem;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+            <label style="font-size:0.875rem; font-weight:600; color:#374151;">Variantes *</label>
+            <button type="button" id="addVariantBtn"
+              style="background:#ec4899; color:#fff; border:none; padding:0.3rem 0.8rem; border-radius:6px; font-size:0.8rem; font-weight:600; cursor:pointer;">
+              + Variante
+            </button>
+          </div>
+          <div style="font-size:0.78rem; color:#6b7280; margin-bottom:0.5rem;">
+            Ej: "6 porciones", "12 porciones", "Personal", "Familiar"
+          </div>
+          <div style="display:flex; gap:0.4rem; font-size:0.78rem; font-weight:600; color:#6b7280; margin-bottom:0.3rem; padding:0 0.1rem;">
+            <span style="flex:1;">Nombre de variante</span>
+            <span style="width:115px;">Precio (RD$)</span>
+            <span style="width:32px;"></span>
+          </div>
+          <div id="variantsList"></div>
+        </div>
+
+        <div style="margin-bottom:1.5rem;">
+          <label style="font-size:0.875rem; font-weight:600; color:#374151; display:block; margin-bottom:0.25rem;">Imagen del producto</label>
+          <input type="file" id="newImage" accept=".png,.jpg,.jpeg,.webp" style="width:100%; padding:0.5rem 0.75rem; border:2px solid #e5e7eb; border-radius:8px; font-size:0.875rem; box-sizing:border-box; cursor:pointer;">
+        </div>
+        <div style="display:flex; gap:0.75rem; justify-content:flex-end;">
+          <button type="button" id="cancelAddProduct" style="padding:0.5rem 1.25rem; border:2px solid #e5e7eb; background:#fff; border-radius:8px; font-weight:600; cursor:pointer;">Cancelar</button>
+          <button type="submit" id="submitAddProduct" style="padding:0.5rem 1.25rem; background:#ec4899; color:#fff; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Agregar</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script src="../TheBakery/assets/js/admin-stock-pasteles.js"></script>
   <script>

@@ -1,17 +1,47 @@
 {
-  "sess-3BdBR1qY2dLI8Ztjff1HhqnyJa4": {
-    "sessionKey": "f571b749db34c580f5dee0acb2aa18f76fa65988",
-    "ordenId": "ORD-1774809056278",
-    "transactionId": "056278",
-    "subtotal": 2650,
-    "total": 2650,
+  "sess-3CPeM4izRbnADySV2DIYvtRG442": {
+    "sessionKey": "4eb41b4f9c75fa60158e3309646e3b34a4ca93bc",
+    "ordenId": "ORD-1776291578944",
+    "transactionId": "578944",
+    "subtotal": 7103,
+    "total": 7103,
     "tax": 0,
     "items": [
       {
         "price_data": {
           "currency": "dop",
           "product_data": {
-            "name": "Pastel de Coco (6\")"
+            "name": "Mini Cake Fresas"
+          },
+          "unit_amount": 55000
+        },
+        "quantity": 1
+      },
+      {
+        "price_data": {
+          "currency": "dop",
+          "product_data": {
+            "name": "Fresas con Crema (1 Unidad)"
+          },
+          "unit_amount": 300
+        },
+        "quantity": 1
+      },
+      {
+        "price_data": {
+          "currency": "dop",
+          "product_data": {
+            "name": "Matcha Strawberry (6 porciones)"
+          },
+          "unit_amount": 390000
+        },
+        "quantity": 1
+      },
+      {
+        "price_data": {
+          "currency": "dop",
+          "product_data": {
+            "name": "Pastel de Coco (6 porciones)"
           },
           "unit_amount": 265000
         },
@@ -24,10 +54,10 @@
       "phone": "8097926278",
       "email": "jlab.abreu@gmail.com",
       "cedulaLast4": null,
-      "deliveryDate": "2026-04-02",
+      "deliveryDate": "2026-04-22",
       "pickupTime": "17:00"
     },
     "discount": null,
-    "createdAt": "2026-03-29T18:30:56.717Z"
+    "createdAt": "2026-04-15T22:19:39.317Z"
   }
 }

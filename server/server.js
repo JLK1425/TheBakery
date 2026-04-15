@@ -36,7 +36,7 @@ const uploadCakeImage = multer({
 });
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://127.0.0.1:5503';
 const TEST_MODE = process.env.TEST_MODE === 'true';
 const IS_PROD = process.env.NODE_ENV === 'production';
@@ -422,13 +422,9 @@ app.use(session({
 app.use(express.static(path.join(__dirname, '..'))); // Servir archivos estáticos del proyecto
 
 // Rutas de datos (para compatibilidad con el frontend)
-app.get('/api/products', async (req, res) => {
-  try {
-    const data = await fsPromises.readFile(path.join(__dirname, '..', 'TheBakery', 'assets', 'data', 'pasteles-autor.json'), 'utf8');
-    res.json(JSON.parse(data));
-  } catch (error) {
-    res.status(500).json({ error: 'Error al cargar productos' });
-  }
+app.get('/api/products', (req, res) => {
+  const cakes = readCakes();
+  res.json(cakes);
 });
 
 // Health/ping para probar CORS sin credenciales
@@ -1952,7 +1948,7 @@ app.put('/api/inventory/cakes/:id/toggle', requireAdmin, (req, res) => {
   }
   const cakes = readCakes();
   const index = cakes.findIndex(c => c.id === id);
-  console.log(`[TOGGLE] findIndex result: ${index} (buscando id="${id}" entre ${cakes.map(c=>c.id)})`);
+  console.log(`[TOGGLE] findIndex result: ${index} (buscando id="${id}" entre ${cakes.map(c => c.id)})`);
   if (index === -1) return res.status(404).json({ error: 'Pastel no encontrado' });
   const variants = cakes[index].variants;
   if (!variants) {
@@ -1960,7 +1956,7 @@ app.put('/api/inventory/cakes/:id/toggle', requireAdmin, (req, res) => {
     return res.status(400).json({ error: 'El pastel no tiene variantes definidas' });
   }
   const vi = variants.findIndex(v => v.name === variantName);
-  console.log(`[TOGGLE] variante idx=${vi} (buscando "${variantName}" en [${variants.map(v=>v.name)}])`);
+  console.log(`[TOGGLE] variante idx=${vi} (buscando "${variantName}" en [${variants.map(v => v.name)}])`);
   if (vi === -1) return res.status(404).json({ error: 'Variante no encontrada' });
   variants[vi].enabled = enabled;
   writeCakes(cakes);

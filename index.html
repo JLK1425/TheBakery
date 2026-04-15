@@ -137,7 +137,6 @@
               <circle cx="11" cy="11" r="8"></circle>
               <path d="m21 21-4.35-4.35"></path>
             </svg>
-            <span class="search-text">Search</span>
           </button>
           <div class="search-overlay" id="searchOverlay">
             <div class="search-box">
@@ -154,7 +153,6 @@
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
-          <span>Log in</span>
         </button>
         <!-- Cart -->
         <button class="nav-action-btn" id="cartBtn">
@@ -164,7 +162,6 @@
             <circle cx="20" cy="21" r="1"></circle>
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
           </svg>
-          <span>Cart</span>
           <span class="cart-badge" id="cartBadge">0</span>
         </button>
       </div>
@@ -346,30 +343,8 @@
         </div>
       </div>
 
-      <div class="cakes-gallery">
-        <div class="cake-item" data-cake-id="1">
-          <img src="TheBakery/assets/imagenes/pastel-coco/pastel-coco-1.png" alt="Pastel de Coco" class="cake-image">
-        </div>
-        <div class="cake-item" data-cake-id="2">
-          <img src="TheBakery/assets/imagenes/matcha-strawberry/matcha-strawberry-1.png" alt="Matcha Strawberry"
-            class="cake-image">
-        </div>
-        <div class="cake-item" data-cake-id="4">
-          <img src="TheBakery/assets/imagenes/pastel-fresas/pastel-fresas-1.png" alt="Pastel de Fresas"
-            class="cake-image">
-        </div>
-        <div class="cake-item" data-cake-id="5">
-          <img src="TheBakery/assets/imagenes/pastel-arandanos/pastel-arandanos-1.png" alt="Pastel de Arandanos"
-            class="cake-image">
-        </div>
-        <div class="cake-item" data-cake-id="6">
-          <img src="TheBakery/assets/imagenes/pastel-lemon-pie/pastel-lemon-pie-1.png" alt="Pastel Lemon Pie"
-            class="cake-image">
-        </div>
-        <div class="cake-item" data-cake-id="7">
-          <img src="TheBakery/assets/imagenes/pastel-chinola/pastel-chinola-1.png" alt="Pastel de Chinola"
-            class="cake-image">
-        </div>
+      <div class="cakes-gallery" id="cakesGallery">
+        <!-- Populated dynamically from API -->
       </div>
     </div>
   </section>

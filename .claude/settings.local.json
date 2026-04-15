@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node server.js)",
+      "Bash(node:*)",
+      "Bash(npm install:*)",
+      "Bash(npx -y ccstatusline@2.2.6 --help)",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":3000\")",
+      "Bash(curl:*)",
+      "Bash(wmic process:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd:*)",
+      "Bash(powershell:*)",
+      "Bash(echo \"PID: $!\")",
+      "Bash(ls \"C:/Proyectos/TheBakery/TheBakery/\"*.html)",
+      "Bash(ls \"C:/Proyectos/TheBakery/\"*.html ls \"C:/Proyectos/TheBakery/TheBakery/\")",
+      "Bash(rm \"C:/temp_cakes.json\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); [print\\('id:'+str\\(p['id']\\)+' | '+p['name']\\) for p in d]\")"
+    ]
+  }
+}

@@ -5,10 +5,21 @@
     "image": "TheBakery/assets/imagenes/pastel-coco/pastel-coco-1.png",
     "rating": 4.9,
     "reviews": 186,
-    "sizes": { "6": 95, "8": 100 },
+    "sizes": {
+      "6": 95,
+      "8": 100
+    },
     "variants": [
-      { "name": "6 porciones", "price": 0, "enabled": true },
-      { "name": "12 porciones", "price": 0, "enabled": false }
+      {
+        "name": "6 porciones",
+        "price": 2650,
+        "enabled": true
+      },
+      {
+        "name": "12 porciones",
+        "price": 3650,
+        "enabled": true
+      }
     ]
   },
   {
@@ -17,10 +28,21 @@
     "image": "TheBakery/assets/imagenes/matcha-strawberry/matcha-strawberry-1.png",
     "rating": 4.8,
     "reviews": 142,
-    "sizes": { "6": 97, "8": 100 },
+    "sizes": {
+      "6": 97,
+      "8": 100
+    },
     "variants": [
-      { "name": "6 porciones", "price": 0, "enabled": true },
-      { "name": "12 porciones", "price": 0, "enabled": false }
+      {
+        "name": "6 porciones",
+        "price": 3900,
+        "enabled": true
+      },
+      {
+        "name": "12 porciones",
+        "price": 5400,
+        "enabled": true
+      }
     ]
   },
   {
@@ -29,10 +51,21 @@
     "image": "TheBakery/assets/imagenes/pastel-fresas/pastel-fresas-1.png",
     "rating": 4.9,
     "reviews": 156,
-    "sizes": { "6": 97, "8": 100 },
+    "sizes": {
+      "6": 97,
+      "8": 100
+    },
     "variants": [
-      { "name": "6 porciones", "price": 0, "enabled": true },
-      { "name": "12 porciones", "price": 0, "enabled": false }
+      {
+        "name": "6 porciones",
+        "price": 2550,
+        "enabled": true
+      },
+      {
+        "name": "12 porciones",
+        "price": 3550,
+        "enabled": true
+      }
     ]
   },
   {
@@ -41,10 +74,21 @@
     "image": "TheBakery/assets/imagenes/pastel-arandanos/pastel-arandanos-1.png",
     "rating": 4.8,
     "reviews": 94,
-    "sizes": { "6": 98, "8": 100 },
+    "sizes": {
+      "6": 98,
+      "8": 100
+    },
     "variants": [
-      { "name": "6 porciones", "price": 0, "enabled": true },
-      { "name": "12 porciones", "price": 0, "enabled": false }
+      {
+        "name": "6 porciones",
+        "price": 2900,
+        "enabled": true
+      },
+      {
+        "name": "12 porciones",
+        "price": 3900,
+        "enabled": true
+      }
     ]
   },
   {
@@ -53,10 +97,21 @@
     "image": "TheBakery/assets/imagenes/pastel-lemon-pie/pastel-lemon-pie-1.png",
     "rating": 4.9,
     "reviews": 178,
-    "sizes": { "6": 98, "8": 100 },
+    "sizes": {
+      "6": 98,
+      "8": 100
+    },
     "variants": [
-      { "name": "6 porciones", "price": 0, "enabled": true },
-      { "name": "12 porciones", "price": 0, "enabled": false }
+      {
+        "name": "6 porciones",
+        "price": 2900,
+        "enabled": true
+      },
+      {
+        "name": "12 porciones",
+        "price": 3900,
+        "enabled": true
+      }
     ]
   },
   {
@@ -65,10 +120,21 @@
     "image": "TheBakery/assets/imagenes/pastel-chinola/pastel-chinola-1.png",
     "rating": 4.7,
     "reviews": 112,
-    "sizes": { "6": 98, "8": 100 },
+    "sizes": {
+      "6": 98,
+      "8": 100
+    },
     "variants": [
-      { "name": "6 porciones", "price": 0, "enabled": true },
-      { "name": "12 porciones", "price": 0, "enabled": true }
+      {
+        "name": "6 porciones",
+        "price": 3100,
+        "enabled": true
+      },
+      {
+        "name": "12 porciones",
+        "price": 4100,
+        "enabled": true
+      }
     ]
   },
   {
@@ -80,7 +146,25 @@
     "reviews": 0,
     "sizes": {},
     "variants": [
-      { "name": "Mini Cake Fresas", "price": 550, "enabled": true }
+      {
+        "name": "Mini Cake Fresas",
+        "price": 550,
+        "enabled": true
+      }
+    ]
+  },
+  {
+    "id": "9",
+    "name": "Fresas con Crema",
+    "description": "Fresas Con Crema",
+    "image": "/TheBakery/assets/imagenes/cake-1776291240117.jpg",
+    "sizes": {},
+    "variants": [
+      {
+        "name": "1 Unidad",
+        "price": 3,
+        "enabled": true
+      }
     ]
   }
 ]

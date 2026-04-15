@@ -1359,6 +1359,7 @@ app.post('/api/auth/login', async (req, res) => {
 
 // Verificar sesión admin
 app.get('/api/auth/me', (req, res) => {
+  res.set('Cache-Control', 'no-store');
   if (req.session && req.session.user) {
     return res.json({ ok: true, user: req.session.user });
   }
@@ -1869,6 +1870,7 @@ function expireReservations() {
 
 // GET /inventory/cakes (requiere autenticación para admin)
 app.get('/inventory/cakes', requireAdmin, (req, res) => {
+  res.set('Cache-Control', 'no-store');
   const cakes = readCakes();
   res.json(cakes);
 });

@@ -1930,7 +1930,7 @@ app.post('/api/inventory/cakes/add', requireAdmin, (req, res) => {
     sizes: {},
     variants: variants.map(v => ({
       name: String(v.name || '').trim(),
-      price: Math.max(0, parseInt(v.price) || 0),
+      price: Math.max(0, parseFloat(v.price) || 0),
       enabled: v.enabled !== false
     })).filter(v => v.name)
   };

@@ -151,7 +151,8 @@
         "price": 550,
         "enabled": true
       }
-    ]
+    ],
+    "featured": true
   },
   {
     "id": "9",
@@ -165,6 +166,7 @@
         "price": 3,
         "enabled": true
       }
-    ]
+    ],
+    "featured": true
   }
 ]

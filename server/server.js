@@ -19,7 +19,15 @@ const session = require('express-session');
 const reservationsLib = require('./lib/reservations');
 const usersReservations = require('./lib/users-reservations');
 const multer = require('multer');
-const IMAGES_DIR = path.join(__dirname, '..', 'TheBakery', 'assets', 'imagenes');
+// En Railway (producción) solo /tmp/ tiene permisos de escritura y persiste
+// durante la ejecución. Localmente se usa la carpeta de assets normal.
+const IMAGES_DIR = process.env.NODE_ENV === 'production'
+  ? '/tmp/imagenes'
+  : path.join(__dirname, '..', 'TheBakery', 'assets', 'imagenes');
+// Crear el directorio si no existe (necesario en Railway al arrancar)
+if (!fs.existsSync(IMAGES_DIR)) {
+  fs.mkdirSync(IMAGES_DIR, { recursive: true });
+}
 const cakeImageStorage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, IMAGES_DIR),
   filename: (req, file, cb) => {
@@ -419,6 +427,9 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000 // 24 horas
   }
 }));
+// Las imágenes subidas se sirven desde IMAGES_DIR (/tmp/imagenes en Railway)
+// con la misma ruta pública que usa el frontend, antes del static general.
+app.use('/TheBakery/assets/imagenes', express.static(IMAGES_DIR));
 app.use(express.static(path.join(__dirname, '..'))); // Servir archivos estáticos del proyecto
 
 // Rutas de datos (para compatibilidad con el frontend)

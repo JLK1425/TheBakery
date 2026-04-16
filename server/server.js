@@ -1991,7 +1991,10 @@ app.post('/api/inventory/cakes/upload-image', requireAdmin, (req, res, next) => 
       return res.status(400).json({ error: 'No se recibió imagen' });
     }
     console.log('[UPLOAD-IMAGE] OK -', req.file.filename, '- path:', IMAGES_DIR);
-    res.json({ path: `/TheBakery/assets/imagenes/${req.file.filename}` });
+    const imageBase = IS_PROD
+      ? 'https://thebakery-production-8ddb.up.railway.app'
+      : `http://localhost:${PORT}`;
+    res.json({ path: `${imageBase}/TheBakery/assets/imagenes/${req.file.filename}` });
   });
 });
 

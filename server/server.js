@@ -1981,6 +1981,22 @@ app.put('/api/inventory/cakes/:id/toggle', requireAdmin, (req, res) => {
   res.json(cakes[index]);
 });
 
+// DELETE /api/inventory/cakes/:id
+app.delete('/api/inventory/cakes/:id', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  console.log(`[DELETE-CAKE] Eliminando producto id=${id}`);
+  const cakes = readCakes();
+  const index = cakes.findIndex(c => String(c.id) === String(id));
+  if (index === -1) {
+    console.log(`[DELETE-CAKE] 404 — id=${id} no encontrado`);
+    return res.status(404).json({ error: 'Producto no encontrado' });
+  }
+  const removed = cakes.splice(index, 1)[0];
+  writeCakes(cakes);
+  console.log(`[DELETE-CAKE] OK — "${removed.name}" eliminado`);
+  res.json({ success: true, deleted: removed.name });
+});
+
 // POST /api/inventory/cakes/upload-image
 app.post('/api/inventory/cakes/upload-image', requireAdmin, (req, res, next) => {
   uploadCakeImage.single('image')(req, res, (err) => {

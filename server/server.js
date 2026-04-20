@@ -183,6 +183,20 @@ function writeArchivedOrders(data) {
 // =====================
 const PROMOTIONS_FILE = path.join(__dirname, 'data', 'promotions.json');
 
+// ── Reviews ──
+const REVIEWS_FILE = path.join(__dirname, 'data', 'reviews.json');
+
+function readReviews() {
+  try {
+    if (!fs.existsSync(REVIEWS_FILE)) return [];
+    return JSON.parse(fs.readFileSync(REVIEWS_FILE, 'utf8'));
+  } catch (e) { return []; }
+}
+
+function writeReviews(data) {
+  fs.writeFileSync(REVIEWS_FILE, JSON.stringify(data, null, 2));
+}
+
 function readPromotions() {
   try {
     return JSON.parse(fs.readFileSync(PROMOTIONS_FILE, 'utf8'));
@@ -1890,6 +1904,75 @@ app.get('/inventory/cakes', requireAdmin, (req, res) => {
 app.get('/public/inventory/cakes', (req, res) => {
   const cakes = readCakes();
   res.json(cakes);
+});
+
+// ============================================
+// RUTAS DE RESEÑAS
+// ============================================
+
+// GET /api/reviews/all — todas las reseñas (admin)
+app.get('/api/reviews/all', requireAdmin, (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json(readReviews());
+});
+
+// GET /api/reviews/pending — reseñas pendientes (admin)
+app.get('/api/reviews/pending', requireAdmin, (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json(readReviews().filter(r => r.status === 'pending'));
+});
+
+// GET /public/reviews — reseñas aprobadas (público)
+app.get('/public/reviews', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  const reviews = readReviews().filter(r => r.status === 'approved');
+  res.json(reviews);
+});
+
+// POST /public/reviews — enviar nueva reseña (pendiente de aprobación)
+app.post('/public/reviews', (req, res) => {
+  const { name, location, rating, title, comment, email } = req.body || {};
+  if (!name || !rating || !comment) {
+    return res.status(400).json({ error: 'name, rating y comment son requeridos' });
+  }
+  const reviews = readReviews();
+  const newReview = {
+    id: Date.now().toString(),
+    name: String(name).trim(),
+    location: location ? String(location).trim() : null,
+    email: email ? String(email).trim() : null,
+    rating: Math.min(5, Math.max(1, parseInt(rating) || 5)),
+    title: title ? String(title).trim() : null,
+    comment: String(comment).trim(),
+    date: new Date().toISOString(),
+    status: 'pending',
+    verified: false,
+    likes: 0
+  };
+  reviews.push(newReview);
+  writeReviews(reviews);
+  res.status(201).json({ ok: true, message: '¡Gracias! Tu reseña será publicada pronto.' });
+});
+
+// PUT /api/reviews/:id/approve — aprobar reseña (admin)
+app.put('/api/reviews/:id/approve', requireAdmin, (req, res) => {
+  const reviews = readReviews();
+  const idx = reviews.findIndex(r => r.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Reseña no encontrada' });
+  reviews[idx].status = 'approved';
+  reviews[idx].verified = true;
+  writeReviews(reviews);
+  res.json(reviews[idx]);
+});
+
+// DELETE /api/reviews/:id — eliminar reseña (admin)
+app.delete('/api/reviews/:id', requireAdmin, (req, res) => {
+  const reviews = readReviews();
+  const idx = reviews.findIndex(r => r.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Reseña no encontrada' });
+  reviews.splice(idx, 1);
+  writeReviews(reviews);
+  res.json({ ok: true });
 });
 
 // GET /server/data/cake_map.json (público para frontend)

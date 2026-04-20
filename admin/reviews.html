@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/png" href="/TheBakery/assets/imagenes/logo.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reseñas - The Bakery by Fresarte</title>
+  <script src="../TheBakery/assets/js/auth-guard.js"></script>
+  <link rel="stylesheet" href="../TheBakery/assets/css/style.css">
+  <link rel="stylesheet" href="../TheBakery/assets/css/admin-sidebar.css">
+  <style>
+    .admin-page { min-height:100vh; padding-top:140px; background:#f9fafb; }
+    .admin-top-header { position:fixed; top:0; left:230px; right:0; height:60px; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,.05); z-index:1000; display:flex; align-items:center; justify-content:space-between; padding:0 24px; transition:left .3s; }
+    .admin-top-header-logo img { width:150px; height:auto; }
+    .admin-header-actions { display:flex; gap:0.5rem; }
+    .admin-header-btn { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 1rem; background:transparent; border:none; color:#6b7280; font-size:0.875rem; font-weight:500; cursor:pointer; border-radius:6px; }
+    .admin-header-btn:hover { background:#f9fafb; color:#374151; }
+    .admin-page-title { font-size:2rem; font-weight:800; color:var(--fg); margin:0; }
+    .reviews-container { width:100%; padding:0 24px; max-width:860px; margin:0 auto; }
+    .tabs { display:flex; gap:0.5rem; margin-bottom:1.5rem; }
+    .tab-btn { padding:0.5rem 1.25rem; border-radius:20px; border:2px solid #e5e7eb; background:#fff; color:#374151; font-weight:600; font-size:0.875rem; cursor:pointer; transition:all 0.15s; }
+    .tab-btn.active { background:#ec4899; border-color:#ec4899; color:#fff; }
+    .review-card { background:#fff; border-radius:12px; padding:1.25rem 1.5rem; margin-bottom:1rem; box-shadow:0 2px 8px rgba(0,0,0,.07); }
+    .review-header { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:0.75rem; }
+    .reviewer-info { flex:1; }
+    .reviewer-name { font-weight:700; font-size:1rem; color:var(--fg); }
+    .reviewer-meta { font-size:0.8rem; color:#9ca3af; margin-top:0.15rem; }
+    .review-stars { color:#f59e0b; font-size:1rem; letter-spacing:0.1em; }
+    .review-title { font-weight:600; color:#374151; margin-bottom:0.4rem; }
+    .review-comment { color:#6b7280; font-size:0.9rem; line-height:1.5; }
+    .review-actions { display:flex; gap:0.5rem; flex-shrink:0; }
+    .btn-approve { background:#10b981; color:#fff; border:none; padding:0.4rem 0.9rem; border-radius:6px; font-weight:600; font-size:0.8rem; cursor:pointer; }
+    .btn-approve:hover { background:#059669; }
+    .btn-delete { background:#fee2e2; color:#ef4444; border:none; padding:0.4rem 0.9rem; border-radius:6px; font-weight:600; font-size:0.8rem; cursor:pointer; }
+    .btn-delete:hover { background:#fca5a5; }
+    .badge-status { font-size:0.72rem; font-weight:700; padding:0.2rem 0.55rem; border-radius:20px; display:inline-block; }
+    .badge-pending { background:#fef3c7; color:#92400e; }
+    .badge-approved { background:#d1fae5; color:#065f46; }
+    .empty-msg { text-align:center; color:#9ca3af; padding:2.5rem; }
+    @media (max-width:768px) { .admin-top-header { left:0; } .admin-page { padding-top:100px; } .reviews-container { padding:0 1rem; } }
+  </style>
+</head>
+<body id="bakery-landing" class="is-white">
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-header">
+      <img src="../TheBakery/assets/imagenes/logo.png" alt="The Bakery" class="sidebar-logo">
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Inicio</span>
+      </a>
+      <a href="pedidos.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg><span>Pedidos</span>
+      </a>
+      <a href="clientes.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Clientes</span>
+      </a>
+      <a href="stock-pasteles.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-4M4 7h4m0 0v13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7m0 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3M10 7V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v3m8 0h4"></path></svg><span>Stock de Pasteles</span>
+      </a>
+      <a href="reportes.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Reportes</span>
+      </a>
+      <a href="promociones.html" class="sidebar-nav-item"><span>🏷️</span><span>Promociones</span></a>
+      <a href="reviews.html" class="sidebar-nav-item active"><span>⭐</span><span>Reseñas</span></a>
+      <a href="usuarios.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Usuarios</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" class="sidebar-footer-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path></svg><span>Configuración</span>
+      </a>
+    </div>
+  </aside>
+
+  <header class="admin-top-header">
+    <div class="admin-top-header-logo">
+      <img src="../TheBakery/assets/imagenes/logo.png" alt="The Bakery">
+    </div>
+    <div class="admin-header-actions">
+      <button class="admin-header-btn" id="refreshBtn">Actualizar</button>
+      <button class="admin-header-btn" id="logoutBtn">Cerrar Sesión</button>
+    </div>
+  </header>
+
+  <div class="admin-content-wrapper">
+    <main class="admin-page">
+      <div class="admin-header" style="padding:2rem 24px;background:#fff;border-bottom:2px solid #e5e7eb;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;">
+        <h1 class="admin-page-title">Reseñas</h1>
+      </div>
+
+      <div class="reviews-container">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="pending">⏳ Pendientes <span id="pendingCount"></span></button>
+          <button class="tab-btn" data-tab="approved">✅ Aprobadas <span id="approvedCount"></span></button>
+        </div>
+        <div id="reviewsContainer">
+          <p class="empty-msg">Cargando reseñas...</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      const API_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+        ? 'http://127.0.0.1:3000'
+        : 'https://thebakery-production-8ddb.up.railway.app';
+
+      let allReviews = [];
+      let activeTab = 'pending';
+
+      async function loadReviews() {
+        try {
+          const res = await fetch(API_URL + '/public/reviews', { credentials: 'include' });
+          if (res.status === 401) { window.location.href = 'login.html'; return; }
+          // Admin puede ver todas — fetch las pendientes también via endpoint especial
+          const resPending = await fetch(API_URL + '/api/reviews/pending', { credentials: 'include' });
+          const approved = res.ok ? await res.json() : [];
+          const pending = resPending.ok ? await resPending.json() : [];
+          allReviews = [...pending, ...approved];
+        } catch (err) {
+          // Fallback: intentar con endpoint admin directo
+          try {
+            const res = await fetch(API_URL + '/api/reviews/all', { credentials: 'include' });
+            if (res.ok) allReviews = await res.json();
+          } catch (_) { allReviews = []; }
+        }
+        renderReviews();
+      }
+
+      function renderReviews() {
+        const container = document.getElementById('reviewsContainer');
+        const filtered = allReviews.filter(r => r.status === activeTab);
+        const pending = allReviews.filter(r => r.status === 'pending');
+        const approved = allReviews.filter(r => r.status === 'approved');
+
+        document.getElementById('pendingCount').textContent = pending.length ? `(${pending.length})` : '';
+        document.getElementById('approvedCount').textContent = approved.length ? `(${approved.length})` : '';
+
+        if (filtered.length === 0) {
+          container.innerHTML = `<p class="empty-msg">${activeTab === 'pending' ? 'No hay reseñas pendientes.' : 'No hay reseñas aprobadas.'}</p>`;
+          return;
+        }
+
+        container.innerHTML = filtered.map(r => {
+          const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+          const date = new Date(r.date).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' });
+          const isPending = r.status === 'pending';
+          return `
+            <div class="review-card" data-id="${r.id}">
+              <div class="review-header">
+                <div class="reviewer-info">
+                  <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+                    <span class="reviewer-name">${r.name}</span>
+                    <span class="badge-status ${isPending ? 'badge-pending' : 'badge-approved'}">${isPending ? 'Pendiente' : 'Aprobada'}</span>
+                  </div>
+                  <div class="reviewer-meta">${r.location || ''} · ${date}${r.email ? ' · ' + r.email : ''}</div>
+                  <div class="review-stars">${stars}</div>
+                </div>
+                <div class="review-actions">
+                  ${isPending ? `<button class="btn-approve" onclick="approveReview('${r.id}')">✓ Aprobar</button>` : ''}
+                  <button class="btn-delete" onclick="deleteReview('${r.id}', '${r.name.replace(/'/g,"\\'")}')">🗑 Eliminar</button>
+                </div>
+              </div>
+              ${r.title ? `<div class="review-title">"${r.title}"</div>` : ''}
+              <div class="review-comment">${r.comment}</div>
+            </div>`;
+        }).join('');
+      }
+
+      window.approveReview = async function(id) {
+        const res = await fetch(`${API_URL}/api/reviews/${id}/approve`, {
+          method: 'PUT', credentials: 'include'
+        });
+        if (res.status === 401) { window.location.href = 'login.html'; return; }
+        if (res.ok) {
+          const idx = allReviews.findIndex(r => r.id === id);
+          if (idx !== -1) { allReviews[idx].status = 'approved'; allReviews[idx].verified = true; }
+          renderReviews();
+          showToast('Reseña aprobada', 'success');
+        }
+      };
+
+      window.deleteReview = async function(id, name) {
+        if (!confirm(`¿Eliminar la reseña de "${name}"?`)) return;
+        const res = await fetch(`${API_URL}/api/reviews/${id}`, {
+          method: 'DELETE', credentials: 'include'
+        });
+        if (res.status === 401) { window.location.href = 'login.html'; return; }
+        if (res.ok) {
+          allReviews = allReviews.filter(r => r.id !== id);
+          renderReviews();
+          showToast('Reseña eliminada', 'success');
+        }
+      };
+
+      function showToast(msg, type) {
+        const t = document.createElement('div');
+        t.style.cssText = `position:fixed;top:80px;right:20px;background:${type==='success'?'#10b981':'#ef4444'};color:#fff;padding:0.75rem 1.25rem;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.2);z-index:5000;font-weight:600;`;
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+      }
+
+      // Tabs
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeTab = btn.dataset.tab;
+          renderReviews();
+        });
+      });
+
+      // Sidebar toggle
+      const s = document.getElementById('adminSidebar');
+      const t = document.getElementById('sidebarToggle');
+      const o = document.getElementById('sidebarOverlay');
+      if (t) t.onclick = () => { s.classList.toggle('open'); o.classList.toggle('active'); };
+      if (o) o.onclick = () => { s.classList.remove('open'); o.classList.remove('active'); };
+
+      // Logout
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        try { await fetch(API_URL + '/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch (_) {}
+        window.location.href = 'login.html';
+      });
+
+      // Refresh
+      document.getElementById('refreshBtn').addEventListener('click', loadReviews);
+
+      loadReviews();
+    })();
+  </script>
+</body>
+</html>

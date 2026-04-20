@@ -1,0 +1,38 @@
+[
+  {
+    "id": "1",
+    "name": "María González",
+    "location": "Santo Domingo, RD",
+    "rating": 5,
+    "title": "¡Increíble experiencia!",
+    "comment": "El pastel de coco superó todas mis expectativas. La presentación era hermosa y el sabor excepcional. Definitivamente volveré a ordenar.",
+    "date": "2025-01-15T10:30:00Z",
+    "status": "approved",
+    "verified": true,
+    "likes": 23
+  },
+  {
+    "id": "2",
+    "name": "Carlos Rodríguez",
+    "location": "Santiago, RD",
+    "rating": 5,
+    "title": "Mejor pastelería de la ciudad",
+    "comment": "Pedí el pastel de fresas para el cumpleaños de mi hija y quedó encantada. Las fresas frescas y la crema perfecta. El servicio fue excelente.",
+    "date": "2025-01-12T14:20:00Z",
+    "status": "approved",
+    "verified": true,
+    "likes": 18
+  },
+  {
+    "id": "3",
+    "name": "Ana Martínez",
+    "location": "La Romana, RD",
+    "rating": 4,
+    "title": "Muy bueno",
+    "comment": "El pastel Matcha Strawberry estaba delicioso y bien decorado. Lo recomiendo para cualquier celebración.",
+    "date": "2025-01-10T09:15:00Z",
+    "status": "approved",
+    "verified": false,
+    "likes": 12
+  }
+]

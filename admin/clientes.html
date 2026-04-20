@@ -274,6 +274,7 @@
         <span>Reportes</span>
       </a>
       <a href="promociones.html" class="sidebar-nav-item"><span>🏷️</span><span>Promociones</span></a>
+      <a href="reviews.html" class="sidebar-nav-item"><span>⭐</span><span>Reseñas</span></a>
       <a href="usuarios.html" class="sidebar-nav-item">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -386,7 +387,9 @@
 
   <script src="../TheBakery/assets/js/admin-common.js"></script>
   <script>
-    var API_URL = 'http://127.0.0.1:3000';
+    var API_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+      ? 'http://127.0.0.1:3000'
+      : 'https://thebakery-production-8ddb.up.railway.app';
 
     async function loadCustomers() {
       try {

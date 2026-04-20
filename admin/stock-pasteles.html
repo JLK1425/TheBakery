@@ -306,6 +306,14 @@
           <input type="text" id="newName" required style="width:100%; padding:0.5rem 0.75rem; border:2px solid #e5e7eb; border-radius:8px; font-size:0.95rem; box-sizing:border-box;">
         </div>
         <div style="margin-bottom:1rem;">
+          <label style="font-size:0.875rem; font-weight:600; color:#374151; display:block; margin-bottom:0.25rem;">Categoría *</label>
+          <select id="newCategory" style="width:100%; padding:0.5rem 0.75rem; border:2px solid #e5e7eb; border-radius:8px; font-size:0.95rem; box-sizing:border-box; background:#fff;">
+            <option value="pastel">🎂 Pastel</option>
+            <option value="mini-cake">🍰 Mini Cake</option>
+            <option value="postre">🍓 Postre</option>
+          </select>
+        </div>
+        <div style="margin-bottom:1rem;">
           <label style="font-size:0.875rem; font-weight:600; color:#374151; display:block; margin-bottom:0.25rem;">Descripción</label>
           <input type="text" id="newDescription" style="width:100%; padding:0.5rem 0.75rem; border:2px solid #e5e7eb; border-radius:8px; font-size:0.95rem; box-sizing:border-box;">
         </div>
@@ -346,7 +354,7 @@
     </div>
   </div>
 
-  <script src="../TheBakery/assets/js/admin-stock-pasteles.js?v=3"></script>
+  <script src="../TheBakery/assets/js/admin-stock-pasteles.js?v=4"></script>
   <script>
     (function () {
       var s = document.getElementById('adminSidebar'),

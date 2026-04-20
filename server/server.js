@@ -1928,16 +1928,18 @@ app.post('/inventory/cakes/update', requireAdmin, (req, res) => {
 // POST /api/inventory/cakes/add
 app.post('/api/inventory/cakes/add', requireAdmin, (req, res) => {
   console.log('[ADD-CAKE] body recibido:', JSON.stringify(req.body));
-  const { name, description, variants, image } = req.body || {};
+  const { name, description, variants, image, category } = req.body || {};
   if (!name || !variants || !Array.isArray(variants) || variants.length === 0) {
     console.log('[ADD-CAKE] 400 — name:', name, '| variants:', variants);
     return res.status(400).json({ error: 'name y variants (array) son requeridos' });
   }
+  const validCategories = ['pastel', 'mini-cake', 'postre'];
   const cakes = readCakes();
   const maxId = cakes.reduce((max, c) => Math.max(max, parseInt(c.id) || 0), 0);
   const newCake = {
     id: String(maxId + 1),
     name,
+    category: validCategories.includes(category) ? category : 'pastel',
     description: description || '',
     image: image || '',
     sizes: {},

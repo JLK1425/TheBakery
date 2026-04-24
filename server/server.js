@@ -43,6 +43,22 @@ const uploadCakeImage = multer({
   }
 });
 
+const reviewPhotoStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, IMAGES_DIR),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `review-${Date.now()}${ext}`);
+  }
+});
+const uploadReviewPhoto = multer({
+  storage: reviewPhotoStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (/\.(png|jpe?g|webp)$/i.test(file.originalname)) cb(null, true);
+    else cb(new Error('Solo se permiten imágenes png, jpg, jpeg, webp'));
+  }
+});
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://127.0.0.1:5503';
@@ -1930,11 +1946,17 @@ app.get('/public/reviews', (req, res) => {
 });
 
 // POST /public/reviews — enviar nueva reseña (pendiente de aprobación)
-app.post('/public/reviews', (req, res) => {
+app.post('/public/reviews', uploadReviewPhoto.single('photo'), (req, res) => {
   const { name, location, rating, title, comment, email } = req.body || {};
   if (!name || !rating || !comment) {
     return res.status(400).json({ error: 'name, rating y comment son requeridos' });
   }
+  const imageBase = IS_PROD
+    ? 'https://thebakery-production-8ddb.up.railway.app'
+    : `http://localhost:${PORT}`;
+  const photo = req.file
+    ? `${imageBase}/TheBakery/assets/imagenes/${req.file.filename}`
+    : null;
   const reviews = readReviews();
   const newReview = {
     id: Date.now().toString(),
@@ -1944,6 +1966,7 @@ app.post('/public/reviews', (req, res) => {
     rating: Math.min(5, Math.max(1, parseInt(rating) || 5)),
     title: title ? String(title).trim() : null,
     comment: String(comment).trim(),
+    photo,
     date: new Date().toISOString(),
     status: 'pending',
     verified: false,

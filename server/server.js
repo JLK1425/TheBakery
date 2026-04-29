@@ -200,7 +200,8 @@ function writeArchivedOrders(data) {
 const PROMOTIONS_FILE = path.join(__dirname, 'data', 'promotions.json');
 
 // ── Reviews ──
-const REVIEWS_FILE = path.join(__dirname, 'data', 'reviews.json');
+// Apunta al submodule para que persista en DreamHost (filesystem no efímero)
+const REVIEWS_FILE = path.join(__dirname, '..', 'TheBakery', 'assets', 'data', 'reviews.json');
 
 function readReviews() {
   try {
@@ -210,7 +211,9 @@ function readReviews() {
 }
 
 function writeReviews(data) {
-  fs.writeFileSync(REVIEWS_FILE, JSON.stringify(data, null, 2));
+  // email se omite del JSON público (solo se usa durante moderación en sesión)
+  const safe = data.map(({ email, ...rest }) => rest);
+  fs.writeFileSync(REVIEWS_FILE, JSON.stringify(safe, null, 2));
 }
 
 function readPromotions() {

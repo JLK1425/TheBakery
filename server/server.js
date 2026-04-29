@@ -213,7 +213,12 @@ function readReviews() {
 function writeReviews(data) {
   // email se omite del JSON público (solo se usa durante moderación en sesión)
   const safe = data.map(({ email, ...rest }) => rest);
-  fs.writeFileSync(REVIEWS_FILE, JSON.stringify(safe, null, 2));
+  try {
+    fs.writeFileSync(REVIEWS_FILE, JSON.stringify(safe, null, 2));
+  } catch (e) {
+    console.error('[writeReviews] Error escribiendo', REVIEWS_FILE, e.message);
+    throw e;
+  }
 }
 
 function readPromotions() {
@@ -1987,7 +1992,11 @@ app.put('/api/reviews/:id/approve', requireAdmin, (req, res) => {
   if (idx === -1) return res.status(404).json({ error: 'Reseña no encontrada' });
   reviews[idx].status = 'approved';
   reviews[idx].verified = true;
-  writeReviews(reviews);
+  try {
+    writeReviews(reviews);
+  } catch (e) {
+    return res.status(500).json({ error: 'No se pudo guardar el cambio en disco: ' + e.message });
+  }
   res.json(reviews[idx]);
 });
 
@@ -1997,7 +2006,11 @@ app.delete('/api/reviews/:id', requireAdmin, (req, res) => {
   const idx = reviews.findIndex(r => r.id === req.params.id);
   if (idx === -1) return res.status(404).json({ error: 'Reseña no encontrada' });
   reviews.splice(idx, 1);
-  writeReviews(reviews);
+  try {
+    writeReviews(reviews);
+  } catch (e) {
+    return res.status(500).json({ error: 'No se pudo guardar el cambio en disco: ' + e.message });
+  }
   res.json({ ok: true });
 });
 

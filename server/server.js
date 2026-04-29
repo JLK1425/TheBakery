@@ -2018,7 +2018,7 @@ app.delete('/api/reviews/:id', requireAdmin, (req, res) => {
 // RUTAS DE SUCURSALES
 // ============================================
 
-const SUCURSALES_FILE = path.join(__dirname, '..', 'TheBakery', 'assets', 'data', 'sucursales.json');
+const SUCURSALES_FILE = path.join(__dirname, 'data', 'sucursales.json');
 
 function readSucursales() {
   try {

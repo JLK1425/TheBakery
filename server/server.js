@@ -2933,6 +2933,31 @@ function scheduleNightlyArchive() {
   }, msUntilArchive);
 }
 
+// ============================================
+// VOLUME INITIALIZATION (Railway Volumes)
+// Copia seeds → data/ solo si el archivo no existe.
+// En primer deploy con volumen vacío, esto inicializa todos los datos.
+// En deploys posteriores, los archivos ya existen y no se tocan.
+// ============================================
+(function initVolume() {
+  const seedsDir = path.join(__dirname, 'seeds');
+  const dataDir  = path.join(__dirname, 'data');
+  if (!fs.existsSync(seedsDir)) return;
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  let seeded = 0;
+  for (const file of fs.readdirSync(seedsDir)) {
+    const dest = path.join(dataDir, file);
+    if (!fs.existsSync(dest)) {
+      fs.copyFileSync(path.join(seedsDir, file), dest);
+      console.log(`[Volume] Seeded: ${file}`);
+      seeded++;
+    }
+  }
+  console.log(seeded > 0
+    ? `[Volume] ${seeded} archivo(s) inicializados desde seeds/`
+    : '[Volume] Todos los archivos de datos presentes — sin seed necesario.');
+})();
+
 // Iniciar timer al arrancar el servidor
 scheduleNightlyArchive();
 

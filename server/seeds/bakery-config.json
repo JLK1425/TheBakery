@@ -1,0 +1,16 @@
+{
+  "maxOrdersPerDay": 8,
+  "minHoursInAdvance": 48,
+  "cartTimerMinutes": 15,
+  "blockedDays": [],
+  "businessHours": {
+    "open": "08:00",
+    "close": "18:00"
+  },
+  "notes": {
+    "maxOrdersPerDay": "Máximo de pedidos que se aceptan por día",
+    "minHoursInAdvance": "Horas mínimas de anticipación para un pedido",
+    "cartTimerMinutes": "Minutos que tiene el cliente para completar la compra",
+    "blockedDays": "Array de fechas bloqueadas en formato YYYY-MM-DD, ej: ['2026-03-01', '2026-12-25']"
+  }
+}

@@ -1,0 +1,10 @@
+[
+  { "id": 1, "name": "Harina",           "qty": 200,  "unit": "lb" },
+  { "id": 2, "name": "Azúcar",           "qty": 400,  "unit": "lb" },
+  { "id": 3, "name": "Huevos",           "qty": 120,  "unit": "unidad" },
+  { "id": 4, "name": "Mantequilla",      "qty": 25,   "unit": "lb" },
+  { "id": 5, "name": "Crema",            "qty": 50,   "unit": "litro" },
+  { "id": 6, "name": "Cacao / Chocolate","qty": 300,  "unit": "lb" },
+  { "id": 7, "name": "Fresas",           "qty": 3000, "unit": "lb" },
+  { "id": 8, "name": "Vainilla",         "qty": 40,   "unit": "botella" }
+]

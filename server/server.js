@@ -2203,6 +2203,28 @@ app.put('/api/inventory/cakes/:id/toggle', requireAdmin, (req, res) => {
   res.json(cakes[index]);
 });
 
+// PUT /api/inventory/cakes/:id/variant-price
+app.put('/api/inventory/cakes/:id/variant-price', requireAdmin, (req, res) => {
+  const { id } = req.params;
+  const { variantName, price } = req.body;
+  if (!variantName || price == null) {
+    return res.status(400).json({ error: 'variantName y price son requeridos' });
+  }
+  const newPrice = parseFloat(price);
+  if (isNaN(newPrice) || newPrice < 0) {
+    return res.status(400).json({ error: 'Precio inválido' });
+  }
+  const cakes = readCakes();
+  const index = cakes.findIndex(c => String(c.id) === String(id));
+  if (index === -1) return res.status(404).json({ error: 'Producto no encontrado' });
+  const variant = cakes[index].variants.find(v => v.name === variantName);
+  if (!variant) return res.status(404).json({ error: 'Variante no encontrada' });
+  variant.price = newPrice;
+  writeCakes(cakes);
+  console.log(`[PRICE] ${cakes[index].name} / ${variantName} => RD$${newPrice}`);
+  res.json(cakes[index]);
+});
+
 // DELETE /api/inventory/cakes/:id
 app.delete('/api/inventory/cakes/:id', requireAdmin, (req, res) => {
   const { id } = req.params;

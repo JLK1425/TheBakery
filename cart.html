@@ -300,7 +300,17 @@
               <span style="font-size: 12px; color: #888; margin-top: 2px; display: block;">Horario: 10:00 AM - 10:00
                 PM</span>
             </div>
-            <div></div>
+
+            <!-- Punto de Recogida -->
+            <div>
+              <label for="customer-sucursal"
+                style="display: block; font-size: 14px; color: #555; margin-bottom: 4px; font-weight: 500;">Punto de Recogida *</label>
+              <select id="customer-sucursal" required
+                style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; box-sizing: border-box; background: white; transition: border-color 0.2s; cursor: pointer;"
+                onfocus="this.style.borderColor='#e91e8c'" onblur="this.style.borderColor='#ddd'">
+                <option value="">¿Dónde recoges tu pedido?</option>
+              </select>
+            </div>
           </div>
 
           <!-- Email o Cédula -->
@@ -343,6 +353,11 @@
       <!-- Resumen -->
       <div class="cart-section">
         <h2 style="margin-top:0">Resumen del Pedido</h2>
+
+        <div class="summary-row" id="sucursalSummaryRow" style="display:none;">
+          <span>Punto de recogida</span>
+          <span id="sucursalSummaryValue" style="font-weight:600; color:#333; text-align:right;"></span>
+        </div>
 
         <div class="summary-row">
           <span>Subtotal</span>
@@ -444,13 +459,14 @@
       var phone = document.getElementById('customer-phone');
       var deliveryDate = document.getElementById('customer-deliveryDate');
       var pickupTime = document.getElementById('customer-pickupTime');
+      var sucursal = document.getElementById('customer-sucursal');
       var email = document.getElementById('customer-email');
       var cedula4 = document.getElementById('customer-cedula4');
       var contactType = document.querySelector('input[name="contact-type"]:checked');
       var errorMsg = document.getElementById('form-error-msg');
 
       // Reset estilos
-      [firstName, lastName, phone, deliveryDate, pickupTime, email, cedula4].forEach(function (el) {
+      [firstName, lastName, phone, deliveryDate, pickupTime, sucursal, email, cedula4].forEach(function (el) {
         if (el) el.style.borderColor = '#ddd';
       });
       if (errorMsg) { errorMsg.style.display = 'none'; errorMsg.textContent = ''; }
@@ -473,6 +489,7 @@
 
       if (!deliveryDate || !deliveryDate.value) return showError('Por favor selecciona una fecha de entrega', deliveryDate);
       if (!pickupTime || !pickupTime.value) return showError('Por favor selecciona una hora de recogida', pickupTime);
+      if (!sucursal || !sucursal.value) return showError('Por favor selecciona un punto de recogida', sucursal);
 
       var contactValue = contactType ? contactType.value : 'email';
       if (contactValue === 'email') {
@@ -510,6 +527,7 @@
       mensaje += 'Teléfono: ' + phone.value.trim() + '\n';
       mensaje += 'Fecha de Entrega: ' + deliveryDate.value + '\n';
       mensaje += 'Hora de Recogida: ' + pickupTime.options[pickupTime.selectedIndex].text + '\n';
+      mensaje += 'Punto de Recogida: ' + (sucursal ? sucursal.options[sucursal.selectedIndex].text : '') + '\n';
       if (contactValue === 'email') {
         mensaje += 'Email: ' + email.value.trim() + '\n';
       } else {

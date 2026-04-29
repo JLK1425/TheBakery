@@ -1198,6 +1198,17 @@ app.post('/api/orders', (req, res) => {
       email: customerEmail || null
     };
 
+    // Enriquecer items: añadir imagen desde inventario si el item no la trae
+    const cakesForOrder = readCakes();
+    const enrichedItems = items.map(item => {
+      if (item.image) return item;
+      const cake = cakesForOrder.find(c =>
+        String(c.id) === String(item.productId) ||
+        (c.name && item.name && c.name.toLowerCase() === String(item.name).toLowerCase())
+      );
+      return (cake && cake.image) ? { ...item, image: cake.image } : item;
+    });
+
     // Crear objeto del pedido (campos de reserva/entrega opcionales)
     const newOrder = {
       id: orderId,
@@ -1206,7 +1217,7 @@ app.post('/api/orders', (req, res) => {
       customerEmail: customer.email || 'sin-email@ejemplo.com',
       customerName: customer.name,
       customerPhone: customer.phone,
-      items: items,
+      items: enrichedItems,
       deliveryDate: deliveryDate || null,
       pickupTime: pickupTime != null ? pickupTime : (deliverySlot || null),
       deliverySlot: deliverySlot || null,

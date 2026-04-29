@@ -2014,6 +2014,95 @@ app.delete('/api/reviews/:id', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// ============================================
+// RUTAS DE SUCURSALES
+// ============================================
+
+const SUCURSALES_FILE = path.join(__dirname, '..', 'TheBakery', 'assets', 'data', 'sucursales.json');
+
+function readSucursales() {
+  try {
+    if (!fs.existsSync(SUCURSALES_FILE)) return [];
+    return JSON.parse(fs.readFileSync(SUCURSALES_FILE, 'utf8'));
+  } catch (e) { return []; }
+}
+
+function writeSucursales(data) {
+  try {
+    fs.writeFileSync(SUCURSALES_FILE, JSON.stringify(data, null, 2));
+  } catch (e) {
+    console.error('[writeSucursales] Error escribiendo', SUCURSALES_FILE, e.message);
+    throw e;
+  }
+}
+
+// GET /api/sucursales
+app.get('/api/sucursales', requireAdmin, (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json(readSucursales());
+});
+
+// GET /public/sucursales — para el frontend del carrito (sin auth)
+app.get('/public/sucursales', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json(readSucursales());
+});
+
+// POST /api/sucursales — agregar sucursal
+app.post('/api/sucursales', requireAdmin, (req, res) => {
+  const { name } = req.body || {};
+  if (!name || !String(name).trim()) {
+    return res.status(400).json({ error: 'El nombre es requerido' });
+  }
+  const sucursales = readSucursales();
+  const newSucursal = {
+    id: String(name).trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+    name: String(name).trim()
+  };
+  if (sucursales.some(s => s.id === newSucursal.id)) {
+    newSucursal.id = newSucursal.id + '-' + Date.now();
+  }
+  sucursales.push(newSucursal);
+  try {
+    writeSucursales(sucursales);
+  } catch (e) {
+    return res.status(500).json({ error: 'No se pudo guardar: ' + e.message });
+  }
+  res.status(201).json(newSucursal);
+});
+
+// PUT /api/sucursales/:id — editar nombre
+app.put('/api/sucursales/:id', requireAdmin, (req, res) => {
+  const { name } = req.body || {};
+  if (!name || !String(name).trim()) {
+    return res.status(400).json({ error: 'El nombre es requerido' });
+  }
+  const sucursales = readSucursales();
+  const idx = sucursales.findIndex(s => s.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Sucursal no encontrada' });
+  sucursales[idx].name = String(name).trim();
+  try {
+    writeSucursales(sucursales);
+  } catch (e) {
+    return res.status(500).json({ error: 'No se pudo guardar: ' + e.message });
+  }
+  res.json(sucursales[idx]);
+});
+
+// DELETE /api/sucursales/:id — eliminar sucursal
+app.delete('/api/sucursales/:id', requireAdmin, (req, res) => {
+  const sucursales = readSucursales();
+  const idx = sucursales.findIndex(s => s.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: 'Sucursal no encontrada' });
+  sucursales.splice(idx, 1);
+  try {
+    writeSucursales(sucursales);
+  } catch (e) {
+    return res.status(500).json({ error: 'No se pudo guardar: ' + e.message });
+  }
+  res.json({ ok: true });
+});
+
 // GET /server/data/cake_map.json (público para frontend)
 app.get('/server/data/cake_map.json', (req, res) => {
   try {

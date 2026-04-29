@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/favicon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sucursales - The Bakery by Fresarte</title>
+  <script src="../TheBakery/assets/js/auth-guard.js"></script>
+  <link rel="stylesheet" href="../TheBakery/assets/css/style.css">
+  <link rel="stylesheet" href="../TheBakery/assets/css/admin-sidebar.css">
+  <style>
+    .admin-page { min-height:100vh; padding-top:140px; background:#f9fafb; }
+    .admin-top-header { position:fixed; top:0; left:230px; right:0; height:60px; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,.05); z-index:1000; display:flex; align-items:center; justify-content:space-between; padding:0 24px; transition:left .3s; }
+    .admin-top-header-logo img { width:150px; height:auto; }
+    .admin-header-actions { display:flex; gap:0.5rem; }
+    .admin-header-btn { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 1rem; background:transparent; border:none; color:#6b7280; font-size:0.875rem; font-weight:500; cursor:pointer; border-radius:6px; }
+    .admin-header-btn:hover { background:#f9fafb; color:#374151; }
+    .admin-page-title { font-size:2rem; font-weight:800; color:var(--fg); margin:0; }
+    .page-content { padding:0 24px 3rem; max-width:700px; margin:0 auto; }
+
+    /* Formulario de nueva sucursal */
+    .add-card { background:#fff; border-radius:12px; padding:1.5rem; box-shadow:0 2px 8px rgba(0,0,0,.07); margin-bottom:2rem; }
+    .add-card h2 { font-size:1.1rem; font-weight:700; color:var(--fg); margin:0 0 1rem; }
+    .add-row { display:flex; gap:0.75rem; align-items:flex-end; }
+    .add-row input { flex:1; padding:0.625rem 1rem; border:2px solid #e5e7eb; border-radius:8px; font-size:0.9rem; transition:border-color .2s; }
+    .add-row input:focus { outline:none; border-color:#ec4899; }
+    .btn-primary { padding:0.625rem 1.25rem; background:#ec4899; color:#fff; border:none; border-radius:8px; font-weight:600; font-size:0.875rem; cursor:pointer; white-space:nowrap; transition:background .2s; }
+    .btn-primary:hover { background:#db2777; }
+    .btn-primary:disabled { opacity:.6; cursor:default; }
+
+    /* Lista de sucursales */
+    .sucursales-list { display:flex; flex-direction:column; gap:0.75rem; }
+    .sucursal-card { background:#fff; border-radius:12px; padding:1rem 1.25rem; box-shadow:0 2px 8px rgba(0,0,0,.07); display:flex; align-items:center; gap:1rem; }
+    .sucursal-icon { font-size:1.5rem; flex-shrink:0; }
+    .sucursal-info { flex:1; min-width:0; }
+    .sucursal-name { font-weight:700; color:var(--fg); font-size:0.95rem; }
+    .sucursal-id { font-size:0.75rem; color:#9ca3af; font-family:monospace; margin-top:2px; }
+    .sucursal-actions { display:flex; gap:0.5rem; flex-shrink:0; }
+    .btn-edit { padding:0.4rem 0.9rem; background:#eff6ff; color:#2563eb; border:none; border-radius:6px; font-weight:600; font-size:0.8rem; cursor:pointer; transition:background .15s; }
+    .btn-edit:hover { background:#dbeafe; }
+    .btn-delete { padding:0.4rem 0.9rem; background:#fee2e2; color:#ef4444; border:none; border-radius:6px; font-weight:600; font-size:0.8rem; cursor:pointer; transition:background .15s; }
+    .btn-delete:hover { background:#fca5a5; }
+
+    /* Modal de edición */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:4000; display:none; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:#fff; border-radius:16px; padding:2rem; width:90%; max-width:440px; box-shadow:0 20px 60px rgba(0,0,0,.25); }
+    .modal-box h3 { font-size:1.2rem; font-weight:800; margin:0 0 1.25rem; color:var(--fg); }
+    .modal-box input { width:100%; padding:0.625rem 1rem; border:2px solid #e5e7eb; border-radius:8px; font-size:0.9rem; box-sizing:border-box; margin-bottom:1rem; transition:border-color .2s; }
+    .modal-box input:focus { outline:none; border-color:#ec4899; }
+    .modal-actions { display:flex; gap:0.75rem; justify-content:flex-end; }
+    .btn-cancel { padding:0.625rem 1.25rem; background:#f3f4f6; color:#374151; border:none; border-radius:8px; font-weight:600; font-size:0.875rem; cursor:pointer; }
+    .btn-cancel:hover { background:#e5e7eb; }
+
+    .empty-msg { text-align:center; color:#9ca3af; padding:2.5rem; }
+    .error-msg { background:#fee2e2; color:#b91c1c; border-radius:8px; padding:0.75rem 1rem; font-size:0.875rem; margin-bottom:1rem; display:none; }
+
+    @media (max-width:768px) {
+      .admin-top-header { left:0; }
+      .admin-page { padding-top:100px; }
+      .page-content { padding:0 1rem 3rem; }
+      .add-row { flex-direction:column; align-items:stretch; }
+    }
+  </style>
+</head>
+<body id="bakery-landing" class="is-white">
+  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-header">
+      <img src="../TheBakery/assets/imagenes/logo.png" alt="The Bakery" class="sidebar-logo">
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Inicio</span>
+      </a>
+      <a href="pedidos.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg><span>Pedidos</span>
+      </a>
+      <a href="clientes.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Clientes</span>
+      </a>
+      <a href="stock-pasteles.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-4M4 7h4m0 0v13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V7m0 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3M10 7V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v3m8 0h4"></path></svg><span>Stock de Pasteles</span>
+      </a>
+      <a href="reportes.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>Reportes</span>
+      </a>
+      <a href="promociones.html" class="sidebar-nav-item"><span>🏷️</span><span>Promociones</span></a>
+      <a href="reviews.html" class="sidebar-nav-item"><span>⭐</span><span>Reseñas</span></a>
+      <a href="sucursales.html" class="sidebar-nav-item active"><span>📍</span><span>Sucursales</span></a>
+      <a href="usuarios.html" class="sidebar-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Usuarios</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" class="sidebar-footer-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path></svg><span>Configuración</span>
+      </a>
+    </div>
+  </aside>
+
+  <header class="admin-top-header">
+    <div class="admin-top-header-logo">
+      <img src="../TheBakery/assets/imagenes/logo.png" alt="The Bakery">
+    </div>
+    <div class="admin-header-actions">
+      <button class="admin-header-btn" id="refreshBtn">Actualizar</button>
+      <button class="admin-header-btn" id="logoutBtn">Cerrar Sesión</button>
+    </div>
+  </header>
+
+  <div class="admin-content-wrapper">
+    <main class="admin-page">
+      <div class="admin-header" style="padding:2rem 24px;background:#fff;border-bottom:2px solid #e5e7eb;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;">
+        <h1 class="admin-page-title">Sucursales</h1>
+      </div>
+
+      <div class="page-content">
+        <!-- Agregar nueva sucursal -->
+        <div class="add-card">
+          <h2>Agregar sucursal</h2>
+          <div id="addError" class="error-msg"></div>
+          <div class="add-row">
+            <input type="text" id="newName" placeholder="Ej: Fresarte Piantini" maxlength="80"
+              onkeydown="if(event.key==='Enter') addSucursal()">
+            <button class="btn-primary" onclick="addSucursal()" id="addBtn">+ Agregar</button>
+          </div>
+        </div>
+
+        <!-- Lista -->
+        <div id="sucursalesList" class="sucursales-list">
+          <p class="empty-msg">Cargando...</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal de edición -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+      <h3>Editar sucursal</h3>
+      <input type="text" id="editName" placeholder="Nombre de la sucursal" maxlength="80"
+        onkeydown="if(event.key==='Enter') saveEdit()">
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeEdit()">Cancelar</button>
+        <button class="btn-primary" onclick="saveEdit()" id="saveEditBtn">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const API_URL = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+        ? 'http://127.0.0.1:3000'
+        : 'https://thebakery-production-8ddb.up.railway.app';
+
+      let sucursales = [];
+      let editingId = null;
+
+      // ── Carga ──────────────────────────────────────
+      async function load() {
+        try {
+          const res = await fetch(API_URL + '/api/sucursales', { credentials: 'include' });
+          if (res.status === 401) { window.location.href = 'login.html'; return; }
+          sucursales = res.ok ? await res.json() : [];
+        } catch (_) { sucursales = []; }
+        render();
+      }
+
+      // ── Render ─────────────────────────────────────
+      function render() {
+        const list = document.getElementById('sucursalesList');
+        if (sucursales.length === 0) {
+          list.innerHTML = '<p class="empty-msg">No hay sucursales registradas.</p>';
+          return;
+        }
+        list.innerHTML = sucursales.map(s => `
+          <div class="sucursal-card">
+            <span class="sucursal-icon">📍</span>
+            <div class="sucursal-info">
+              <div class="sucursal-name">${esc(s.name)}</div>
+              <div class="sucursal-id">id: ${esc(s.id)}</div>
+            </div>
+            <div class="sucursal-actions">
+              <button class="btn-edit" onclick="openEdit('${esc(s.id)}')">Editar</button>
+              <button class="btn-delete" onclick="deleteSucursal('${esc(s.id)}', '${esc(s.name)}')">Eliminar</button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // ── Agregar ────────────────────────────────────
+      window.addSucursal = async function () {
+        const input = document.getElementById('newName');
+        const errEl = document.getElementById('addError');
+        const btn = document.getElementById('addBtn');
+        const name = input.value.trim();
+        errEl.style.display = 'none';
+        if (!name) { showError(errEl, 'El nombre no puede estar vacío.'); return; }
+
+        btn.disabled = true;
+        btn.textContent = 'Guardando...';
+        try {
+          const res = await fetch(API_URL + '/api/sucursales', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ name })
+          });
+          if (res.status === 401) { window.location.href = 'login.html'; return; }
+          const data = await res.json();
+          if (!res.ok) { showError(errEl, data.error || 'Error al agregar'); return; }
+          sucursales.push(data);
+          input.value = '';
+          render();
+          showToast('Sucursal agregada');
+        } catch (_) {
+          showError(errEl, 'Error de conexión con el servidor.');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = '+ Agregar';
+        }
+      };
+
+      // ── Editar ─────────────────────────────────────
+      window.openEdit = function (id) {
+        const s = sucursales.find(x => x.id === id);
+        if (!s) return;
+        editingId = id;
+        document.getElementById('editName').value = s.name;
+        document.getElementById('editModal').classList.add('open');
+        setTimeout(() => document.getElementById('editName').focus(), 50);
+      };
+
+      window.closeEdit = function () {
+        editingId = null;
+        document.getElementById('editModal').classList.remove('open');
+      };
+
+      window.saveEdit = async function () {
+        const name = document.getElementById('editName').value.trim();
+        if (!name || !editingId) return;
+        const btn = document.getElementById('saveEditBtn');
+        btn.disabled = true;
+        btn.textContent = 'Guardando...';
+        try {
+          const res = await fetch(`${API_URL}/api/sucursales/${editingId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ name })
+          });
+          if (res.status === 401) { window.location.href = 'login.html'; return; }
+          const data = await res.json();
+          if (!res.ok) { showToast(data.error || 'Error al guardar', 'error'); return; }
+          const idx = sucursales.findIndex(s => s.id === editingId);
+          if (idx !== -1) sucursales[idx].name = data.name;
+          closeEdit();
+          render();
+          showToast('Sucursal actualizada');
+        } catch (_) {
+          showToast('Error de conexión', 'error');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Guardar';
+        }
+      };
+
+      // ── Eliminar ───────────────────────────────────
+      window.deleteSucursal = async function (id, name) {
+        if (!confirm(`¿Eliminar la sucursal "${name}"?\nLos pedidos existentes que la referencien no se verán afectados.`)) return;
+        try {
+          const res = await fetch(`${API_URL}/api/sucursales/${id}`, {
+            method: 'DELETE', credentials: 'include'
+          });
+          if (res.status === 401) { window.location.href = 'login.html'; return; }
+          if (res.ok) {
+            sucursales = sucursales.filter(s => s.id !== id);
+            render();
+            showToast('Sucursal eliminada');
+          } else {
+            const d = await res.json();
+            showToast(d.error || 'Error al eliminar', 'error');
+          }
+        } catch (_) {
+          showToast('Error de conexión', 'error');
+        }
+      };
+
+      // ── Utilidades ─────────────────────────────────
+      function esc(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+      }
+
+      function showError(el, msg) {
+        el.textContent = msg;
+        el.style.display = 'block';
+      }
+
+      function showToast(msg, type) {
+        const t = document.createElement('div');
+        t.style.cssText = `position:fixed;top:80px;right:20px;background:${type==='error'?'#ef4444':'#10b981'};color:#fff;padding:0.75rem 1.25rem;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.2);z-index:5000;font-weight:600;`;
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+      }
+
+      // ── Sidebar / Logout ───────────────────────────
+      document.getElementById('refreshBtn').addEventListener('click', load);
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        try { await fetch(API_URL + '/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch (_) {}
+        window.location.href = 'login.html';
+      });
+
+      const s = document.getElementById('adminSidebar');
+      const t = document.getElementById('sidebarToggle');
+      const o = document.getElementById('sidebarOverlay');
+      if (t) t.addEventListener('click', () => { s.classList.toggle('open'); o.classList.toggle('active'); });
+      if (o) o.addEventListener('click', () => { s.classList.remove('open'); o.classList.remove('active'); });
+
+      // Cerrar modal con Escape
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEdit(); });
+
+      load();
+    })();
+  </script>
+</body>
+</html>

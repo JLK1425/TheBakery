@@ -22,7 +22,7 @@ const multer = require('multer');
 // En producción las imágenes se guardan dentro del volumen Railway (server/data/images)
 // para que persistan entre redeploys. Localmente se usa la carpeta de assets normal.
 const IMAGES_DIR = process.env.NODE_ENV === 'production'
-  ? path.join(__dirname, 'data', 'images')
+  ? path.join(__dirname, 'server', 'data', 'images')
   : path.join(__dirname, '..', 'TheBakery', 'assets', 'imagenes');
 // Crear el directorio si no existe (necesario en Railway al arrancar con volumen)
 try {

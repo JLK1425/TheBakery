@@ -8,7 +8,9 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 
-const ADMIN_USERS_FILE = path.join(__dirname, '..', 'data', 'admin-users.json');
+const ADMIN_USERS_FILE = process.env.NODE_ENV === 'production'
+  ? path.join(__dirname, '..', 'server', 'data', 'admin-users.json')
+  : path.join(__dirname, '..', 'data', 'admin-users.json');
 const DEFAULT_EMAIL = 'admin@thebakery.com';
 const DEFAULT_PASSWORD = 'Bakery2024!';
 

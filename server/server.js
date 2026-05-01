@@ -19,10 +19,13 @@ const session = require('express-session');
 const reservationsLib = require('./lib/reservations');
 const usersReservations = require('./lib/users-reservations');
 const multer = require('multer');
-// En producción las imágenes se guardan dentro del volumen Railway (server/data/images)
-// para que persistan entre redeploys. Localmente se usa la carpeta de assets normal.
+// En Railway __dirname = /app (raíz del deploy), no /app/server.
+// DATA_DIR centraliza la ruta al volumen para que todos los archivos JSON persistan.
+const DATA_DIR = process.env.NODE_ENV === 'production'
+  ? path.join(__dirname, 'server', 'data')
+  : path.join(__dirname, 'data');
 const IMAGES_DIR = process.env.NODE_ENV === 'production'
-  ? path.join(__dirname, 'server', 'data', 'images')
+  ? path.join(DATA_DIR, 'images')
   : path.join(__dirname, '..', 'TheBakery', 'assets', 'imagenes');
 // Crear el directorio si no existe (necesario en Railway al arrancar con volumen)
 try {
@@ -130,7 +133,7 @@ app.post('/cardnet/cancel', function (req, res) {
 });
 
 // Inventario
-const INVENTORY_FILE = path.join(__dirname, 'data', 'inventory.json');
+const INVENTORY_FILE = path.join(DATA_DIR,'inventory.json');
 
 function readInventory() {
   try {
@@ -151,7 +154,7 @@ function writeInventory(data) {
 }
 
 // Pedidos
-const ORDERS_FILE = path.join(__dirname, 'data', 'orders.json');
+const ORDERS_FILE = path.join(DATA_DIR,'orders.json');
 
 function readOrders() {
   const ordersFilePath = ORDERS_FILE;
@@ -178,7 +181,7 @@ function writeOrders(data) {
 // =====================
 //   ARCHIVED ORDERS
 // =====================
-const ARCHIVED_ORDERS_FILE = path.join(__dirname, 'data', 'archived-orders.json');
+const ARCHIVED_ORDERS_FILE = path.join(DATA_DIR,'archived-orders.json');
 
 function readArchivedOrders() {
   try {
@@ -200,11 +203,13 @@ function writeArchivedOrders(data) {
 // =====================
 //  PROMOTIONS / DESCUENTOS
 // =====================
-const PROMOTIONS_FILE = path.join(__dirname, 'data', 'promotions.json');
+const PROMOTIONS_FILE = path.join(DATA_DIR,'promotions.json');
 
 // ── Reviews ──
 // Apunta al submodule para que persista en DreamHost (filesystem no efímero)
-const REVIEWS_FILE = path.join(__dirname, '..', 'TheBakery', 'assets', 'data', 'reviews.json');
+const REVIEWS_FILE = process.env.NODE_ENV === 'production'
+  ? path.join(DATA_DIR, 'reviews.json')
+  : path.join(__dirname, '..', 'TheBakery', 'assets', 'data', 'reviews.json');
 
 function readReviews() {
   try {
@@ -354,7 +359,7 @@ function archiveDeliveredOrders() {
 }
 
 // Usuarios
-const USERS_FILE = path.join(__dirname, 'data', 'users.json');
+const USERS_FILE = path.join(DATA_DIR,'users.json');
 
 function readUsers() {
   try {
@@ -375,7 +380,7 @@ function writeUsers(data) {
 }
 
 // Admin users (sesión con express-session)
-const ADMIN_USERS_FILE = path.join(__dirname, 'data', 'admin-users.json');
+const ADMIN_USERS_FILE = path.join(DATA_DIR,'admin-users.json');
 
 function ensureAdminUsersFile() {
   try {
@@ -764,7 +769,7 @@ app.get('/api/pay/verify', async (req, res) => {
 
     // Si fue aprobada, guardar la orden en orders.json
     if (result.approved) {
-      const ordersPath = path.join(__dirname, 'data', 'orders.json');
+      const ordersPath = path.join(DATA_DIR,'orders.json');
       let orders = [];
       try {
         orders = JSON.parse(fs.readFileSync(ordersPath, 'utf8'));
@@ -1637,7 +1642,7 @@ app.delete('/api/users/:id', requireAuth, requireSuperAdmin, (req, res) => {
 // RUTAS DE INVENTARIO DE INGREDIENTES
 // ============================================
 
-const INGREDIENTS_FILE = path.join(__dirname, 'data', 'inventory_ingredients.json');
+const INGREDIENTS_FILE = path.join(DATA_DIR,'inventory_ingredients.json');
 
 function readIngredients() {
   try {
@@ -1716,7 +1721,7 @@ app.post('/inventory/ingredients/delete', requireAuth, (req, res) => {
 // RUTAS DE INVENTARIO DE PASTELES
 // ============================================
 
-const CAKES_FILE = path.join(__dirname, 'data', 'inventory_cakes.json');
+const CAKES_FILE = path.join(DATA_DIR,'inventory_cakes.json');
 
 function readCakes() {
   try {
@@ -1786,7 +1791,7 @@ function initializeCakesInventory() {
 // ============================================
 // RESERVAS TEMPORALES DE STOCK
 // ============================================
-const STOCK_RESERVATIONS_FILE = path.join(__dirname, 'data', 'stock-reservations.json');
+const STOCK_RESERVATIONS_FILE = path.join(DATA_DIR,'stock-reservations.json');
 const RESERVATION_TTL_MS = 10 * 60 * 1000; // 10 minutos
 
 function readStockReservations() {
@@ -2044,7 +2049,7 @@ app.delete('/api/reviews/:id', requireAdmin, (req, res) => {
 // RUTAS DE SUCURSALES
 // ============================================
 
-const SUCURSALES_FILE = path.join(__dirname, 'data', 'sucursales.json');
+const SUCURSALES_FILE = path.join(DATA_DIR,'sucursales.json');
 
 function readSucursales() {
   try {
@@ -2132,7 +2137,7 @@ app.delete('/api/sucursales/:id', requireAdmin, (req, res) => {
 // GET /server/data/cake_map.json (público para frontend)
 app.get('/server/data/cake_map.json', (req, res) => {
   try {
-    const cakeMapPath = path.join(__dirname, 'data', 'cake_map.json');
+    const cakeMapPath = path.join(DATA_DIR,'cake_map.json');
     const cakeMap = JSON.parse(fs.readFileSync(cakeMapPath, 'utf8'));
     res.json(cakeMap);
   } catch (err) {
@@ -2460,7 +2465,7 @@ app.post('/api/users/lookup', (req, res) => {
 // ============================================
 // STOCK DE PASTELES (Takeout - stock general diario)
 // ============================================
-const STOCK_FILE = path.join(__dirname, 'data', 'stock.json');
+const STOCK_FILE = path.join(DATA_DIR,'stock.json');
 
 function readStock() {
   try {
@@ -2522,7 +2527,7 @@ app.get('/api/stock', async (req, res) => {
 });
 
 // GET /api/stock/low - productos con stock bajo (inventory_cakes)
-const STOCK_ALERTS_FILE = path.join(__dirname, 'data', 'stock-alerts.json');
+const STOCK_ALERTS_FILE = path.join(DATA_DIR,'stock-alerts.json');
 const LOW_STOCK_THRESHOLD = 3;
 
 function readStockAlerts() {
@@ -2698,7 +2703,7 @@ app.get('/api/reservations/validate/:id', (req, res) => {
   try {
     const id = (req.params.id || '').trim();
     if (!id) return res.status(400).json({ valid: false, error: 'ID requerido' });
-    const reservations = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'reservations.json'), 'utf8'));
+    const reservations = JSON.parse(fs.readFileSync(path.join(DATA_DIR,'reservations.json'), 'utf8'));
     const r = reservations.find((x) => String(x.id) === id);
     if (!r) return res.json({ valid: false, reason: 'no_existe' });
     if (r.status !== 'HELD') return res.json({ valid: false, reason: 'expirada_o_invalida' });
@@ -2732,9 +2737,9 @@ app.post('/api/reservations/expire', async (req, res) => {
 // ============================================
 
 // Leer configuración del bakery
-const bakeryConfigPath = path.join(__dirname, 'data', 'bakery-config.json');
-const customersPath = path.join(__dirname, 'data', 'customers.json');
-const dailyOrdersPath = path.join(__dirname, 'data', 'daily-orders.json');
+const bakeryConfigPath = path.join(DATA_DIR,'bakery-config.json');
+const customersPath = path.join(DATA_DIR,'customers.json');
+const dailyOrdersPath = path.join(DATA_DIR,'daily-orders.json');
 
 function readJSON(filePath, fallback) {
   try {
@@ -2988,8 +2993,8 @@ function scheduleNightlyArchive() {
 // En deploys posteriores, los archivos ya existen y no se tocan.
 // ============================================
 (function initVolume() {
-  const seedsDir = path.join(__dirname, 'seeds');
-  const dataDir  = path.join(__dirname, 'data');
+  const seedsDir = path.join(path.dirname(DATA_DIR), 'seeds');
+  const dataDir  = DATA_DIR;
   if (!fs.existsSync(seedsDir)) return;
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
   let seeded = 0;

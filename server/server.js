@@ -1352,6 +1352,30 @@ app.delete('/api/orders/:id', requireAdmin, (req, res) => {
 
 // Endpoint de emergencia: copia admin-users seed → volumen solo si está vacío.
 // Se auto-deshabilita cuando ya existe al menos un admin. Llamar una sola vez.
+// Endpoint de emergencia: copia inventory_cakes seed → volumen solo si está vacío o tiene 0 items.
+app.get('/api/admin/init-inventory', (req, res) => {
+  try {
+    const current = readCakes();
+    if (current.length > 0) {
+      return res.json({ ok: false, message: `Ya existen ${current.length} producto(s). No se hizo nada.` });
+    }
+    const seedPath = path.join(__dirname, 'seeds', 'inventory_cakes.json');
+    if (!fs.existsSync(seedPath)) {
+      return res.status(404).json({ error: 'Seed no encontrado en: ' + seedPath });
+    }
+    const seed = JSON.parse(fs.readFileSync(seedPath, 'utf8'));
+    if (!Array.isArray(seed) || seed.length === 0) {
+      return res.status(400).json({ error: 'El seed está vacío.' });
+    }
+    fs.writeFileSync(CAKES_FILE, JSON.stringify(seed, null, 2), 'utf8');
+    console.log(`[init-inventory] ${seed.length} productos restaurados desde seed`);
+    res.json({ ok: true, message: `${seed.length} productos restaurados`, products: seed.map(p => p.name) });
+  } catch (err) {
+    console.error('[init-inventory] Error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/admin/init-admin', (req, res) => {
   try {
     const current = readAdminUsers();

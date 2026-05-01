@@ -1376,6 +1376,31 @@ app.get('/api/admin/init-inventory', (req, res) => {
   }
 });
 
+// Diagnóstico del volumen Railway — sin autenticación para uso en emergencias
+app.get('/api/admin/diag', (req, res) => {
+  try {
+    const imagesOk = fs.existsSync(IMAGES_DIR);
+    const imageFiles = imagesOk ? fs.readdirSync(IMAGES_DIR).slice(0, 20) : [];
+    const reviewsOk = fs.existsSync(REVIEWS_FILE);
+    const reviews = reviewsOk ? JSON.parse(fs.readFileSync(REVIEWS_FILE, 'utf8')) : [];
+    const cakesOk = fs.existsSync(CAKES_FILE);
+    const cakes = cakesOk ? JSON.parse(fs.readFileSync(CAKES_FILE, 'utf8')) : [];
+    res.json({
+      DATA_DIR,
+      IMAGES_DIR,
+      imagesDir: { exists: imagesOk, files: imageFiles, count: imageFiles.length },
+      REVIEWS_FILE,
+      reviews: { exists: reviewsOk, total: reviews.length, withPhoto: reviews.filter(r => r.photo).length },
+      CAKES_FILE,
+      cakes: { exists: cakesOk, count: cakes.length, names: cakes.map(c => c.name) },
+      ADMIN_USERS_FILE,
+      admins: readAdminUsers().length
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/admin/init-admin', (req, res) => {
   try {
     const current = readAdminUsers();

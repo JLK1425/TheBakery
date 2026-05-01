@@ -24,9 +24,12 @@ const multer = require('multer');
 const IMAGES_DIR = process.env.NODE_ENV === 'production'
   ? path.join(__dirname, 'data', 'images')
   : path.join(__dirname, '..', 'TheBakery', 'assets', 'imagenes');
-// Crear el directorio si no existe (necesario en Railway al arrancar)
-if (!fs.existsSync(IMAGES_DIR)) {
+// Crear el directorio si no existe (necesario en Railway al arrancar con volumen)
+try {
   fs.mkdirSync(IMAGES_DIR, { recursive: true });
+  console.log(`[IMAGES_DIR] OK: ${IMAGES_DIR}`);
+} catch (e) {
+  console.error(`[IMAGES_DIR] No se pudo crear ${IMAGES_DIR}:`, e.message);
 }
 const cakeImageStorage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, IMAGES_DIR),
@@ -1965,35 +1968,47 @@ app.get('/public/reviews', (req, res) => {
 });
 
 // POST /public/reviews — enviar nueva reseña (pendiente de aprobación)
-app.post('/public/reviews', uploadReviewPhoto.single('photo'), (req, res) => {
-  const { name, location, rating, title, comment, email } = req.body || {};
-  if (!name || !rating || !comment) {
-    return res.status(400).json({ error: 'name, rating y comment son requeridos' });
-  }
-  const imageBase = IS_PROD
-    ? 'https://thebakery-production-8ddb.up.railway.app'
-    : `http://localhost:${PORT}`;
-  const photo = req.file
-    ? `${imageBase}/TheBakery/assets/imagenes/${req.file.filename}`
-    : null;
-  const reviews = readReviews();
-  const newReview = {
-    id: Date.now().toString(),
-    name: String(name).trim(),
-    location: location ? String(location).trim() : null,
-    email: email ? String(email).trim() : null,
-    rating: Math.min(5, Math.max(1, parseInt(rating) || 5)),
-    title: title ? String(title).trim() : null,
-    comment: String(comment).trim(),
-    photo,
-    date: new Date().toISOString(),
-    status: 'pending',
-    verified: false,
-    likes: 0
-  };
-  reviews.push(newReview);
-  writeReviews(reviews);
-  res.status(201).json({ ok: true, message: '¡Gracias! Tu reseña será publicada pronto.' });
+app.post('/public/reviews', (req, res) => {
+  uploadReviewPhoto.single('photo')(req, res, (uploadErr) => {
+    if (uploadErr) {
+      console.error('[REVIEW-UPLOAD] Multer error:', uploadErr.message);
+      return res.status(400).json({ error: 'Error al procesar la imagen: ' + uploadErr.message });
+    }
+    try {
+      const { name, location, rating, title, comment, email } = req.body || {};
+      if (!name || !rating || !comment) {
+        return res.status(400).json({ error: 'name, rating y comment son requeridos' });
+      }
+      const imageBase = IS_PROD
+        ? 'https://thebakery-production-8ddb.up.railway.app'
+        : `http://localhost:${PORT}`;
+      const photo = req.file
+        ? `${imageBase}/TheBakery/assets/imagenes/${req.file.filename}`
+        : null;
+      console.log(`[REVIEW] nueva reseña de "${name}" — foto: ${photo || 'sin foto'}`);
+      const reviews = readReviews();
+      const newReview = {
+        id: Date.now().toString(),
+        name: String(name).trim(),
+        location: location ? String(location).trim() : null,
+        email: email ? String(email).trim() : null,
+        rating: Math.min(5, Math.max(1, parseInt(rating) || 5)),
+        title: title ? String(title).trim() : null,
+        comment: String(comment).trim(),
+        photo,
+        date: new Date().toISOString(),
+        status: 'pending',
+        verified: false,
+        likes: 0
+      };
+      reviews.push(newReview);
+      writeReviews(reviews);
+      res.status(201).json({ ok: true, message: '¡Gracias! Tu reseña será publicada pronto.' });
+    } catch (err) {
+      console.error('[REVIEW] Error guardando reseña:', err.message);
+      res.status(500).json({ error: 'Error interno al guardar la reseña: ' + err.message });
+    }
+  });
 });
 
 // PUT /api/reviews/:id/approve — aprobar reseña (admin)

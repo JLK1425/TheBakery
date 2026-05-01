@@ -1350,6 +1350,31 @@ app.delete('/api/orders/:id', requireAdmin, (req, res) => {
 //        AUTH USUARIOS
 // =========================
 
+// Endpoint de emergencia: copia admin-users seed → volumen solo si está vacío.
+// Se auto-deshabilita cuando ya existe al menos un admin. Llamar una sola vez.
+app.get('/api/admin/init-admin', (req, res) => {
+  try {
+    const current = readAdminUsers();
+    if (current.length > 0) {
+      return res.json({ ok: false, message: `Ya existen ${current.length} admin(s). No se hizo nada.` });
+    }
+    const seedPath = path.join(__dirname, 'seeds', 'admin-users.json');
+    if (!fs.existsSync(seedPath)) {
+      return res.status(404).json({ error: 'Seed no encontrado en: ' + seedPath });
+    }
+    const seed = JSON.parse(fs.readFileSync(seedPath, 'utf8'));
+    if (!Array.isArray(seed) || seed.length === 0) {
+      return res.status(400).json({ error: 'El seed está vacío.' });
+    }
+    fs.writeFileSync(ADMIN_USERS_FILE, JSON.stringify(seed, null, 2), 'utf8');
+    console.log('[init-admin] Admin restaurado desde seed:', seed.map(u => u.email).join(', '));
+    res.json({ ok: true, message: `Admin creado: ${seed[0].email}` });
+  } catch (err) {
+    console.error('[init-admin] Error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Registrar usuario (por ahora uso interno, se puede limitar luego)
 app.post('/api/auth/register', async (req, res) => {
   const { name, email, password, role } = req.body;
@@ -2993,7 +3018,7 @@ function scheduleNightlyArchive() {
 // En deploys posteriores, los archivos ya existen y no se tocan.
 // ============================================
 (function initVolume() {
-  const seedsDir = path.join(path.dirname(DATA_DIR), 'seeds');
+  const seedsDir = path.join(__dirname, 'seeds');
   const dataDir  = DATA_DIR;
   if (!fs.existsSync(seedsDir)) return;
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });

@@ -3,7 +3,7 @@
     "id": "admin-1746057600000",
     "email": "j.abreu@grupopeguero.com",
     "passwordHash": "$2b$10$Zm6JxFLbOvoF8YmSeyNkEuD969fClogHJh0UNpTcwrnF9HgvCbc5W",
-    "role": "admin",
+    "role": "superadmin",
     "createdAt": "2026-05-01T00:00:00.000Z"
   }
 ]

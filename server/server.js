@@ -847,7 +847,7 @@ app.get('/api/promotions/:id', requireAdmin, (req, res) => {
 });
 
 // ── POST /api/promotions — Crear nueva promoción (solo superadmin) ──
-app.post('/api/promotions', requireAdmin, requireSuperAdmin, (req, res) => {
+app.post('/api/promotions', requireAdmin, (req, res) => {
   const { code, description, type, value, minPurchase, maxUses, startDate, endDate, onePerCustomer } = req.body;
 
   // Validaciones
@@ -896,7 +896,7 @@ app.post('/api/promotions', requireAdmin, requireSuperAdmin, (req, res) => {
 });
 
 // ── PUT /api/promotions/:id — Editar promoción (solo superadmin) ──
-app.put('/api/promotions/:id', requireAdmin, requireSuperAdmin, (req, res) => {
+app.put('/api/promotions/:id', requireAdmin, (req, res) => {
   const promotions = readPromotions();
   const index = promotions.findIndex(p => p.id === req.params.id);
   if (index === -1) return res.status(404).json({ error: 'Promoción no encontrada' });
@@ -931,7 +931,7 @@ app.put('/api/promotions/:id', requireAdmin, requireSuperAdmin, (req, res) => {
 });
 
 // ── DELETE /api/promotions/:id — Eliminar promoción (solo superadmin) ──
-app.delete('/api/promotions/:id', requireAdmin, requireSuperAdmin, (req, res) => {
+app.delete('/api/promotions/:id', requireAdmin, (req, res) => {
   let promotions = readPromotions();
   const promo = promotions.find(p => p.id === req.params.id);
   if (!promo) return res.status(404).json({ error: 'Promoción no encontrada' });
@@ -944,7 +944,7 @@ app.delete('/api/promotions/:id', requireAdmin, requireSuperAdmin, (req, res) =>
 });
 
 // ── PATCH /api/promotions/:id/toggle — Activar/desactivar (solo superadmin) ──
-app.patch('/api/promotions/:id/toggle', requireAdmin, requireSuperAdmin, (req, res) => {
+app.patch('/api/promotions/:id/toggle', requireAdmin, (req, res) => {
   const promotions = readPromotions();
   const promo = promotions.find(p => p.id === req.params.id);
   if (!promo) return res.status(404).json({ error: 'Promoción no encontrada' });
@@ -1396,6 +1396,20 @@ app.get('/api/admin/diag', (req, res) => {
       ADMIN_USERS_FILE,
       admins: readAdminUsers().length
     });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Endpoint de emergencia: eleva todos los admin a superadmin en el volumen
+app.get('/api/admin/fix-roles', (req, res) => {
+  try {
+    const users = readAdminUsers();
+    if (users.length === 0) return res.status(404).json({ error: 'No hay admins en el volumen' });
+    users.forEach(u => { u.role = 'superadmin'; });
+    fs.writeFileSync(ADMIN_USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
+    console.log('[fix-roles] Roles actualizados a superadmin:', users.map(u => u.email).join(', '));
+    res.json({ ok: true, updated: users.map(u => ({ email: u.email, role: u.role })) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

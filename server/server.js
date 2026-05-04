@@ -639,7 +639,7 @@ app.post('/api/pay/session', async (req, res) => {
 
     console.log('[CARDNET] Recibido request de pago');
 
-    // Calcular subtotal desde line_items
+    // Calcular subtotal desde line_items (precios originales sin descuento)
     let subtotal = 0;
     if (line_items && line_items.length > 0) {
       subtotal = line_items.reduce((sum, item) => {
@@ -647,24 +647,74 @@ app.post('/api/pay/session', async (req, res) => {
         const qty = item.quantity || 1;
         return sum + (unitAmount * qty);
       }, 0) / 100; // convertir de centavos a pesos
-    } else if (total) {
+    } else if (total != null) {
       subtotal = parseFloat(String(total).replace(/[^0-9.]/g, ''));
+    }
+
+    // Aplicar descuento al monto que se enviará a CardNet
+    const discountAmount = discount ? parseFloat(discount.discount || 0) : 0;
+    const totalAmount = Math.max(0, subtotal - discountAmount);
+
+    console.log(`[CARDNET] subtotal=${subtotal} descuento=${discountAmount} totalAmount=${totalAmount}`);
+
+    // Pedido 100% cubierto por descuento: crear orden sin pasar por CardNet
+    if (totalAmount === 0) {
+      const orderId = `ORD-${Date.now()}`;
+      const cakesForFree = readCakes();
+      const freeItems = (items || []).map(item => {
+        if (item.image) return item;
+        const cake = cakesForFree.find(c =>
+          String(c.id) === String(item.productId) ||
+          (c.name && item.name && c.name.toLowerCase() === item.name.toLowerCase())
+        );
+        return (cake && cake.image) ? { ...item, image: cake.image } : item;
+      });
+      const freeOrder = {
+        id: orderId,
+        sessionId: orderId,
+        customer: {
+          name: [customer?.firstName, customer?.lastName].filter(Boolean).join(' ') || 'Cliente',
+          phone: customer?.phone || null,
+          email: customer?.email || null,
+          cedulaLast4: customer?.cedulaLast4 || null,
+          deliveryDate: customer?.deliveryDate || null,
+          pickupTime: customer?.pickupTime || null,
+          pickupLocation: customer?.pickupLocation || null,
+          pickupLocationName: customer?.pickupLocationName || null
+        },
+        customerEmail: customer?.email || 'sin-email@ejemplo.com',
+        customerName: [customer?.firstName, customer?.lastName].filter(Boolean).join(' ') || 'Cliente',
+        items: freeItems,
+        total: 0,
+        subtotal,
+        discount: discount || null,
+        tax: 0,
+        status: 'Pendiente',
+        paymentMethod: 'free',
+        deliveryDate: customer?.deliveryDate || null,
+        pickupTime: customer?.pickupTime || null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      const freeOrders = readOrders();
+      freeOrders.push(freeOrder);
+      writeOrders(freeOrders);
+      console.log(`[CARDNET] Pedido gratuito creado: ${orderId} (descuento 100%)`);
+      return res.json({ freeOrder: true, orderId });
     }
 
     if (subtotal <= 0) {
       return res.status(400).json({ error: 'El monto debe ser mayor a 0' });
     }
 
-    // El total es igual al subtotal (sin ITBIS)
     const tax = 0;
-    const totalAmount = subtotal;
 
     // Obtener IP del cliente
     let clientIp = req.ip || req.connection.remoteAddress || '127.0.0.1';
     clientIp = clientIp.replace('::ffff:', '').replace('::1', '127.0.0.1');
 
     const result = await cardnet.createSession({
-      subtotal,
+      subtotal: totalAmount,
       tax,
       total: totalAmount,
       clientIp,

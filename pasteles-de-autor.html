@@ -28,6 +28,7 @@
           <a href="index.html#reviews" class="nav-link">Reseñas</a>
           <a href="index.html#about" class="nav-link">Nosotros</a>
           <a href="index.html#contact" class="nav-link">Contacto</a>
+          <a href="mi-pedido.html" class="nav-link" style="color:var(--accent);font-weight:700;">📦 Rastrear Pedido</a>
         </div>
       </div>
       <div class="nav-actions">
@@ -122,6 +123,23 @@
       <p class="modal-footer-text" id="registerFooter" style="display:none">
         ¿Ya tienes cuenta? <a href="#" id="switchToLogin">Inicia sesión</a>
       </p>
+    </div>
+  </div>
+
+  <!-- Cart Modal -->
+  <div class="modal-overlay" id="cartModal">
+    <div class="modal-content cart-modal">
+      <button class="modal-close" id="cartClose" aria-label="Cerrar">×</button>
+      <h2>Carrito de Compras</h2>
+      <div class="cart-items" id="cartItems">
+        <p class="cart-empty">Tu carrito está vacío</p>
+      </div>
+      <div class="cart-footer" id="cartFooter" style="display:none">
+        <div class="cart-total">
+          <strong>Total: <span id="cartTotal">RD$0.00</span></strong>
+        </div>
+        <button class="btn btn-primary" id="checkoutBtn" style="width:100%">Ver Carrito Completo</button>
+      </div>
     </div>
   </div>
 

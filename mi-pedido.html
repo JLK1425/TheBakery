@@ -255,6 +255,63 @@
       margin-bottom: 1.5rem;
     }
 
+    /* ── Review Modal ── */
+    .tr-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .tr-modal-overlay.active { display: flex; }
+    .tr-modal-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+    }
+    .tr-modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.6rem;
+      cursor: pointer;
+      color: #9ca3af;
+      line-height: 1;
+      padding: 0;
+    }
+    .tr-field { margin-bottom: 1.1rem; }
+    .tr-label { display: block; font-weight: 600; color: var(--fg); margin-bottom: 0.4rem; font-size: 0.95rem; }
+    .tr-input, .tr-textarea {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    .tr-input:focus, .tr-textarea:focus { outline: none; border-color: var(--accent); }
+    .tr-textarea { resize: vertical; }
+    /* Star rating — reverse-order radio trick */
+    .tr-stars { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: 0.2rem; }
+    .tr-stars input[type="radio"] { display: none; }
+    .tr-stars label { font-size: 2.2rem; color: #d1d5db; cursor: pointer; transition: color 0.1s; line-height: 1; }
+    .tr-stars input:checked ~ label,
+    .tr-stars label:hover,
+    .tr-stars label:hover ~ label { color: #f59e0b; }
+
     @media print {
       .nav, .footer, .tracking-header, .action-buttons { display: none !important; }
       .tracking-page { padding-top: 10px !important; background: #fff !important; }
@@ -419,7 +476,53 @@
   </footer>
 
   <!-- Scripts -->
-  <script src="TheBakery/assets/js/tracking.js?v=6"></script>
+  <!-- Review Modal -->
+  <div class="tr-modal-overlay" id="trReviewOverlay">
+    <div class="tr-modal-box">
+      <button class="tr-modal-close" id="trReviewClose" aria-label="Cerrar">×</button>
+      <h2 style="margin:0 0 1.5rem;font-size:1.4rem;font-weight:800;">⭐ Dejar una Reseña</h2>
+      <form id="trReviewForm">
+        <div class="tr-field">
+          <label class="tr-label">Calificación</label>
+          <div class="tr-stars">
+            <input type="radio" name="tr-rating" value="5" id="trStar5">
+            <label for="trStar5">★</label>
+            <input type="radio" name="tr-rating" value="4" id="trStar4">
+            <label for="trStar4">★</label>
+            <input type="radio" name="tr-rating" value="3" id="trStar3">
+            <label for="trStar3">★</label>
+            <input type="radio" name="tr-rating" value="2" id="trStar2">
+            <label for="trStar2">★</label>
+            <input type="radio" name="tr-rating" value="1" id="trStar1">
+            <label for="trStar1">★</label>
+          </div>
+        </div>
+        <div class="tr-field">
+          <label class="tr-label" for="trReviewerName">Tu Nombre</label>
+          <input class="tr-input" type="text" id="trReviewerName" required autocomplete="name">
+        </div>
+        <div class="tr-field">
+          <label class="tr-label" for="trReviewTitle">Título</label>
+          <input class="tr-input" type="text" id="trReviewTitle" required placeholder="Ej: ¡Increíble pastel!">
+        </div>
+        <div class="tr-field">
+          <label class="tr-label" for="trReviewComment">Comentario</label>
+          <textarea class="tr-textarea" id="trReviewComment" rows="4" required placeholder="Cuéntanos tu experiencia..."></textarea>
+        </div>
+        <div class="tr-field" style="margin-bottom:1.5rem;">
+          <label class="tr-label" for="trReviewPhoto">Foto (opcional)</label>
+          <input type="file" id="trReviewPhoto" accept="image/*" style="font-size:0.9rem;">
+          <div id="trPhotoPreview" style="display:none;margin-top:0.75rem;position:relative;width:fit-content;">
+            <img id="trPreviewImg" src="" alt="Preview" style="max-height:110px;border-radius:8px;border:2px solid #e5e7eb;">
+            <button type="button" id="trRemovePhoto" style="position:absolute;top:-8px;right:-8px;background:#ef4444;color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:0.95rem;cursor:pointer;line-height:1;">×</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="trReviewSubmit" style="width:100%;">Publicar Reseña</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="TheBakery/assets/js/tracking.js?v=7"></script>
 </body>
 
 </html>

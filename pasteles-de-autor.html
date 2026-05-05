@@ -125,6 +125,45 @@
     </div>
   </div>
 
+  <!-- Product Detail Modal -->
+  <div class="modal-overlay product-detail-overlay" id="productDetailModal">
+    <div class="product-detail-modal">
+      <button class="modal-close" id="productDetailClose" aria-label="Cerrar">×</button>
+      <div class="product-detail-container">
+        <div class="product-images">
+          <div class="product-main-image">
+            <img id="productMainImage" src="" alt="Pastel">
+          </div>
+          <div class="product-thumbnails" id="productThumbnails"></div>
+        </div>
+        <div class="product-info">
+          <div class="breadcrumbs" id="productBreadcrumbs">
+            <a href="index.html#home">Inicio</a> > <a href="pasteles-de-autor.html">Pasteles de Autor</a> > <span id="productBreadcrumbName"></span>
+          </div>
+          <h1 id="productName" class="product-title"></h1>
+          <div class="product-rating">
+            <div class="stars">★★★★★</div>
+            <span class="reviews-count" id="productReviews">0 reseñas</span>
+          </div>
+          <div class="product-price">
+            <span id="productPrice">RD$0.00</span>
+            <span class="tax-note">Impuestos incluidos.</span>
+          </div>
+          <div class="product-options">
+            <div class="form-group">
+              <label for="productSize">Tamaño</label>
+              <select id="productSize" class="form-select"></select>
+            </div>
+          </div>
+          <div class="product-description product-description-elegant" id="productDescription"></div>
+          <button class="btn btn-primary add-to-cart-detail" id="addToCartDetail" style="width:100%; margin-top:1.5rem">
+            AGREGAR AL CARRITO
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- PASTELES DE AUTOR PAGE -->
   <main class="pasteles-autor-page">
     <!-- Page Header -->
@@ -235,8 +274,8 @@
 
   <!-- Scripts -->
   <script src="TheBakery/assets/js/auth.js"></script>
-  <script src="TheBakery/assets/js/script.js?v=8"></script>
-  <script src="TheBakery/assets/js/pasteles-autor.js?v=5"></script>
+  <script src="TheBakery/assets/js/script.js?v=9"></script>
+  <script src="TheBakery/assets/js/pasteles-autor.js?v=6"></script>
 </body>
 
 </html>

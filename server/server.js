@@ -2114,7 +2114,10 @@ app.get('/public/reviews', (req, res) => {
 app.post('/public/reviews', (req, res) => {
   uploadReviewPhoto.single('photo')(req, res, (uploadErr) => {
     if (uploadErr) {
-      console.error('[REVIEW-UPLOAD] Multer error:', uploadErr.message);
+      console.error('[REVIEW-UPLOAD] Multer error:', uploadErr.code, uploadErr.message);
+      if (uploadErr.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: 'La imagen no puede superar 5MB. Por favor comprime la foto antes de subirla.' });
+      }
       return res.status(400).json({ error: 'Error al procesar la imagen: ' + uploadErr.message });
     }
     try {
